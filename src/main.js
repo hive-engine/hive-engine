@@ -45,6 +45,4 @@ app.use(Notifications);
 app.component("Loading", Loading);
 app.component("Spinner", Spinner);
 
-await router.isReady();
-
 app.mount("#app");
