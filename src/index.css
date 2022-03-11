@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  a {
+    @apply text-red-500;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply align-middle inline-block leading-normal px-6 py-2 border border-transparent shadow-sm font-bold rounded-md text-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 focus:disabled:ring-0;
+  }
+
+  .btn-sm {
+    @apply btn px-1.5 py-1.5;
+  }
+
+  .alert-warning {
+    @apply text-sm border border-orange-200 bg-orange-100 text-orange-700 p-3 mb-5;
+  }
+
+  .page-content {
+    @apply w-full max-w-7xl mx-auto py-10 px-2 sm:px-6 lg:px-8 min-h-[calc(100vh-484px)];
+  }
+}

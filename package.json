@@ -1,0 +1,61 @@
+{
+  "name": "hive-engine",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 5050",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
+  },
+  "dependencies": {
+    "@headlessui/vue": "^1.5.0",
+    "@heroicons/vue": "^1.0.6",
+    "@hiveio/dhive": "^1.2.0",
+    "@kyvg/vue3-notification": "^2.3.4",
+    "@vuelidate/core": "^2.0.0-alpha.34",
+    "@vuelidate/validators": "^2.0.0-alpha.26",
+    "@vueuse/core": "^7.7.1",
+    "axios": "^0.26.1",
+    "chartjs-adapter-date-fns": "^2.0.0",
+    "chartjs-chart-financial": "^0.1.1",
+    "date-fns": "^2.28.0",
+    "ethers": "^5.6.0",
+    "floating-vue": "^2.0.0-beta.6",
+    "mitt": "^3.0.0",
+    "pinia": "^2.0.11",
+    "vue": "^3.2.31",
+    "vue-chart-3": "^3.1.4",
+    "vue-final-modal": "^3.4.3",
+    "vue-router": "^4.0.13"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-patch": "^1.1.0",
+    "@tailwindcss/forms": "^0.5.0",
+    "@vitejs/plugin-vue": "^2.2.4",
+    "@vue/eslint-config-prettier": "^7.0.0",
+    "autoprefixer": "^10.4.2",
+    "eslint": "^8.10.0",
+    "eslint-plugin-vue": "^8.5.0",
+    "postcss": "^8.4.8",
+    "prettier": "^2.5.1",
+    "sass": "^1.49.9",
+    "tailwindcss": "^3.0.23",
+    "vite": "^2.8.6"
+  },
+  "description": "Hive-Engine - Smart Contracts on the Hive Blockchain",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hive-engine/hive-engine.git"
+  },
+  "keywords": [
+    "hive",
+    "hive-engine",
+    "smartcontract"
+  ],
+  "author": "Reazul Iqbal",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hive-engine/hive-engine/issues"
+  },
+  "homepage": "https://github.com/hive-engine/hive-engine#readme"
+}

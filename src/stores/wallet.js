@@ -1,0 +1,486 @@
+import axios from "axios";
+import { format } from "date-fns";
+import { utils } from "ethers";
+import { defineStore } from "pinia";
+import { useStore } from ".";
+import { useUserStore } from "./user";
+import { useTokenStore } from "./token";
+import { sidechain } from "../plugins/sidechain";
+import { toFixedWithoutRounding } from "../utils";
+import { BSC_BRIDGE_API, CTC_API, ETH_BRIDGE_API, POLYGON_BRIDGE_API, SCOT_API } from "../config";
+
+export const useWalletStore = defineStore({
+  id: "wallet",
+
+  state: () => ({
+    wallet: [],
+    pendingUnstakes: [],
+    depositInfo: null,
+    evmGasFee: 0,
+    gasFeeBalance: 0,
+  }),
+
+  actions: {
+    async fetchWallet(symbols) {
+      try {
+        const store = useStore();
+        const userStore = useUserStore();
+
+        if (!store.settings) {
+          await store.fetchSettings();
+        }
+
+        const balances = await sidechain.getBalance(userStore.username, symbols);
+
+        this.wallet = balances
+          .filter((b) => !store.settings.disabled_tokens.includes(b.symbol))
+          .map((b) => ({ ...b, balance: Number(b.balance) }));
+      } catch {
+        //
+      }
+    },
+
+    async fetchPendingUnstakes() {
+      try {
+        const userStore = useUserStore();
+
+        let pendingUnstakes = await sidechain.getPendingUnstakes(userStore.username);
+
+        pendingUnstakes = pendingUnstakes.map((p) => ({
+          ...p,
+          quantity: Number(p.quantity),
+          quantityLeft: Number(p.quantityLeft),
+        }));
+
+        this.pendingUnstakes = pendingUnstakes;
+      } catch {
+        //
+      }
+    },
+
+    async requestTransfer({ symbol, to, quantity, memo, eventName }) {
+      const json = {
+        contractName: "tokens",
+        contractAction: "transfer",
+        contractPayload: {
+          symbol,
+          to,
+          quantity,
+          memo,
+        },
+      };
+
+      const message = `Transfer (${symbol})`;
+
+      const store = useStore();
+
+      await store.requestBroadcastJson({ message, json, eventName });
+    },
+
+    async requestDelegate({ symbol, to, quantity }) {
+      const json = {
+        contractName: "tokens",
+        contractAction: "delegate",
+        contractPayload: {
+          to,
+          symbol,
+          quantity,
+        },
+      };
+
+      const message = `Delegate (${symbol})`;
+
+      const store = useStore();
+
+      await store.requestBroadcastJson({ message, json });
+    },
+
+    async requestUndelegate({ symbol, from, quantity }) {
+      const json = {
+        contractName: "tokens",
+        contractAction: "undelegate",
+        contractPayload: {
+          from,
+          symbol,
+          quantity,
+        },
+      };
+
+      const message = `Undelegate (${symbol})`;
+
+      const store = useStore();
+
+      await store.requestBroadcastJson({ message, json });
+    },
+
+    async requestStake({ symbol, to, quantity }) {
+      const json = {
+        contractName: "tokens",
+        contractAction: "stake",
+        contractPayload: {
+          to,
+          symbol,
+          quantity,
+        },
+      };
+
+      const message = `Stake (${symbol})`;
+
+      const store = useStore();
+
+      await store.requestBroadcastJson({ message, json });
+    },
+
+    async requestUnstake({ symbol, quantity }) {
+      const json = {
+        contractName: "tokens",
+        contractAction: "unstake",
+        contractPayload: {
+          symbol,
+          quantity,
+        },
+      };
+
+      const message = `Unstake (${symbol})`;
+
+      const store = useStore();
+
+      await store.requestBroadcastJson({ message, json });
+    },
+
+    async requestCancelUnstake({ symbol, trxId }) {
+      const json = {
+        contractName: "tokens",
+        contractAction: "cancelUnstake",
+        contractPayload: {
+          txID: trxId,
+        },
+      };
+
+      const message = `Cancel Unstake (${symbol})`;
+
+      const store = useStore();
+
+      await store.requestBroadcastJson({ message, json });
+    },
+
+    async getDepositAddress(symbol) {
+      let depositInfo = null;
+
+      try {
+        const tokenStore = useTokenStore();
+        const userStore = useUserStore();
+
+        const peggedToken = tokenStore.peggedTokens.find((p) => p.symbol === symbol);
+
+        if (!peggedToken) {
+          return;
+        }
+
+        if (!userStore.isLoggedIn) {
+          return;
+        }
+
+        const { data: response } = await axios.post(`${CTC_API}/convert/`, {
+          from_coin: symbol,
+          to_coin: peggedToken.pegged_token_symbol,
+          destination: userStore.username,
+        });
+
+        depositInfo = { ...response, ...peggedToken };
+      } catch (e) {
+        console.log(e.message);
+      }
+
+      this.depositInfo = depositInfo;
+    },
+
+    async fetchEvmAddress(network = "eth") {
+      const userStore = useUserStore();
+
+      let address = "";
+
+      const endpoints = {
+        eth: `${ETH_BRIDGE_API}/utils/ethaddress`,
+        bsc: `${BSC_BRIDGE_API}/utils/bscaddress`,
+        polygon: `${POLYGON_BRIDGE_API}/utils/polygonaddress`,
+      };
+
+      const addressKeys = {
+        eth: "ethereumAddress",
+        bsc: "bscAddress",
+        polygon: "polygonAddress",
+      };
+
+      try {
+        const {
+          data: { data },
+        } = await axios.get(`${endpoints[network]}/${userStore.username}`);
+
+        address = data[addressKeys[network]];
+      } catch (e) {
+        console.log(e.message);
+      }
+
+      return utils.isAddress(address) ? address : "";
+    },
+
+    async fetchGasFee(network, evmToken) {
+      try {
+        const endpoints = {
+          eth: `${ETH_BRIDGE_API}/utils/withdrawalfee`,
+          bsc: `${BSC_BRIDGE_API}/utils/withdrawalfee`,
+          polygon: `${POLYGON_BRIDGE_API}/utils/withdrawalfee`,
+        };
+
+        const {
+          data: { data },
+        } = await axios.get(`${endpoints[network]}/${evmToken}`);
+
+        this.evmGasFee = Number(data);
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+
+    async fetchFeeBalance(network) {
+      const userStore = useUserStore();
+
+      try {
+        const endpoints = {
+          eth: `${ETH_BRIDGE_API}/utils/feebalance`,
+          bsc: `${BSC_BRIDGE_API}/utils/feebalance`,
+          polygon: `${POLYGON_BRIDGE_API}/utils/feebalance`,
+        };
+
+        const {
+          data: {
+            data: { balance },
+          },
+        } = await axios.get(`${endpoints[network]}/${userStore.username}`);
+
+        this.gasFeeBalance = Number(balance);
+      } catch (e) {
+        console.log(e);
+      }
+    },
+
+    async requestDepositGasFee({ amount, symbol, network }) {
+      const store = useStore();
+
+      const bridgeAccount = store.settings[`${network}_bridge`].account;
+
+      const json = {
+        contractName: "tokens",
+        contractAction: "transfer",
+        contractPayload: {
+          symbol,
+          to: bridgeAccount,
+          quantity: amount.toFixed(8),
+          memo: "fee",
+        },
+      };
+
+      const message = "Deposit Reserved Gas Fee";
+
+      await store.requestBroadcastJson({ message, json, eventName: "fee-deposit-successful" });
+    },
+
+    async getWithdrawalAddress({ symbol, address }) {
+      const tokenStore = useTokenStore();
+      const userStore = useUserStore();
+
+      let result = null;
+
+      const peggedToken = tokenStore.peggedTokens.find((p) => p.pegged_token_symbol === symbol);
+
+      if (!peggedToken) {
+        return;
+      }
+
+      if (!userStore.username) {
+        return;
+      }
+
+      const data = {
+        from_coin: peggedToken.pegged_token_symbol,
+        to_coin: peggedToken.symbol,
+        destination: address,
+      };
+
+      const { data: response } = await axios.post(`${CTC_API}/convert/`, data);
+
+      result = { ...response, ...peggedToken };
+    },
+
+    async requestTokenWithdrawal({ amount, symbol, address, memo, network }) {
+      try {
+        const store = useStore();
+
+        let json = {
+          contractName: "tokens",
+          contractAction: "transfer",
+          contractPayload: {},
+        };
+
+        if (symbol === "SWAP.HIVE") {
+          json = {
+            contractName: "hivepegged",
+            contractAction: "withdraw",
+            contractPayload: {
+              quantity: toFixedWithoutRounding(Number(amount), 3).toFixed(3),
+            },
+          };
+        } else if (network) {
+          const bridgeAccount = store.settings[`${network}_bridge`].account;
+
+          json.contractPayload = {
+            symbol,
+            to: bridgeAccount,
+            quantity: amount,
+            memo: address,
+          };
+        } else {
+          const withdrawInfo = await this.getWithdrawalAddress({ symbol, address, memo });
+
+          let withdrawMemo = withdrawInfo.memo;
+
+          if (memo && memo !== "") {
+            withdrawMemo = `${withdrawMemo} ${memo}`;
+          }
+
+          json.contractPayload = {
+            symbol: withdrawInfo.pegged_token_symbol,
+            to: withdrawInfo.account,
+            quantity: amount,
+            memo: withdrawMemo,
+          };
+        }
+
+        const message = `Withdraw ${symbol}`;
+
+        await store.requestBroadcastJson({ message, json });
+      } catch {
+        //
+      }
+    },
+
+    async fetchConversionHistory() {
+      const userStore = useUserStore();
+
+      try {
+        let [
+          {
+            data: { results: withdrawals },
+          },
+          {
+            data: { results: deposits },
+          },
+        ] = await Promise.all([
+          axios.get(`${CTC_API}/conversions`, {
+            params: { limit: 20, offset: 0, deposit__from_account: userStore.username },
+          }),
+          axios.get(`${CTC_API}/conversions`, {
+            params: { limit: 20, offset: 0, to_address: userStore.username },
+          }),
+        ]);
+
+        withdrawals = withdrawals
+          .filter((w) => w.from_coin_symbol.includes("SWAP."))
+          .map((w) => {
+            const amount = Number(w.to_amount);
+            const fee = Number(w.ex_fee);
+            const timestamp = new Date(w.created_at).getTime();
+
+            return {
+              type: "Withdraw",
+              symbol: w.to_coin_symbol,
+              address: w.to_address,
+              trx_id: w.to_txid,
+              amount: toFixedWithoutRounding(amount + fee, 8),
+              fee,
+              timestamp,
+              date: format(timestamp, "Pp"),
+            };
+          });
+
+        deposits = deposits
+          .filter((w) => w.to_coin_symbol.includes("SWAP."))
+          .map((w) => {
+            const amount = Number(w.to_amount);
+            const fee = Number(w.ex_fee);
+            const timestamp = new Date(w.created_at).getTime();
+
+            return {
+              type: "Deposit",
+              symbol: w.to_coin_symbol,
+              address: w.from_address,
+              trx_id: w.to_txid,
+              amount: toFixedWithoutRounding(amount + fee, 8),
+              fee,
+              timestamp,
+              date: format(timestamp, "Pp"),
+            };
+          });
+
+        const conversions = [...withdrawals, ...deposits].sort((a, b) => b.timestamp - a.timestamp);
+
+        return conversions;
+      } catch {
+        //
+      }
+
+      return [];
+    },
+
+    async fetchScotRewards() {
+      const userStore = useUserStore();
+
+      let rewards = [];
+
+      try {
+        const { data } = await axios.get(`${SCOT_API}/@${userStore.username}`, {
+          params: { hive: 1 },
+        });
+
+        rewards = Object.values(data)
+          .filter((r) => r.pending_token > 0)
+          .map((r) => ({
+            symbol: r.symbol,
+            stake: toFixedWithoutRounding(r.staked_tokens / 10 ** r.precision, r.precision),
+            reward: toFixedWithoutRounding(r.pending_token / 10 ** r.precision, r.precision),
+          }));
+      } catch {
+        //
+      }
+
+      return rewards;
+    },
+
+    async requestClaimScotRewards(symbols) {
+      const store = useStore();
+
+      let json = {};
+
+      if (Array.isArray(symbols)) {
+        json = symbols.reduce((acc, symbol) => {
+          acc.push({ symbol });
+
+          return acc;
+        }, []);
+      } else {
+        json = { symbol: symbols };
+      }
+
+      const message = `Claim SCOT Rewards`;
+
+      await store.requestBroadcastJson({
+        id: "scot_claim_token",
+        key: "Posting",
+        message,
+        json,
+        eventName: "scot-claim-successful",
+      });
+    },
+  },
+});

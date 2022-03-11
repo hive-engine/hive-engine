@@ -1,0 +1,94 @@
+{
+  "general": [
+    {
+      "title": "What is Hive Engine?",
+      "content": "Hive Engine is a smart contracts side-chain platform for the Hive blockchain. This means that it can execute custom smart contracts based on data published to the Hive blockchain. This allows us to do things that are not currently supported by the Hive blockchain, such as creating custom tokens, or literally anything else achievable with a smart contract."
+    },
+    {
+      "title": "How does Hive Engine work?",
+      "content": "Hive Engine uses the Hive Smart Contracts software created by @harpagon. The software scans all blocks added to the Hive blockchain for transfers, custom_json, or even comment operations that contain a certain sidechain ID. It then executes the smart contract function specified in the operation data and packages it into a block which is added to the sidechain. It also maintains the current state of the sidechain and all smart contracts running on it which can be queried using a familiar RPC API."
+    },
+    {
+      "title": "What are BEE tokens?",
+      "content": "BEE is the native token of the Hive Engine platform, just like how ETH is the native token of the Ethereum platform. BEE is currently required to create a new token on the Hive Engine platform, and in the future it will be required to publish and execute custom smart contracts."
+    },
+    {
+      "title": "How do I get BEE tokens?",
+      "content": "BEE can be purchased through this website by clicking the \"Trade\" button on the Tokens page. BEE can be earned by running the Hive Smart Contracts node software to create blocks and help secure the network, just as HIVE/BTC/ETH can be earned by block producers securing their networks."
+    },
+    {
+      "title": "How do I create my own token?",
+      "content": "You can create your own token by using <a href=\"https://tribaldex.com/tokens/create\" target=\"_blank\">Tribaldex</a> - our full featured interface for contracts. You will then be prompted to fill in all of the required information about your token and pay the specified fee in BEE. Please keep in mind that, other than the token URL, none of the information can be changed once your token has been created, so please make sure you have thoroughly thought through everything before submitting."
+    },
+    {
+      "title": "Why is there a fee to create a token?",
+      "content": "The fee is primarily to prevent people from creating \"spam\" tokens that have no real planned use. If you would like to test creating a token, you can do so for free on the testnet website here. The fee is meant to be large enough to prevent people from creating tokens they don't plan to actually use, but small enough to not be a barrier for any serious projects. If you have a good project and you truly cannot afford the fee, please contact us on <a href=\"https://discord.gg/xWRYB9s\" target=\"_blank\">Discord</a> and we may be able to cover the fee for you. "
+    },
+    {
+      "title": "How do I issue new tokens and what does that mean?",
+      "content": "After a new token is created they must be \"issued\" in order for them to be used and traded. The total amount of a token that can be issued is limited by the max supply set during token creation. Tokens may be issued all at once or in small amounts over time, it is up to the token creator. To issue a token, you can click on the token in the list on the Tokens page and then click on the \"Issue\" button on the top right of the screen. Only the creator of the token may issue them, so you must be logged in with the Hive account that created the token in order for the option to appear."
+    },
+    {
+      "title": "How do I view my balance/history and transfer tokens?",
+      "content": "You can view your balances of any tokens built on the Hive Engine platform from the \"Wallet\" page of this site. If you click on a particular token you can see your recent transaction history. If you click on a particular transaction in the history list you can see more details of that transaction. There is also a \"Send\" button at the top right of the page after you have clicked on a specific token which will allow you to transfer them to another Hive account. Additionally, you can view your token balances and transfer tokens directly from the <a href=\"https://hive-keychain.com\" target=\"_blank\">Hive Keychain</a> browser extension."
+    }
+  ],
+  "market": [
+    {
+      "title": "What is the market?",
+      "content": "The Hive Engine market is a decentralized exchange (DEX) that allows anyone to buy or sell any token created on the Hive Engine platform against HIVE. All transactions are published on the Hive blockchain and trades are executed by the open source Steem Smart Contracts platform software which is avaialble for anyone to independently run and verify. The Hive Engine market is very similar to other decentralized exchanges such as BitShares, Stellar, and even the internal HIVE / SBD market on the Hive blockchain."
+    },
+    {
+      "title": "What is SWAP.HIVE?",
+      "content": "Since the Hive Engine platform is not part of the core Hive blockchain code, it cannot transact in the HIVE token directly. Instead we have created a Hive Engine token which is pegged to the value of the HIVE token, called SWAP.HIVE. This means that all trading on the Hive Engine market will use the SWAP.HIVE token which can be exchanged for real HIVE or vice versa at any time on a 1:1 basis.<br><br>SWAP.HIVE is pegged to the value of HIVE because one HIVE token will be held for every SWAP.HIVE token in circulation, and users are able to exchange HIVE for SWAP.HIVE and vice versa on a 1:1 basis at any time. This is the same way that many other pegged tokens work, such as Tether where, allegedly, $1 is held for every USDT token in circulation. Unlike with Tether, anyone can easily verify that the amount of HIVE held in the @steem-peg account is enough to cover all of the SWAP.HIVE tokens in circulation at any time thanks to the open and transparent nature of the Hive blockchain. Another example of creating a HIVE-pegged token to allow HIVE to be traded on another exchange is the Hive Anchor project which allows HIVE and SBD to be traded on the Stellar decentralized exchange."
+    },
+    {
+      "title": "How do I deposit or withdraw HIVE?",
+      "content": "At the top of the Wallet page on the Hive Engine website there are buttons to both deposit and withdraw HIVE. Please do NOT transfer tokens manually, to ensure your deposits and withdrawals arrive in the right location.<br><br>Please note that there is a 0.75% fee on all HIVE deposits and withdrawals. This fee is charged for the service of creating and maintaining the HIVE-pegged token on the Hive Engine platform and will be used to fund future development of the platform and associated services."
+    },
+    {
+      "title": "How do I buy or sell tokens?",
+      "content": "To buy or sell Hive Engine tokens on the market, you can first find the token you wish to trade in the tokens or wallet page and click on the trade icon next to it. This will take you to the market view for that specific token. If you would like to buy the token you will first need enough SWAP.HIVE tokens in your account to pay for them at the specified price. You can get SWAP.HIVE tokens by either selling other Hive Engine tokens for SWAP.HIVE on the market, or you can deposit HIVE and get an equal amount of SWAP.HIVE tokens in return from the Wallet page.<br><br>When you are ready to place your trade, you can enter the price at which you would like to buy or sell the tokens and the amount you would like to buy or sell and then press the \"Buy\" or \"Sell\" button. You will then see a confirmation screen in which you can double check the details of your order and submit it. Once submitted, your order will appear in the \"My Open Orders\" section until it is either filled or cancelled."
+    },
+    {
+      "title": "Are there any trading fees?",
+      "content": "There are no fees for using the Hive Engine market, however please note that as with anything on the Hive blockchain you will need to have enough Resource Credits available in your account to publish the required transactions. Also, as mentioned above, there is a 0.75% fee for any deposits or withdrawals of HIVE."
+    },
+    {
+      "title": "Why aren't some tokens listed on the market?",
+      "content": "While the market is fully decentralized and anyone can trade any token on the Hive Engine platform against HIVE at any time, the Hive Engine website itself is still owned and operated by a centralized entity and must abide by local laws and regulations in the jurisdictions where it is based. As a result certain tokens may not be listed on the market page of the Hive Engine website, though they may still be able to be traded on other Hive Engine based front ends. Additionally, token creators may request that their token not be listed on the Hive Engine website market page and we plan to honor those requests."
+    }
+  ],
+  "pegged_tokens": [
+    {
+      "title": "What are pegged tokens?",
+      "content": "Pegged tokens are tokens on Hive Engine that are backed one-to-one by a token on another blockchain or potentially by a real world asset such as USD or gold. In addition to HIVE, Hive Engine now supports pegged tokens for Bitcoin (BTC), Litecoin (LTC), Bitcoin Cash (BCH), and Dogecoin (DOGE) and plans to add many more in the near future. This means that at any time users can deposit any of the supported tokens and receive the pegged versions which can then be transferred or traded for other Hive Engine tokens on the Hive Engine decentralized market. Users can also withdraw the pegged tokens back out to the real version at any time."
+    },
+    {
+      "title": "How do I deposit tokens into Hive Engine?",
+      "content": "To deposit tokens into Hive Engine from an external blockchain, you can click on the \"Deposit\" button found at the top of the Wallet page. Then choose the token you would like to deposit from the list of supported tokens. Then you will see the wallet address to which you will need to send the tokens to deposit them. You may then send any amount of tokens to the wallet address shown on the appropriate blockchain to convert them into Hive Engine pegged tokens. It may take some time for the transaction to complete and for the pegged tokens to be credited to your Hive account depending on the speed of the external blockchain. You can check to see if your deposit has completed on the Conversion History page."
+    },
+    {
+      "title": "How do I withdraw pegged tokens from Hive Engine?",
+      "content": "To withdraw pegged tokens from Hive Engine to your wallet on an external blockchain, you can click on the \"Withdraw\" button found at the top of the Wallet page. Then choose the token you would like to withdraw from the list of supported tokens, enter the amount you would like to withdraw, and the wallet address on the external blockchain to which the tokens should be sent. It may take some time for the transaction to complete and for the tokens to be send to your external wallet depending on the speed of the external blockchain. Please double check the withdraw address as we cannot refund or recover any incorrect withdrawals. You can check to see if your withdrawal has completed on the Conversion History page."
+    },
+    {
+      "title": "What do I do if there is an issue?",
+      "content": "If you run into any issue with deposits or withdrawals of pegged tokens on the Hive Engine platform, please post your problem in the #tech-support channel in the <a href=\"https://discord.gg/xWRYB9s\" target=\"_blank\">Hive Engine Discord Server</a> and one of our dedicated support representatives will get back to you as soon as possible. "
+    }
+  ],
+  "developers": [
+    {
+      "title": "Can I integrate my website or project with Hive Engine?",
+      "content": "Yes! The simplest way to integrate with the Hive Engine platform is to use our <a href=\"https://github.com/hive-engine/sscjs\" target=\"_blank\">JavaScript library</a>, however you can also interact with the RPC endpoints directly from any programming language or tool of your choice. If you have any questions or need any help please reach out in the developers channel in our <a href=\"https://discord.gg/xWRYB9s\" target=\"_blank\">Discord server</a>."
+    },
+    {
+      "title": "Can I run my own Hive Smart Contracts node?",
+      "content": "Yes again! You can download the <a href=\"https://github.com/hive-engine/steemsmartcontracts/tree/hive-engine\" target=\"_blank\">Hive Smart Contracts</a> software from GitHub and view the documentation for how to set it up in the readme. If you have any questions or need any help please reach out in the developers channel in our <a href=\"https://discord.gg/xWRYB9s\" target=\"_blank\">Discord server</a>."
+    },
+    {
+      "title": "Can I publish my own smart contract to the Hive Engine sidechain?",
+      "content": "We are currently not allowing arbitrary smart contracts to be published to the sidechain, as you can do on platforms like Ethereum or EOS. Our goal is to be able to allow this at some point in the future, but for now if you are interested in deploying a custom smart contract please contact us on <a href=\"https://discord.gg/xWRYB9s\" target=\"_blank\">Discord</a> and we can work with you on that."
+    }
+  ]
+}

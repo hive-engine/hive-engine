@@ -1,0 +1,100 @@
+<template>
+  <DepthLineChart :chart-data="chartData" :options="options" />
+</template>
+
+<script>
+import {
+  Chart,
+  LineController,
+  LineElement,
+  Tooltip,
+  PointElement,
+  CategoryScale,
+  Filler,
+} from "chart.js";
+import { defineComponent, ref, toRefs } from "vue";
+import { defineChartComponent } from "vue-chart-3";
+
+class CustomLineChart extends LineController {
+  draw() {
+    super.draw(arguments);
+
+    const borderColor = "#999";
+
+    if (this.chart.tooltip._active && this.chart.tooltip._active.length) {
+      const activePoint = this.chart.tooltip._active[0];
+
+      const { x } = activePoint.element;
+      const topY = this.chart.scales.y.top;
+      const bottomY = this.chart.scales.y.bottom;
+
+      const ctx = this.chart.ctx;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(x, topY);
+      ctx.lineTo(x, bottomY);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = borderColor;
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+}
+
+CustomLineChart.id = "CustomLineChart";
+CustomLineChart.defaults = LineController.defaults;
+
+Chart.register(
+  LineController,
+  LineElement,
+  Tooltip,
+  PointElement,
+  CategoryScale,
+  Filler,
+  CustomLineChart
+);
+
+const DepthLineChart = defineChartComponent("DepthLineChart", "CustomLineChart");
+
+export default defineComponent({
+  name: "DepthChart",
+
+  components: {
+    DepthLineChart,
+  },
+
+  props: {
+    chartData: { type: Object, required: true },
+  },
+
+  setup(props) {
+    const { chartData } = toRefs(props);
+
+    const options = ref({
+      maintainAspectRatio: false,
+      interaction: {
+        mode: "index",
+        intersect: false,
+      },
+      scales: {
+        y: {
+          ticks: {
+            fontColor: "#565d69",
+          },
+        },
+        x: {
+          ticks: {
+            fontColor: "#565d69",
+          },
+        },
+      },
+    });
+
+    return {
+      chartData,
+      options,
+    };
+  },
+});
+</script>

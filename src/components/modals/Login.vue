@@ -1,0 +1,145 @@
+<template>
+  <Modal v-model="show" name="loginModal" @before-open="beforeOpen" @close="onClose">
+    <template #title>Login</template>
+
+    <div class="text-center">
+      <label for="username" class="sr-only">Hive username</label>
+
+      <input
+        id="username"
+        v-model="username"
+        type="text"
+        name="username"
+        placeholder="Hive username"
+        :class="[
+          v$.username.$error
+            ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
+            : '',
+          'block mx-auto w-3/4 text-center text-xl px-3 py-3 dark:bg-slate-600 dark:border-gray-500 rounded-md focus:ring-0 border-gray-400 placeholder-gray-300',
+        ]"
+        required
+        @blur="v$.username.$touch()"
+        @keyup.enter="requestLogin"
+      />
+
+      <button
+        type="submit"
+        class="btn py-3 mt-10"
+        :disabled="v$.username.$invalid || btnBusy"
+        @click="requestLogin"
+      >
+        <Spinner v-if="btnBusy" />
+        {{ " " }} Login using Keychain
+      </button>
+    </div>
+  </Modal>
+</template>
+
+<script>
+import { defineComponent, inject, onMounted, onBeforeUnmount, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useVuelidate } from "@vuelidate/core";
+import { minLength, maxLength, required } from "@vuelidate/validators";
+import { useUserStore } from "../../stores/user";
+import Modal from "./Modal.vue";
+
+export default defineComponent({
+  name: "LoginModal",
+
+  components: {
+    Modal,
+  },
+
+  setup() {
+    const userStore = useUserStore();
+    const event = inject("eventBus");
+    const vfm$ = inject("$vfm");
+
+    const username = ref("");
+    const show = ref(false);
+    const btnBusy = ref(false);
+
+    const route = useRoute();
+    const router = useRouter();
+
+    const rules = {
+      username: {
+        required,
+        minLength: minLength(3),
+        maxLength: maxLength(16),
+        validUsername: (value) => {
+          if (value === "") {
+            return true;
+          }
+
+          return /^([a-z])[a-z0-9-.]*$/.test(value);
+        },
+      },
+    };
+
+    const v$ = useVuelidate(rules, { username });
+
+    const loggedInUser = localStorage.getItem("username");
+
+    if (loggedInUser && loggedInUser !== "") {
+      username.value = loggedInUser;
+
+      v$.value.$touch();
+    }
+
+    if (!v$.value.$invalid) {
+      userStore.username = loggedInUser;
+
+      let { redirect } = route.query;
+
+      if (redirect) {
+        redirect = atob(redirect);
+
+        const resolved = router.resolve(redirect)
+
+        if (resolved.name) {
+          router.push(redirect);
+        }
+      }
+    }
+
+    const beforeOpen = () => {
+      username.value = "";
+    };
+
+    const onClose = () => {
+      username.value = "";
+
+      v$.value.$reset();
+    };
+
+    onMounted(() => {
+      event.on("login-awaiting", () => {
+        btnBusy.value = true;
+      });
+
+      event.on("login-done", () => {
+        btnBusy.value = false;
+
+        vfm$.hide("loginModal");
+      });
+    });
+
+    onBeforeUnmount(() => {
+      event.off("login-awaiting");
+      event.off("login-done");
+    });
+
+    return {
+      username,
+      show,
+      btnBusy,
+      v$,
+
+      requestLogin: () => userStore.requestLogin(username.value),
+      beforeOpen,
+      onClose,
+    };
+  },
+});
+</script>
