@@ -19,6 +19,7 @@
         ]"
         required
         @blur="v$.username.$touch()"
+        @input="event => username = event.target.value.toLowerCase()"
         @keyup.enter="requestLogin"
       />
 
@@ -83,9 +84,11 @@ export default defineComponent({
 
     const v$ = useVuelidate(rules, { username });
 
-    const loggedInUser = localStorage.getItem("username");
+    let loggedInUser = localStorage.getItem("username");
 
     if (loggedInUser && loggedInUser !== "") {
+      loggedInUser = loggedInUser.toLowerCase()
+
       username.value = loggedInUser;
 
       v$.value.$touch();
