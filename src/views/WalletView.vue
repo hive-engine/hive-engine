@@ -23,7 +23,9 @@
   <Loading v-if="loading" />
 
   <div v-else class="page-content">
-    <div class="flex flex-wrap items-center justify-between">
+    <div
+      class="flex flex-wrap items-center text-center sm:text-left justify-center sm:justify-between"
+    >
       <div class="mb-5">
         <input
           v-model="filter"
@@ -33,9 +35,15 @@
         />
       </div>
 
-      <label class="mb-5">
-        <input type="checkbox" v-model="hiveZeroBalance" /> Hide small balances
-      </label>
+      <div>
+        <label class="mb-1 block">
+          <input type="checkbox" v-model="hiveZeroBalance" /> Hide small balances
+        </label>
+
+        <label class="mb-3 block">
+          <input type="checkbox" v-model="includeAll" /> Value includes stake and delegated
+        </label>
+      </div>
     </div>
 
     <CustomTable :fields="walletTableFields" :items="wallet" :per-page="20">
@@ -203,6 +211,7 @@ import {
   TrendingDownIcon,
   SwitchHorizontalIcon,
 } from "@heroicons/vue/outline";
+import { useStorage } from '@vueuse/core'
 import { useStore } from "../stores";
 import { useTokenStore } from "../stores/token";
 import { useWalletStore } from "../stores/wallet";
@@ -238,7 +247,8 @@ export default defineComponent({
     const event = inject("eventBus");
 
     const filter = ref("");
-    const hiveZeroBalance = ref(false);
+    const hiveZeroBalance = useStorage('hide-small-balances', false);
+    const includeAll = useStorage('value-includes-all', false);
 
     let refreshTimeout = null;
 
@@ -298,13 +308,15 @@ export default defineComponent({
           const availableStake = toFixedWithoutRounding(stake - lockedStake, token.precision);
           const changePct = metrics ? parseFloat(metrics.priceChangePercent) : 0;
 
-          const balance = Number(b.balance);
+          const balance = b.balance;
 
           stake = toFixedWithoutRounding(stake + pendingUnstake - lockedStake, token.precision);
 
+          const stakesAndDelegated = delegationsOut + stake
+
           const valueHive = metrics
-            ? (balance + delegationsOut + stake) * metrics.lastPrice
-            : balance + delegationsOut + stake;
+            ? (balance + (includeAll.value ? stakesAndDelegated : 0)) * metrics.lastPrice
+            : balance + (includeAll.value ? stakesAndDelegated : 0);
 
           const valueUSD = toFixedWithoutRounding(valueHive * hivePrice.value);
 
@@ -399,6 +411,7 @@ export default defineComponent({
 
       filter,
       hiveZeroBalance,
+      includeAll,
 
       walletTableFields,
       wallet,
