@@ -5,9 +5,10 @@
         <div class="col-span-full md:col-span-3">
           <h1 class="text-4xl uppercase">My Token Wallet</h1>
 
-          <div v-if="!loading" class="text-lg">
-            Estimated value: ${{ estimatedValue.toLocaleString() }} USD
-          </div>
+          <div
+            v-if="!loading"
+            class="text-lg"
+          >Estimated value: ${{ estimatedValue.toLocaleString() }} USD</div>
         </div>
 
         <div class="col-span-full md:col-span-1">
@@ -43,9 +44,9 @@
       </template>
 
       <template #cell(changePct)="{ item }">
-        <span :class="{ 'text-red-500': item.changePct < 0, 'text-green-500': item.changePct > 0 }"
-          >{{ item.changePct.toFixed(2) }}%</span
-        >
+        <span
+          :class="{ 'text-red-500': item.changePct < 0, 'text-green-500': item.changePct > 0 }"
+        >{{ item.changePct.toFixed(2) }}%</span>
       </template>
 
       <template #cell(stake)="{ item }">
@@ -55,8 +56,7 @@
             content: `Available: ${item.availableStake}<br>Locked: ${item.lockedStake}<br>Pending: ${item.pendingUnstake}`,
             html: true,
           }"
-          >{{ item.stake }}</span
-        >
+        >{{ item.stake }}</span>
 
         <span v-else>--</span>
       </template>
@@ -68,8 +68,7 @@
             content: `In: ${item.delegationsIn}<br>Out: ${item.delegationsOut}<br>Pending: ${item.pendingUndelegations}`,
             html: true,
           }"
-          >{{ item.delegationsIn + item.delegationsOut + item.pendingUndelegations }}</span
-        >
+        >{{ item.delegationsIn + item.delegationsOut + item.pendingUndelegations }}</span>
 
         <span v-else>--</span>
       </template>
@@ -254,14 +253,17 @@ export default defineComponent({
         .filter((p) => p.numberTransactionsLeft > 1)
         .reduce((acc, cur) => {
           const token = mappedTokens.value.get(cur.symbol);
-          if (!acc[cur.symbol]) {
-            acc[cur.symbol] = 0;
-          }
 
-          acc[cur.symbol] += toFixedWithoutRounding(
-            Number(cur.quantityLeft) - Number(Number(cur.quantity) / token.numberTransactions),
-            token.precision
-          );
+          if (token) {
+            if (!acc[cur.symbol]) {
+              acc[cur.symbol] = 0;
+            }
+
+            acc[cur.symbol] += toFixedWithoutRounding(
+              Number(cur.quantityLeft) - Number(Number(cur.quantity) / token.numberTransactions),
+              token.precision
+            );
+          }
 
           return acc;
         }, {});
