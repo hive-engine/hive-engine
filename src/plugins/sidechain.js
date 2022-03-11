@@ -101,10 +101,13 @@ const sidechain = {
     return this.contract(request);
   },
 
-  getPendingUnstakes(account, symbols) {
+  getPendingUnstakes(account, symbol) {
     const query = { account };
-    if (symbols) {
-      query.symbol = { $in: symbols };
+
+    if (Array.isArray(symbol)) {
+      query.symbol = { $in: symbol };
+    } else {
+      query.symbol = symbol;
     }
 
     const request = {

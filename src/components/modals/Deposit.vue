@@ -9,16 +9,14 @@
     @closed="modalClose"
   >
     <div class="flex items-center justify-between px-6 py-4">
-      <div class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300">
-        Deposit Tokens
-      </div>
+      <div class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300">Deposit Tokens</div>
 
       <button class="dark:text-gray-300" @click="close">
         <x-icon class="h-5 w-5" aria-hidden="true" />
       </button>
     </div>
 
-    <div class="p-6 flex-grow">
+    <div class="p-6 flex-grow overflow-y-auto">
       <Loading small v-if="modalBusy" />
 
       <template v-else>
@@ -52,9 +50,10 @@
         <template v-else-if="selectedToken === 'HIVE' && depositInfo">
           <div class="mb-3">
             <label class="block mb-2 font-bold">Available Balance</label>
-            <div class="cursor-pointer" @click="depositAmount = depositInfo.balance">
-              {{ depositInfo.balance }} HIVE
-            </div>
+            <div
+              class="cursor-pointer"
+              @click="depositAmount = depositInfo.balance"
+            >{{ depositInfo.balance }} HIVE</div>
           </div>
 
           <div class="mb-3">
@@ -75,7 +74,8 @@
             :disabled="depositAmount <= 0 || depositAmount > depositInfo.balance"
             @click.prevent="depositHive"
           >
-            <Spinner v-if="btnBusy" /> {{ " " }} Deposit {{ selectedToken }}
+            <Spinner v-if="btnBusy" />
+            {{ " " }} Deposit {{ selectedToken }}
           </button>
         </template>
 
@@ -104,18 +104,17 @@
                 class="btn-sm self-stretch rounded-l-none"
                 title="Add or update address"
                 @click="updateEvmAddress(networks[selectedToken])"
-              >
-                Update
-              </button>
+              >Update</button>
             </div>
           </div>
 
           <template v-if="['ETH', 'BNB', 'MATIC'].includes(selectedToken)">
             <div class="mb-3">
               <label class="block mb-2 font-bold">Available Balance</label>
-              <div class="cursor-pointer" @click="depositAmount = depositInfo.balance">
-                {{ depositInfo.balance }} {{ selectedToken }}
-              </div>
+              <div
+                class="cursor-pointer"
+                @click="depositAmount = depositInfo.balance"
+              >{{ depositInfo.balance }} {{ selectedToken }}</div>
             </div>
 
             <div class="mb-3">
@@ -134,7 +133,8 @@
               :disabled="depositAmount <= 0 || depositAmount > depositInfo.balance"
               @click.prevent="depositEvmAsset(networks[selectedToken])"
             >
-              <Spinner v-if="btnBusy" /> {{ " " }} Deposit {{ selectedToken }}
+              <Spinner v-if="btnBusy" />
+              {{ " " }} Deposit {{ selectedToken }}
             </button>
           </template>
 
@@ -150,9 +150,10 @@
 
             <div class="mb-3">
               <label class="block mb-2 font-bold">Available Balance</label>
-              <div class="cursor-pointer" @click="depositAmount = depositInfo.balance">
-                {{ depositInfo.balance }} {{ evmToken }}
-              </div>
+              <div
+                class="cursor-pointer"
+                @click="depositAmount = depositInfo.balance"
+              >{{ depositInfo.balance }} {{ evmToken }}</div>
             </div>
 
             <div class="mb-3">
@@ -171,7 +172,8 @@
               :disabled="depositAmount <= 0 || depositAmount > depositInfo.balance"
               @click.prevent="depositEvmToken(networks[selectedToken])"
             >
-              <Spinner v-if="btnBusy" /> {{ " " }} Deposit {{ evmToken }}
+              <Spinner v-if="btnBusy" />
+              {{ " " }} Deposit {{ evmToken }}
             </button>
           </template>
         </template>
@@ -200,9 +202,7 @@
                 <button
                   class="btn-sm leading-4 py-3 rounded-l-none border-l-0"
                   @click="copyAddress(depositInfo.address)"
-                >
-                  {{ addressCopied ? "Copied" : "Copy" }}
-                </button>
+                >{{ addressCopied ? "Copied" : "Copy" }}</button>
               </div>
             </div>
           </div>
@@ -221,9 +221,7 @@
                 <button
                   class="btn-sm leading-4 py-3 rounded-l-none border-l-0"
                   @click="copyAddress(depositInfo.account)"
-                >
-                  {{ addressCopied ? "Copied" : "Copy" }}
-                </button>
+                >{{ addressCopied ? "Copied" : "Copy" }}</button>
               </div>
             </div>
 
@@ -240,9 +238,7 @@
                 <button
                   class="btn-sm leading-4 py-3 rounded-l-none border-l-0"
                   @click="copyMemo(depositInfo.memo)"
-                >
-                  {{ memoCopied ? "Copied" : "Copy" }}
-                </button>
+                >{{ memoCopied ? "Copied" : "Copy" }}</button>
               </div>
             </div>
           </div>

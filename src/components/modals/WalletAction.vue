@@ -3,103 +3,153 @@
     v-model="show"
     v-slot="{ params, close }"
     classes="flex justify-center items-center"
-    content-class="w-full max-w-lg relative flex flex-col max-h-full border dark:border-gray-800 rounded bg-white dark:bg-gray-600 dark:text-gray-300"
+    content-class="w-full max-w-xl relative flex flex-col max-h-full border dark:border-gray-800 rounded bg-white dark:bg-gray-600 dark:text-gray-300"
     name="walletActionModal"
     @before-open="beforeOpen"
     @closed="modalClose"
   >
     <div class="flex items-center justify-between px-6 py-4">
-      <div class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300">
-        {{ actionName }} {{ params.symbol }}
-      </div>
+      <div
+        class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300"
+      >{{ actionName }} {{ params.symbol }}</div>
 
       <button class="dark:text-gray-300" @click="close">
         <x-icon class="h-5 w-5" aria-hidden="true" />
       </button>
     </div>
 
-    <div class="flex-grow overflow-y-auto">
+    <div class="p-6 flex-grow overflow-y-auto">
       <template v-if="modalBusy"></template>
 
       <template v-else>
-        <div class="block mb-2 font-bold">Available</div>
-        <div class="cursor-pointer mb-4" @click="quantity = params.available">
-          {{ params.available }} {{ params.symbol }}
-        </div>
+        <CustomTable
+          v-if="params.action === 'pendingUnstakes'"
+          :items="pendingUnstakes"
+          :fields="pendingUnstakeFields"
+        >
+          <template #cell(quantity)="{ item }">{{ item.quantity }} {{ params.symbol }}</template>
 
-        <div class="mb-3" v-if="showTo">
-          <label for="to" class="block mb-2 font-bold">To</label>
-          <input
-            type="text"
-            :class="[
-              v$.to.$error
-                ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
-                : '',
-              'rounded-md dark:bg-slate-600 w-full',
-            ]"
-            id="to"
-            v-model="to"
-            @input="(event) => (to = event.target.value.toLowerCase())"
-          />
-          <div v-if="v$.to.$error" class="text-sm text-red-500 mt-1">
-            Please enter a valid hive username.
-          </div>
-        </div>
+          <template #cell(quantityLeft)="{ item }">
+            {{ item.quantityLeft }} {{ params.symbol }}
+            <small>({{ item.numberTransactionsLeft }} Transactions)</small>
+          </template>
 
-        <div class="mb-3" v-if="showFrom">
-          <label for="from" class="block mb-2 font-bold">From</label>
-          <input
-            type="text"
-            :class="[
-              v$.from.$error
-                ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
-                : '',
-              'rounded-md dark:bg-slate-600 w-full',
-            ]"
-            id="from"
-            v-model="from"
-            @input="(event) => (from = event.target.value.toLowerCase())"
-          />
-          <div v-if="v$.from.$error" class="text-sm text-red-500 mt-1">
-            Please enter a valid hive username.
-          </div>
-        </div>
+          <template
+            #cell(nextTransactionTimestamp)="{ item }"
+          >{{ item.quantityLeft / item.numberTransactionsLeft }} {{ params.symbol }} at {{ new Date(item.nextTransactionTimestamp).toLocaleString() }}</template>
 
-        <div class="mb-3">
-          <label for="quantity" class="block mb-2 font-bold">Quantity</label>
+          <template #cell(actions)="{ item }">
+            <button
+              class="btn-sm"
+              @click.prevent="requestCancelUnstake({ symbol: params.symbol, trxId: item.txID })"
+            >
+              <XIcon class="h-5 w-5" />
+            </button>
+          </template>
+        </CustomTable>
 
-          <div class="flex items-center w-full">
+        <template v-else>
+          <CustomTable
+            v-if="params.action === 'undelegate'"
+            :fields="delegationFields"
+            :items="delegations"
+            class="mb-5"
+          >
+            <template #cell(actions)="{ item }">
+              <button
+                class="btn-sm"
+                @click.prevent="quantity = item.quantity; from = item.to; requestAction(params)"
+              >
+                <XIcon class="h-5 w-5" />
+              </button>
+            </template>
+          </CustomTable>
+
+          <div class="block mb-2 font-bold">Available</div>
+          <div
+            class="cursor-pointer mb-4"
+            @click="quantity = params.available"
+          >{{ params.available }} {{ params.symbol }}</div>
+
+          <div class="mb-3" v-if="showTo">
+            <label for="to" class="block mb-2 font-bold">To</label>
             <input
-              type="number"
+              type="text"
               :class="[
-                v$.quantity.$error
+                v$.to.$error
                   ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
                   : '',
-                'rounded-l-md dark:bg-slate-600 w-full',
+                'rounded-md dark:bg-slate-600 w-full',
               ]"
-              id="quantity"
-              v-model="quantity"
+              id="to"
+              v-model="to"
+              @input="(event) => (to = event.target.value.toLowerCase())"
             />
             <div
-              class="bg-gray-200 dark:bg-slate-600 h-full p-2 border border-l-0 rounded-r-md border-gray-500"
-            >
-              {{ params.symbol }}
+              v-if="v$.to.$error"
+              class="text-sm text-red-500 mt-1"
+            >Please enter a valid hive username.</div>
+          </div>
+
+          <div class="mb-3" v-if="showFrom">
+            <label for="from" class="block mb-2 font-bold">From</label>
+            <input
+              type="text"
+              :class="[
+                v$.from.$error
+                  ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
+                  : '',
+                'rounded-md dark:bg-slate-600 w-full',
+              ]"
+              id="from"
+              v-model="from"
+              @input="(event) => (from = event.target.value.toLowerCase())"
+            />
+            <div
+              v-if="v$.from.$error"
+              class="text-sm text-red-500 mt-1"
+            >Please enter a valid hive username.</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="quantity" class="block mb-2 font-bold">Quantity</label>
+
+            <div class="flex items-center w-full">
+              <input
+                type="number"
+                :class="[
+                  v$.quantity.$error
+                    ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
+                    : '',
+                  'rounded-l-md dark:bg-slate-600 w-full',
+                ]"
+                id="quantity"
+                v-model="quantity"
+              />
+              <div
+                class="bg-gray-200 dark:bg-slate-600 h-full p-2 border border-l-0 rounded-r-md border-gray-500"
+              >{{ params.symbol }}</div>
             </div>
+            <div
+              v-if="v$.quantity.$error"
+              class="text-sm text-red-500 mt-1"
+            >Please enter a quantity greater than zero.</div>
           </div>
-          <div v-if="v$.quantity.$error" class="text-sm text-red-500 mt-1">
-            Please enter a quantity greater than zero.
+
+          <div class="mb-3" v-if="params.action === 'transfer'">
+            <label for="memo" class="block mb-2 font-bold">Memo</label>
+            <input type="text" class="rounded-md dark:bg-slate-600 w-full" id="memo" v-model="memo" />
           </div>
-        </div>
 
-        <div class="mb-3" v-if="params.action === 'transfer'">
-          <label for="memo" class="block mb-2 font-bold">Memo</label>
-          <input type="text" class="rounded-md dark:bg-slate-600 w-full" id="memo" v-model="memo" />
-        </div>
-
-        <button class="btn" :disabled="quantity > params.available" @click="requestAction(params)">
-          <Spinner v-if="btnBusy" />
-          {{ " " }} {{ actionName }}
-        </button>
+          <button
+            class="btn"
+            :disabled="quantity > params.available"
+            @click="requestAction(params)"
+          >
+            <Spinner v-if="btnBusy" />
+            {{ " " }} {{ actionName }}
+          </button>
+        </template>
       </template>
     </div>
   </vue-final-modal>
@@ -112,12 +162,15 @@ import { required, minLength, maxLength } from "@vuelidate/validators";
 import { XIcon } from "@heroicons/vue/outline";
 import { useWalletStore } from "../../stores/wallet";
 import { useUserStore } from "../../stores/user";
+import { sidechain } from "../../plugins/sidechain";
+import CustomTable from "../utilities/CustomTable.vue";
 
 export default defineComponent({
   name: "WalletAction",
 
   components: {
     XIcon,
+    CustomTable
   },
 
   setup() {
@@ -135,6 +188,21 @@ export default defineComponent({
     const from = ref("");
     const quantity = ref("");
     const memo = ref("");
+
+    const delegations = ref([])
+    const delegationFields = [
+      { key: 'to', label: 'From' },
+      { key: 'quantity', label: 'Amount' },
+      { key: 'actions', label: '' }
+    ]
+
+    const pendingUnstakes = ref([])
+    const pendingUnstakeFields = [
+      { key: 'quantity', label: 'Quantity' },
+      { key: 'quantityLeft', label: 'Remaining' },
+      { key: 'nextTransactionTimestamp', label: 'Next Withdrawal' },
+      { key: 'actions', label: '' }
+    ]
 
     const username = computed(() => userStore.username);
 
@@ -184,6 +252,7 @@ export default defineComponent({
         undelegate: { from, quantity },
         stake: { to, quantity },
         unstake: { quantity },
+        pendingUnstakes: {}
       };
 
       return Object.keys(obj[modalAction.value]).reduce((a, c) => {
@@ -201,6 +270,7 @@ export default defineComponent({
         undelegate: "Undelegate",
         stake: "Stake",
         unstake: "Unstake",
+        pendingUnstakes: 'Pending Unstakes'
       };
 
       return obj[modalAction.value] || "";
@@ -231,13 +301,29 @@ export default defineComponent({
     const showTo = computed(() => ["transfer", "stake", "delegate"].includes(modalAction.value));
     const showFrom = computed(() => ["undelegate"].includes(modalAction.value));
 
-    const beforeOpen = (e) => {
+    const beforeOpen = async (e) => {
       modalBusy.value = true;
 
-      modalAction.value = e.ref.params.value.action;
+      const { action, symbol } = e.ref.params.value
+      modalAction.value = action;
 
       if (modalAction.value === "stake") {
         to.value = username.value;
+      } else if (modalAction.value === "undelegate") {
+        const result = await sidechain.contract({
+          method: 'find',
+          params: {
+            contract: 'tokens',
+            table: 'delegations',
+            query: { symbol, from: username.value }
+          }
+        })
+
+        delegations.value = result.map(d => ({ ...d, quantity: Number(d.quantity) }))
+      } else if (modalAction.value === "pendingUnstakes") {
+        const result = await sidechain.getPendingUnstakes(username.value, symbol)
+
+        pendingUnstakes.value = result.map(p => ({ ...p, quantity: Number(p.quantity), quantityLeft: Number(p.quantityLeft) }))
       }
 
       modalBusy.value = false;
@@ -246,10 +332,15 @@ export default defineComponent({
     const modalClose = () => {
       v$.value.$reset();
 
+      modalAction.value = 'transfer'
+
       to.value = "";
       from.value = "";
       quantity.value = "";
       memo.value = "";
+
+      delegations.value = []
+      pendingUnstakes.value = []
     };
 
     onMounted(() => {
@@ -283,6 +374,12 @@ export default defineComponent({
       quantity,
       memo,
 
+      delegations,
+      delegationFields,
+
+      pendingUnstakes,
+      pendingUnstakeFields,
+
       actionName,
       showTo,
       showFrom,
@@ -290,6 +387,8 @@ export default defineComponent({
       requestAction,
       beforeOpen,
       modalClose,
+
+      requestCancelUnstake: walletStore.requestCancelUnstake
     };
   },
 });

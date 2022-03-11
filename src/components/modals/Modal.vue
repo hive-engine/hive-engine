@@ -15,7 +15,7 @@
       </button>
     </div>
 
-    <div class="p-6 flex-grow">
+    <div class="p-6 flex-grow overflow-y-auto">
       <slot :params="params"></slot>
     </div>
   </vue-final-modal>

@@ -16,7 +16,7 @@
       </button>
     </div>
 
-    <div class="p-6 flex-grow">
+    <div class="p-6 flex-grow overflow-y-auto">
       <Loading small v-if="modalBusy" />
 
       <template v-else>

@@ -169,6 +169,13 @@
           v-if="item.pendingUnstake > 0"
           class="btn-sm mr-1 mt-1 mb-1"
           title="Pending Unstakes"
+          @click="
+            vfm$.show('walletActionModal', {
+              action: 'pendingUnstakes',
+              symbol: item.symbol,
+              available: item.pendingUnstake,
+            })
+          "
         >
           <lightning-bolt-icon class="h-5 w-5" />
         </button>
