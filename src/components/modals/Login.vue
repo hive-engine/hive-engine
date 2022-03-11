@@ -31,6 +31,10 @@
         <Spinner v-if="btnBusy" />
         {{ " " }} Login using Keychain
       </button>
+
+      <div class="text-center mt-3 text-sm">
+        <a href="https://hive-keychain.com/#download" target="_blank">Download Hive Keychain</a>
+      </div>
     </div>
   </Modal>
 </template>
