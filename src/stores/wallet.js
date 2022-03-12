@@ -311,6 +311,8 @@ export const useWalletStore = defineStore({
       const { data: response } = await axios.post(`${CTC_API}/convert/`, data);
 
       result = { ...response, ...peggedToken };
+
+      return result;
     },
 
     async requestTokenWithdrawal({ amount, symbol, address, memo, network }) {
@@ -342,6 +344,8 @@ export const useWalletStore = defineStore({
           };
         } else {
           const withdrawInfo = await this.getWithdrawalAddress({ symbol, address, memo });
+
+          console.log(withdrawInfo);
 
           let withdrawMemo = withdrawInfo.memo;
 
