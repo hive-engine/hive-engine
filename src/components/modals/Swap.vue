@@ -4,6 +4,7 @@
     v-model="show"
     :click-to-close="false"
     @before-open="beforeOpen"
+    @before-close="beforeClose"
     @close="onClose"
   >
     <template #title>Swap Tokens</template>
@@ -13,7 +14,10 @@
     <template v-else>
       <div class="text-center">
         Choose which token you would like to swap below. For more information about DSwap see the
-        <a href="https://dswap.trade/faq" target="_blank">FAQ</a>.
+        <a
+          href="https://dswap.trade/faq"
+          target="_blank"
+        >FAQ</a>.
       </div>
 
       <LoadingOverlay :show="showOverlay">
@@ -34,9 +38,7 @@
               />
               <div
                 class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
-              >
-                {{ fromSymbol }}
-              </div>
+              >{{ fromSymbol }}</div>
             </div>
           </template>
         </div>
@@ -59,9 +61,7 @@
               />
               <div
                 class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
-              >
-                {{ toSymbol }}
-              </div>
+              >{{ toSymbol }}</div>
             </div>
           </template>
         </div>
@@ -80,9 +80,7 @@
               />
               <div
                 class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400"
-              >
-                %
-              </div>
+              >%</div>
             </div>
           </div>
 
@@ -100,17 +98,16 @@
               />
               <div
                 class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400"
-              >
-                %
-              </div>
+              >%</div>
             </div>
           </div>
         </template>
       </LoadingOverlay>
 
-      <div class="alert-warning text-center font-bold" v-if="btnBusy">
-        Swap request is in progress. Please do not close this modal.
-      </div>
+      <div
+        class="alert-warning text-center font-bold"
+        v-if="swapInProgress"
+      >Swap request is in progress. Please do not close this modal.</div>
 
       <div class="text-center mt-10">
         <button
@@ -164,6 +161,7 @@ export default defineComponent({
     const modalBusy = ref(true);
     const btnBusy = ref(false);
     const showOverlay = ref(false);
+    const swapInProgress = ref(false)
 
     const dswapAPI = axios.create({
       baseURL: DSWAP_API,
@@ -252,6 +250,18 @@ export default defineComponent({
       modalBusy.value = false;
     };
 
+    const beforeClose = async (e) => {
+      if (swapInProgress.value) {
+        if (confirm('Swap request is in progress. If you close this modal, your swap will fail. Click cancel to stop closing the modal.')) {
+          await vfm$.hideAll()
+
+          onClose()
+        } else {
+          e.stop()
+        }
+      }
+    }
+
     const onClose = () => {
       fromSymbol.value = null;
       toSymbol.value = null;
@@ -263,6 +273,7 @@ export default defineComponent({
       slippageTwo.value = 5;
 
       showOverlay.value = false;
+      swapInProgress.value = false
 
       baseTokenAmount.value = 0;
     };
@@ -326,7 +337,7 @@ export default defineComponent({
     onMounted(() => {
       event.on("dswap-transfer-successful", async ({ id }) => {
         showOverlay.value = true;
-        btnBusy.value = true;
+        swapInProgress.value = true;
 
         await store.validateTransaction(id, 10);
       });
@@ -358,7 +369,12 @@ export default defineComponent({
 
               await dswapAPI.post("SwapRequest", postData);
 
+              swapInProgress.value = false;
+              showOverlay.value = false;
+
               await vfm$.hideAll();
+
+              onClose()
 
               router.push({ name: "swaps" });
             } catch (e) {
@@ -366,7 +382,7 @@ export default defineComponent({
             }
           }
 
-          btnBusy.value = false;
+          swapInProgress.value = false;
           showOverlay.value = false;
         }
       );
@@ -382,6 +398,7 @@ export default defineComponent({
       modalBusy,
       btnBusy,
       showOverlay,
+      swapInProgress,
 
       fromSymbol,
       toSymbol,
@@ -399,6 +416,7 @@ export default defineComponent({
       slippageTwo,
 
       beforeOpen,
+      beforeClose,
       onClose,
       requestSwap,
     };
