@@ -20,14 +20,15 @@
       <template #cell(type)="{ item }">
         <span
           :class="{ 'text-red-500': item.type === 'SELL', 'text-green-500': item.type === 'BUY' }"
-          >{{ item.type }}</span
-        >
+        >{{ item.type }}</span>
       </template>
 
       <template #cell(symbol)="{ item }">
-        <router-link :to="{ name: 'trade', params: { symbol: item.symbol } }">{{
-          item.symbol
-        }}</router-link>
+        <router-link :to="{ name: 'trade', params: { symbol: item.symbol } }">
+          {{
+            item.symbol
+          }}
+        </router-link>
       </template>
 
       <template #cell(txId)="{ item }">
@@ -38,9 +39,10 @@
     </custom-table>
 
     <div class="mt-5 text-right" v-if="selectedOrders.length > 1">
-      <button @click="marketStore.requestCancelOrders(selectedOrders)" class="btn-sm px-4">
-        Cancel All
-      </button>
+      <button
+        @click="marketStore.requestCancelOrders(selectedOrders)"
+        class="btn-sm px-4"
+      >Cancel All</button>
     </div>
   </div>
 
@@ -96,33 +98,39 @@ export default defineComponent({
       { key: "txId", label: "Action" },
     ];
 
+    const onBoardcastSuccess = async ({ id, ntrx }) => {
+      loading.value = true;
+
+      await store.validateTransaction(ntrx > 1 ? `${id}-0` : id);
+    }
+
+    const onTransactionValidated = async () => {
+      await marketStore.fetchUserOrders(null, username.value);
+
+      loading.value = false;
+    }
+
     onBeforeMount(async () => {
       loading.value = true;
 
-      await marketStore.fetchUserOrders(null, username.value);
+      try {
+        await marketStore.fetchUserOrders(null, username.value);
+      } catch {
+        //
+      }
 
       loading.value = false;
     });
 
     onMounted(() => {
-      event.on("broadcast-success", async ({ id, ntrx }) => {
-        loading.value = true;
+      event.on("broadcast-success", onBoardcastSuccess);
 
-        await store.validateTransaction(ntrx > 1 ? `${id}-0` : id);
-      });
-
-      event.on("transaction-validated", async () => {
-        resetForm();
-
-        await fetchTokenMarket();
-
-        loading.value = false;
-      });
+      event.on("transaction-validated", onTransactionValidated);
     });
 
     onBeforeUnmount(() => {
-      event.off("broadcast-success");
-      event.off("transaction-validated");
+      event.off("broadcast-success", onBoardcastSuccess);
+      event.off("transaction-validated", onTransactionValidated);
     });
 
     return {

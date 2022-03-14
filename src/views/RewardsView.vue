@@ -12,9 +12,7 @@
   <Loading v-if="loading" />
 
   <div v-else class="page-content">
-    <div class="alert-warning">
-      You can only claim a token once a day, including manual and auto.
-    </div>
+    <div class="alert-warning">You can only claim a token once a day, including manual and auto.</div>
 
     <CustomTable :fields="rewardsTableFields" :items="rewards">
       <template #cell(actions)="{ item }">
@@ -61,7 +59,11 @@ export default defineComponent({
     ];
 
     const fetchRewards = async () => {
-      rewards.value = await walletStore.fetchScotRewards();
+      try {
+        rewards.value = await walletStore.fetchScotRewards();
+      } catch {
+        //
+      }
     };
 
     const claimAll = async () => {
@@ -69,6 +71,16 @@ export default defineComponent({
 
       await walletStore.requestClaimScotRewards(symbols);
     };
+
+    const onScotClaim = async () => {
+      loading.value = true;
+
+      await sleep(30 * 1000);
+
+      await fetchRewards();
+
+      loading.value = false;
+    }
 
     onBeforeMount(async () => {
       loading.value = true;
@@ -79,19 +91,11 @@ export default defineComponent({
     });
 
     onMounted(() => {
-      event.on("scot-claim-successful", async () => {
-        loading.value = true;
-
-        await sleep(30 * 1000);
-
-        await fetchRewards();
-
-        loading.value = false;
-      });
+      event.on("scot-claim-successful", onScotClaim);
     });
 
     onBeforeUnmount(() => {
-      event.off("scot-claim-successful");
+      event.off("scot-claim-successful", onScotClaim);
     });
 
     return {

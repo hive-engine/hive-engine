@@ -126,30 +126,34 @@ export default defineComponent({
     }
 
     const fetchAccountHistory = async (more = false) => {
-      if (more) {
-        offset.value += limit.value;
-      }
+      try {
+        if (more) {
+          offset.value += limit.value;
+        }
 
-      const query = {
-        account: username.value,
-        limit: limit.value,
-        offset: offset.value,
-      };
+        const query = {
+          account: username.value,
+          limit: limit.value,
+          offset: offset.value,
+        };
 
-      if (route.params.symbol) {
-        query.symbol = route.params.symbol;
-      }
+        if (route.params.symbol) {
+          query.symbol = route.params.symbol;
+        }
 
-      const history = await sidechain.getAccountHistory(query);
+        const history = await sidechain.getAccountHistory(query);
 
-      if (history.length === 0 || history.length < limit.value) {
-        disabledLoadMore.value = true;
-      }
+        if (history.length === 0 || history.length < limit.value) {
+          disabledLoadMore.value = true;
+        }
 
-      if (more) {
-        rawHistory.value = [...rawHistory.value, ...history];
-      } else {
-        rawHistory.value = history;
+        if (more) {
+          rawHistory.value = [...rawHistory.value, ...history];
+        } else {
+          rawHistory.value = history;
+        }
+      } catch {
+        //
       }
     };
 

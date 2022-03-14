@@ -164,7 +164,11 @@ export default defineComponent({
     onBeforeMount(async () => {
       loading.value = true;
 
-      await Promise.all([tokenStore.fetchTokens(), tokenStore.fetchMetrics()]);
+      try {
+        await Promise.all([tokenStore.fetchTokens(), tokenStore.fetchMetrics()]);
+      } catch {
+        //
+      }
 
       loading.value = false;
     });

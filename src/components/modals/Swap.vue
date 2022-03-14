@@ -292,6 +292,55 @@ export default defineComponent({
       btnBusy.value = false;
     };
 
+    const onTransferSuccessful = async ({ id }) => {
+      showOverlay.value = true;
+      swapInProgress.value = true;
+
+      await store.validateTransaction(id, 10);
+    }
+
+    const onTransactionValidated = async ({ error, contract, action, payload, trx_id: trxId }) => {
+      if (
+        !error &&
+        contract === "tokens" &&
+        action === "transfer" &&
+        payload.to === DSWAP_ACCOUNT
+      ) {
+        try {
+          const postData = {
+            Chain: 1,
+            Account: username.value,
+            TokenInput: fromSymbol.value,
+            TokenInputAmount: fromQuantity.value,
+            TokenOutput: toSymbol.value,
+            TokenOutputAmount: toQuantity.value,
+            SwapSourceId: DSWAP_SOURCE_ID,
+            ChainTransactionId: trxId,
+            MaxSlippageInputToken: slippageOne.value,
+            MaxSlippageOutputToken: slippageTwo.value,
+            BaseTokenAmount: baseTokenAmount.value,
+            TokenInputMemo: "",
+          };
+
+          await dswapAPI.post("SwapRequest", postData);
+
+          swapInProgress.value = false;
+          showOverlay.value = false;
+
+          await vfm$.hideAll();
+
+          onClose()
+
+          router.push({ name: "swaps" });
+        } catch (e) {
+          console.log(e.message);
+        }
+      }
+
+      swapInProgress.value = false;
+      showOverlay.value = false;
+    }
+
     watch(fromSymbol, (value) => {
       if (toSymbol.value && value === toSymbol.value) {
         toSymbol.value = null;
@@ -335,62 +384,13 @@ export default defineComponent({
     );
 
     onMounted(() => {
-      event.on("dswap-transfer-successful", async ({ id }) => {
-        showOverlay.value = true;
-        swapInProgress.value = true;
-
-        await store.validateTransaction(id, 10);
-      });
-
-      event.on(
-        "transaction-validated",
-        async ({ error, contract, action, payload, trx_id: trxId }) => {
-          if (
-            !error &&
-            contract === "tokens" &&
-            action === "transfer" &&
-            payload.to === DSWAP_ACCOUNT
-          ) {
-            try {
-              const postData = {
-                Chain: 1,
-                Account: username.value,
-                TokenInput: fromSymbol.value,
-                TokenInputAmount: fromQuantity.value,
-                TokenOutput: toSymbol.value,
-                TokenOutputAmount: toQuantity.value,
-                SwapSourceId: DSWAP_SOURCE_ID,
-                ChainTransactionId: trxId,
-                MaxSlippageInputToken: slippageOne.value,
-                MaxSlippageOutputToken: slippageTwo.value,
-                BaseTokenAmount: baseTokenAmount.value,
-                TokenInputMemo: "",
-              };
-
-              await dswapAPI.post("SwapRequest", postData);
-
-              swapInProgress.value = false;
-              showOverlay.value = false;
-
-              await vfm$.hideAll();
-
-              onClose()
-
-              router.push({ name: "swaps" });
-            } catch (e) {
-              console.log(e.message);
-            }
-          }
-
-          swapInProgress.value = false;
-          showOverlay.value = false;
-        }
-      );
+      event.on("dswap-transfer-successful", onTransferSuccessful);
+      event.on("transaction-validated", onTransactionValidated);
     });
 
     onBeforeUnmount(() => {
-      event.off("dswap-transfer-successful");
-      event.off("transaction-validated");
+      event.off("dswap-transfer-successful", onTransferSuccessful);
+      event.off("transaction-validated", onTransactionValidated);
     });
 
     return {

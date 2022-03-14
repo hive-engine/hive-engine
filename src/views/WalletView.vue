@@ -402,13 +402,31 @@ export default defineComponent({
     ];
 
     const fetchWallet = async () => {
-      await Promise.all([
-        walletStore.fetchWallet(account),
-        walletStore.fetchPendingUnstakes(),
-        tokenStore.fetchTokens(),
-        tokenStore.fetchMetrics(),
-      ]);
+      try {
+        await Promise.all([
+          walletStore.fetchWallet(account),
+          walletStore.fetchPendingUnstakes(),
+          tokenStore.fetchTokens(),
+          tokenStore.fetchMetrics(),
+        ]);
+      } catch {
+        //
+      }
     };
+
+    const onBoardcastSuccess = async ({ id, ntrx }) => {
+      loading.value = true;
+
+      await vfm$.hideAll();
+
+      await store.validateTransaction(ntrx > 1 ? `${id}-0` : id);
+    }
+
+    const onTransactionValidated = async () => {
+      await fetchWallet();
+
+      loading.value = false;
+    }
 
     onBeforeMount(async () => {
       loading.value = true;
@@ -421,26 +439,15 @@ export default defineComponent({
     onMounted(async () => {
       refreshTimeout = setInterval(fetchWallet, 60 * 1000);
 
-      event.on("broadcast-success", async ({ id, ntrx }) => {
-        loading.value = true;
-
-        await vfm$.hideAll();
-
-        await store.validateTransaction(ntrx > 1 ? `${id}-0` : id);
-      });
-
-      event.on("transaction-validated", async () => {
-        await fetchWallet();
-
-        loading.value = false;
-      });
+      event.on("broadcast-success", onBoardcastSuccess);
+      event.on("transaction-validated", onTransactionValidated);
     });
 
     onBeforeUnmount(() => {
       clearInterval(refreshTimeout);
 
-      event.off("broadcast-success");
-      event.off("transaction-validated");
+      event.off("broadcast-success", onBoardcastSuccess);
+      event.off("transaction-validated", onTransactionValidated);
     });
 
     return {

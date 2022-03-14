@@ -753,28 +753,32 @@ export default defineComponent({
     };
 
     const fetchTokenMarket = async () => {
-      const requests = [
-        marketStore.fetchOrders(symbol.value),
-        marketStore.fetchMarketHistory(symbol.value, interval.value),
-        marketStore.fetchToken(symbol.value),
-        marketStore.fetchTokenMetrics(symbol.value),
-        marketStore.fetchTradeHistory(symbol.value),
-      ];
+      try {
+        const requests = [
+          marketStore.fetchOrders(symbol.value),
+          marketStore.fetchMarketHistory(symbol.value, interval.value),
+          marketStore.fetchToken(symbol.value),
+          marketStore.fetchTokenMetrics(symbol.value),
+          marketStore.fetchTradeHistory(symbol.value),
+        ];
 
-      if (tokens.value.length <= 0) {
-        requests.push(tokenStore.fetchTokens());
+        if (tokens.value.length <= 0) {
+          requests.push(tokenStore.fetchTokens());
+        }
+
+        if (isLoggedIn.value) {
+          requests.push(marketStore.fetchUserOrders(symbol.value, username.value));
+          requests.push(walletStore.fetchWallet(username.value, ["SWAP.HIVE", symbol.value]));
+        }
+
+        await Promise.all(requests);
+
+        produceCandleChart();
+        producevDepthChart();
+        produceVolumeChart();
+      } catch {
+        //
       }
-
-      if (isLoggedIn.value) {
-        requests.push(marketStore.fetchUserOrders(symbol.value, username.value));
-        requests.push(walletStore.fetchWallet(username.value, ["SWAP.HIVE", symbol.value]));
-      }
-
-      await Promise.all(requests);
-
-      produceCandleChart();
-      producevDepthChart();
-      produceVolumeChart();
     };
 
     const resetForm = () => {
@@ -791,6 +795,20 @@ export default defineComponent({
       selectedOrders.value = [];
     };
 
+    const onBroadcastSuccess = async ({ id, ntrx }) => {
+      loading.value = true;
+
+      await store.validateTransaction(ntrx > 1 ? `${id}-0` : id);
+    }
+
+    const onTransactionValidated = async () => {
+      resetForm();
+
+      await fetchTokenMarket();
+
+      loading.value = false;
+    }
+
     let refreshTimeout = null;
 
     onBeforeMount(async () => {
@@ -804,26 +822,16 @@ export default defineComponent({
     onMounted(() => {
       refreshTimeout = setInterval(fetchTokenMarket, 30 * 1000);
 
-      event.on("broadcast-success", async ({ id, ntrx }) => {
-        loading.value = true;
+      event.on("broadcast-success", onBroadcastSuccess);
 
-        await store.validateTransaction(ntrx > 1 ? `${id}-0` : id);
-      });
-
-      event.on("transaction-validated", async () => {
-        resetForm();
-
-        await fetchTokenMarket();
-
-        loading.value = false;
-      });
-    });
+      event.on("transaction-validated", onTransactionValidated);
+    })
 
     onBeforeUnmount(() => {
       clearInterval(refreshTimeout);
 
-      event.off("broadcast-success");
-      event.off("transaction-validated");
+      event.off("broadcast-success", onBroadcastSuccess);
+      event.off("transaction-validated", onTransactionValidated);
     });
 
     return {

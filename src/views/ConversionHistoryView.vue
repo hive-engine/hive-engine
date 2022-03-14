@@ -19,14 +19,14 @@
             'text-red-500': item.type === 'Deposit',
             'text-green-500': item.type === 'Withdraw',
           }"
-          >{{ item.type }}</span
-        >
+        >{{ item.type }}</span>
       </template>
 
       <template #cell(trx_id)="{ item }">
-        <a :href="getExplorerLink(item.symbol, item.trx_id)" target="_blank"
-          >{{ item.trx_id.substr(0, 5) }}...{{ item.trx_id.substr(-5, 5) }}</a
-        >
+        <a
+          :href="getExplorerLink(item.symbol, item.trx_id)"
+          target="_blank"
+        >{{ item.trx_id.substr(0, 5) }}...{{ item.trx_id.substr(-5, 5) }}</a>
       </template>
     </CustomTable>
   </div>
@@ -94,7 +94,11 @@ export default defineComponent({
     onBeforeMount(async () => {
       loading.value = true;
 
-      history.value = await walletStore.fetchConversionHistory();
+      try {
+        history.value = await walletStore.fetchConversionHistory();
+      } catch {
+        //
+      }
 
       loading.value = false;
     });

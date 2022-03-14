@@ -14,22 +14,26 @@
   <div v-else class="page-content">
     <div class="alert-warning">
       For swap request details containing transactions, please go to
-      <a href="https://dswap.trade" target="_blank" class="font-bold">DSwap website</a>.
+      <a
+        href="https://dswap.trade"
+        target="_blank"
+        class="font-bold"
+      >DSwap website</a>.
     </div>
 
     <CustomTable :fields="swapFields" :items="swaps">
-      <template #cell(from)="{ item }"> {{ item.fromAmount }} {{ item.fromSymbol }} </template>
+      <template #cell(from)="{ item }">{{ item.fromAmount }} {{ item.fromSymbol }}</template>
 
-      <template #cell(requested)="{ item }">
-        {{ item.amountRequested }} {{ item.toSymbol }}
-      </template>
+      <template #cell(requested)="{ item }">{{ item.amountRequested }} {{ item.toSymbol }}</template>
 
-      <template #cell(realized)="{ item }"> {{ item.actualAmount }} {{ item.toSymbol }} </template>
+      <template #cell(realized)="{ item }">{{ item.actualAmount }} {{ item.toSymbol }}</template>
 
       <template #cell(status)="{ item }">
-        <span :class="[getStatusClass(item.status), 'py-1 px-2 text-sm font-bold']">{{
-          item.status
-        }}</span>
+        <span :class="[getStatusClass(item.status), 'py-1 px-2 text-sm font-bold']">
+          {{
+            item.status
+          }}
+        </span>
       </template>
     </CustomTable>
   </div>
@@ -92,21 +96,25 @@ export default defineComponent({
     onBeforeMount(async () => {
       loading.value = true;
 
-      let { data } = await axios.get(`${DSWAP_API}/SwapRequest`, {
-        params: { account: username.value, sourceId: DSWAP_SOURCE_ID, limit: 50 },
-      });
+      try {
+        let { data } = await axios.get(`${DSWAP_API}/SwapRequest`, {
+          params: { account: username.value, sourceId: DSWAP_SOURCE_ID, limit: 50 },
+        });
 
-      data = data.map((s) => ({
-        date: format(new Date(s.CreatedAt), "Pp"),
-        fromSymbol: s.TokenInput,
-        fromAmount: s.TokenInputAmount,
-        toSymbol: s.TokenOutput,
-        amountRequested: s.TokenOutputAmount,
-        actualAmount: s.TokenOutputAmountActual,
-        status: statusObj[s.SwapStatusId],
-      }));
+        data = data.map((s) => ({
+          date: format(new Date(s.CreatedAt), "Pp"),
+          fromSymbol: s.TokenInput,
+          fromAmount: s.TokenInputAmount,
+          toSymbol: s.TokenOutput,
+          amountRequested: s.TokenOutputAmount,
+          actualAmount: s.TokenOutputAmountActual,
+          status: statusObj[s.SwapStatusId],
+        }));
 
-      swaps.value = data;
+        swaps.value = data;
+      } catch {
+        //
+      }
 
       loading.value = false;
     });
