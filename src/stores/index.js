@@ -59,6 +59,10 @@ export const useStore = defineStore({
       );
 
       if (success) {
+        if (!result.id) {
+          result.id = result.tx_id;
+        }
+
         if (eventName) {
           emitter.emit(eventName, result);
         } else {
@@ -84,6 +88,10 @@ export const useStore = defineStore({
       );
 
       if (success) {
+        if (!result.id) {
+          result.id = result.tx_id;
+        }
+
         const nTrx = json.length;
 
         const data = { ...result, ntrx: nTrx };
