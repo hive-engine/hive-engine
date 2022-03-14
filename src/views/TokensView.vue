@@ -21,7 +21,7 @@
   <Loading v-if="loading" />
 
   <div v-else class="page-content">
-    <custom-table :fields="fields" :items="tokens" :per-page="50">
+    <custom-table :fields="fields" :items="tokens" :per-page="100">
       <template #cell(icon)="{ item }">
         <img :src="item.icon" class="w-6" />
       </template>
@@ -36,15 +36,16 @@
             'text-green-500': parseFloat(item.change) > 0,
             'text-red-500': parseFloat(item.change) < 0,
           }"
-          >{{ item.change }}</span
-        >
+        >{{ item.change }}</span>
       </template>
 
       <template #cell(volume)="{ item }">${{ item.volume.toLocaleString() }}</template>
 
-      <template #cell(circulatingSupply)="{ item }">{{
-        item.circulatingSupply.toLocaleString()
-      }}</template>
+      <template #cell(circulatingSupply)="{ item }">
+        {{
+          item.circulatingSupply.toLocaleString()
+        }}
+      </template>
 
       <template #cell(actions)="{ item }">
         <div class="flex">

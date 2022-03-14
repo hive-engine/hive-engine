@@ -1,65 +1,67 @@
 <template>
-  <table
-    class="min-w-full table-auto divide-y divide-gray-200 dark:divide-slate-600 dark:text-gray-300"
-    v-bind="$attrs"
-  >
-    <thead class="bg-gray-400 dark:bg-slate-600">
-      <tr>
-        <template v-for="(th, i) of fields" :key="i">
-          <th
-            scope="col"
-            :class="[
-              thClass,
-              'px-4 py-2 font-bold first-of-type:text-left last-of-type:text-right',
-              th.class,
-            ]"
-            role="columnheader"
-            :aria-sort="sortKey === th.key ? sortDirection : 'none'"
-            v-if="th.sortable"
-            @click="sortItems(th.key)"
-          >{{ th.label }}</th>
+  <div class="overflow-x-auto">
+    <table
+      class="min-w-full table-auto divide-y divide-gray-200 dark:divide-slate-600 dark:text-gray-300"
+      v-bind="$attrs"
+    >
+      <thead class="bg-gray-400 dark:bg-slate-600">
+        <tr>
+          <template v-for="(th, i) of fields" :key="i">
+            <th
+              scope="col"
+              :class="[
+                thClass,
+                'px-4 py-2 font-bold first-of-type:text-left last-of-type:text-right',
+                th.class,
+              ]"
+              role="columnheader"
+              :aria-sort="sortKey === th.key ? sortDirection : 'none'"
+              v-if="th.sortable"
+              @click="sortItems(th.key)"
+            >{{ th.label }}</th>
 
-          <th
-            scope="col"
-            :class="[
-              thClass,
-              'px-4 py-2 font-bold first-of-type:text-left last-of-type:text-right',
-              th.class,
-            ]"
-            role="columnheader"
-            v-else
-          >{{ th.label }}</th>
-        </template>
-      </tr>
-    </thead>
+            <th
+              scope="col"
+              :class="[
+                thClass,
+                'px-4 py-2 font-bold first-of-type:text-left last-of-type:text-right',
+                th.class,
+              ]"
+              role="columnheader"
+              v-else
+            >{{ th.label }}</th>
+          </template>
+        </tr>
+      </thead>
 
-    <tbody class="divide-y divide-gray-200 dark:divide-slate-600 dark:text-gray-300">
-      <tr
-        v-if="items.length > 0"
-        v-for="(tr, i) of items"
-        key="i"
-        class="odd:bg-gray-300 even:bg-gray-200 odd:dark:bg-slate-800 even:dark:bg-slate-700 dark:border-slate-700"
-      >
-        <td
-          v-for="(td, k) of fields"
-          :class="[tdClass, 'px-4 py-2 first-of-type:text-left last-of-type:text-right', td.class]"
+      <tbody class="divide-y divide-gray-200 dark:divide-slate-600 dark:text-gray-300">
+        <tr
+          v-if="items.length > 0"
+          v-for="(tr, i) of items"
+          key="i"
+          class="odd:bg-gray-300 even:bg-gray-200 odd:dark:bg-slate-800 even:dark:bg-slate-700 dark:border-slate-700"
         >
-          <slot :name="`cell(${td.key})`" :item="tr">
-            {{
-              tr[td.key] !== undefined ? tr[td.key] : ""
-            }}
-          </slot>
-        </td>
-      </tr>
+          <td
+            v-for="(td, k) of fields"
+            :class="[tdClass, 'px-4 py-2 first-of-type:text-left last-of-type:text-right', td.class]"
+          >
+            <slot :name="`cell(${td.key})`" :item="tr">
+              {{
+                tr[td.key] !== undefined ? tr[td.key] : ""
+              }}
+            </slot>
+          </td>
+        </tr>
 
-      <tr
-        v-else
-        class="odd:bg-gray-300 even:bg-gray-200 odd:dark:bg-slate-800 even:dark:bg-slate-700 dark:border-slate-700"
-      >
-        <td class="px-4 py-2 text-center" :colspan="fields.length">No results</td>
-      </tr>
-    </tbody>
-  </table>
+        <tr
+          v-else
+          class="odd:bg-gray-300 even:bg-gray-200 odd:dark:bg-slate-800 even:dark:bg-slate-700 dark:border-slate-700"
+        >
+          <td class="px-4 py-2 text-center" :colspan="fields.length">No results</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <div
     v-if="perPage > 0"

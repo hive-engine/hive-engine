@@ -21,16 +21,13 @@
           'relative inline-flex items-center px-4 py-2 border text-sm font-bold',
         ]"
         @click="updatePageHandler(page)"
-      >
-        {{ page }}
-      </button>
+      >{{ page }}</button>
 
       <span
         v-else
         :key="`pagination-page-${page}-else`"
         class="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-sm font-bold text-gray-700 dark:text-gray-300"
-        >...</span
-      >
+      >...</span>
     </template>
 
     <button
@@ -77,7 +74,7 @@ export default defineComponent({
     const pagination = computed(() => {
       const res = [];
 
-      const minPaginationElems = 5 + props.rangeSize * 2;
+      const minPaginationElems = 3 + props.rangeSize * 2;
 
       let rangeStart = props.pages <= minPaginationElems ? 1 : props.modelValue - props.rangeSize;
       let rangeEnd =

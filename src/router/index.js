@@ -31,7 +31,7 @@ const router = createRouter({
       beforeEnter: (to) => {
         const { account } = to.params;
 
-        return /^[a-z][a-z0-9-.]{2,14}$/.test(account);
+        return /^[a-z][a-z0-9-.]{2,15}$/.test(account);
       },
     },
     {
