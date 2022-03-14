@@ -95,6 +95,14 @@
         <button
           class="btn-sm mr-1 mt-1 mb-1"
           title="Transfer"
+          @click="vfm$.show('tokenInfoModal', item.token)"
+        >
+          <information-circle-icon class="h-5 w-5" />
+        </button>
+
+        <button
+          class="btn-sm mr-1 mt-1 mb-1"
+          title="Transfer"
           @click="
             vfm$.show('walletActionModal', {
               action: 'transfer',
@@ -206,6 +214,7 @@
   <WalletAction />
   <Deposit />
   <Withdraw />
+  <TokenInfo />
 </template>
 
 <script>
@@ -218,7 +227,9 @@ import {
   onMounted,
   onBeforeUnmount,
 } from "vue";
+import { useRoute } from "vue-router";
 import {
+  InformationCircleIcon,
   LightningBoltIcon,
   LockClosedIcon,
   LockOpenIcon,
@@ -238,14 +249,15 @@ import CustomTable from "../components/utilities/CustomTable.vue";
 import WalletAction from "../components/modals/WalletAction.vue";
 import Deposit from "../components/modals/Deposit.vue";
 import Withdraw from "../components/modals/Withdraw.vue";
+import TokenInfo from "../components/modals/TokenInfo.vue";
 import PageFooter from "../components/PageFooter.vue";
-import { useRoute } from "vue-router";
 
 export default defineComponent({
   name: "Wallet",
 
   components: {
     CustomTable,
+    InformationCircleIcon,
     LightningBoltIcon,
     LockOpenIcon,
     LockClosedIcon,
@@ -258,6 +270,7 @@ export default defineComponent({
     Deposit,
     Withdraw,
     PageFooter,
+    TokenInfo
   },
 
   setup() {
@@ -331,7 +344,7 @@ export default defineComponent({
           const stake = b.stake && Number(b.stake) > 0 ? Number(b.stake) : 0;
           const pendingUnstake = Number(b.pendingUnstake);
           const lockedStake = lockedStakes.value[b.symbol] || 0;
-          const availableStake = toFixedWithoutRounding(Math.max(0, stake - lockedStake), token.precision);
+          const availableStake = toFixedWithoutRounding(stake - lockedStake, token.precision);
           const changePct = metrics ? parseFloat(metrics.priceChangePercent) : 0;
 
           const balance = b.balance;
@@ -345,6 +358,7 @@ export default defineComponent({
           const valueUSD = toFixedWithoutRounding(valueHive * hivePrice.value);
 
           return {
+            token,
             icon: token.icon,
             symbol: b.symbol,
             name: token.name,
