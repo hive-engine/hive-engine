@@ -2,155 +2,162 @@
   <vue-final-modal
     v-model="show"
     v-slot="{ params, close }"
-    classes="flex justify-center items-center"
-    content-class="w-full max-w-xl relative flex flex-col max-h-full border dark:border-gray-800 rounded bg-white dark:bg-gray-600 dark:text-gray-300"
+    classes="flex justify-center items-center overflow-y-auto"
+    content-class="w-full max-w-xl relative flex flex-col max-h-full"
     name="walletActionModal"
     @before-open="beforeOpen"
     @closed="modalClose"
   >
-    <div class="flex items-center justify-between px-6 py-4">
-      <div
-        class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300"
-      >{{ actionName }} {{ params.symbol }}</div>
+    <div class="border dark:border-gray-800 rounded bg-white dark:bg-gray-600 dark:text-gray-300">
+      <div class="flex items-center justify-between px-6 py-4">
+        <div
+          class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300"
+        >{{ actionName }} {{ params.symbol }}</div>
 
-      <button class="dark:text-gray-300" @click="close">
-        <x-icon class="h-5 w-5" aria-hidden="true" />
-      </button>
-    </div>
+        <button class="dark:text-gray-300" @click="close">
+          <x-icon class="h-5 w-5" aria-hidden="true" />
+        </button>
+      </div>
 
-    <div class="p-6 flex-grow overflow-y-auto">
-      <Loading small v-if="modalBusy" />
-
-      <template v-else>
-        <CustomTable
-          v-if="params.action === 'pendingUnstakes'"
-          :items="pendingUnstakes"
-          :fields="pendingUnstakeFields"
-        >
-          <template #cell(quantity)="{ item }">{{ item.quantity }} {{ params.symbol }}</template>
-
-          <template #cell(quantityLeft)="{ item }">
-            {{ item.quantityLeft }} {{ params.symbol }}
-            <small>({{ item.numberTransactionsLeft }} Transactions)</small>
-          </template>
-
-          <template
-            #cell(nextTransactionTimestamp)="{ item }"
-          >{{ item.quantityLeft / item.numberTransactionsLeft }} {{ params.symbol }} at {{ new Date(item.nextTransactionTimestamp).toLocaleString() }}</template>
-
-          <template #cell(actions)="{ item }">
-            <button
-              class="btn-sm"
-              @click.prevent="requestCancelUnstake({ symbol: params.symbol, trxId: item.txID })"
-            >
-              <XIcon class="h-5 w-5" />
-            </button>
-          </template>
-        </CustomTable>
+      <div class="p-6 flex-grow">
+        <Loading small v-if="modalBusy" />
 
         <template v-else>
           <CustomTable
-            v-if="params.action === 'undelegate'"
-            :fields="delegationFields"
-            :items="delegations"
-            class="mb-5"
+            v-if="params.action === 'pendingUnstakes'"
+            :items="pendingUnstakes"
+            :fields="pendingUnstakeFields"
           >
+            <template #cell(quantity)="{ item }">{{ item.quantity }} {{ params.symbol }}</template>
+
+            <template #cell(quantityLeft)="{ item }">
+              {{ item.quantityLeft }} {{ params.symbol }}
+              <small>({{ item.numberTransactionsLeft }} Transactions)</small>
+            </template>
+
+            <template
+              #cell(nextTransactionTimestamp)="{ item }"
+            >{{ item.quantityLeft / item.numberTransactionsLeft }} {{ params.symbol }} at {{ new Date(item.nextTransactionTimestamp).toLocaleString() }}</template>
+
             <template #cell(actions)="{ item }">
               <button
                 class="btn-sm"
-                @click.prevent="quantity = item.quantity; from = item.to; requestAction(params)"
+                @click.prevent="requestCancelUnstake({ symbol: params.symbol, trxId: item.txID })"
               >
                 <XIcon class="h-5 w-5" />
               </button>
             </template>
           </CustomTable>
 
-          <div class="block mb-2 font-bold">Available</div>
-          <div
-            class="cursor-pointer mb-4"
-            @click="quantity = params.available"
-          >{{ params.available }} {{ params.symbol }}</div>
+          <template v-else>
+            <CustomTable
+              v-if="params.action === 'undelegate'"
+              :fields="delegationFields"
+              :items="delegations"
+              class="mb-5"
+            >
+              <template #cell(actions)="{ item }">
+                <button
+                  class="btn-sm"
+                  @click.prevent="quantity = item.quantity; from = item.to; requestAction(params)"
+                >
+                  <XIcon class="h-5 w-5" />
+                </button>
+              </template>
+            </CustomTable>
 
-          <div class="mb-3" v-if="showTo">
-            <label for="to" class="block mb-2 font-bold">To</label>
-            <input
-              type="text"
-              :class="[
-                v$.to.$error
-                  ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
-                  : '',
-                'rounded-md dark:bg-slate-600 w-full',
-              ]"
-              id="to"
-              v-model="to"
-              @input="(event) => (to = event.target.value.toLowerCase())"
-            />
+            <div class="block mb-2 font-bold">Available</div>
             <div
-              v-if="v$.to.$error"
-              class="text-sm text-red-500 mt-1"
-            >Please enter a valid hive username.</div>
-          </div>
+              class="cursor-pointer mb-4"
+              @click="quantity = params.available"
+            >{{ params.available }} {{ params.symbol }}</div>
 
-          <div class="mb-3" v-if="showFrom">
-            <label for="from" class="block mb-2 font-bold">From</label>
-            <input
-              type="text"
-              :class="[
-                v$.from.$error
-                  ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
-                  : '',
-                'rounded-md dark:bg-slate-600 w-full',
-              ]"
-              id="from"
-              v-model="from"
-              @input="(event) => (from = event.target.value.toLowerCase())"
-            />
-            <div
-              v-if="v$.from.$error"
-              class="text-sm text-red-500 mt-1"
-            >Please enter a valid hive username.</div>
-          </div>
-
-          <div class="mb-3">
-            <label for="quantity" class="block mb-2 font-bold">Quantity</label>
-
-            <div class="flex items-center w-full">
+            <div class="mb-3" v-if="showTo">
+              <label for="to" class="block mb-2 font-bold">To</label>
               <input
-                type="number"
+                type="text"
                 :class="[
-                  v$.quantity.$error
+                  v$.to.$error
                     ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
                     : '',
-                  'rounded-l-md dark:bg-slate-600 w-full',
+                  'rounded-md dark:bg-slate-600 w-full',
                 ]"
-                id="quantity"
-                v-model="quantity"
+                id="to"
+                v-model="to"
+                @input="(event) => (to = event.target.value.toLowerCase())"
               />
               <div
-                class="bg-gray-200 dark:bg-slate-600 h-full p-2 border border-l-0 rounded-r-md border-gray-500"
-              >{{ params.symbol }}</div>
+                v-if="v$.to.$error"
+                class="text-sm text-red-500 mt-1"
+              >Please enter a valid hive username.</div>
             </div>
-            <div
-              v-if="v$.quantity.$error"
-              class="text-sm text-red-500 mt-1"
-            >Please enter a quantity greater than zero.</div>
-          </div>
 
-          <div class="mb-3" v-if="params.action === 'transfer'">
-            <label for="memo" class="block mb-2 font-bold">Memo</label>
-            <input type="text" class="rounded-md dark:bg-slate-600 w-full" id="memo" v-model="memo" />
-          </div>
+            <div class="mb-3" v-if="showFrom">
+              <label for="from" class="block mb-2 font-bold">From</label>
+              <input
+                type="text"
+                :class="[
+                  v$.from.$error
+                    ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
+                    : '',
+                  'rounded-md dark:bg-slate-600 w-full',
+                ]"
+                id="from"
+                v-model="from"
+                @input="(event) => (from = event.target.value.toLowerCase())"
+              />
+              <div
+                v-if="v$.from.$error"
+                class="text-sm text-red-500 mt-1"
+              >Please enter a valid hive username.</div>
+            </div>
 
-          <button
-            class="btn"
-            :disabled="quantity > params.available"
-            @click="requestAction(params)"
-          >
-            <Spinner v-if="btnBusy" />
-            {{ " " }} {{ actionName }}
-          </button>
+            <div class="mb-3">
+              <label for="quantity" class="block mb-2 font-bold">Quantity</label>
+
+              <div class="flex items-center w-full">
+                <input
+                  type="number"
+                  :class="[
+                    v$.quantity.$error
+                      ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
+                      : '',
+                    'rounded-l-md dark:bg-slate-600 w-full',
+                  ]"
+                  id="quantity"
+                  v-model="quantity"
+                />
+                <div
+                  class="bg-gray-200 dark:bg-slate-600 h-full p-2 border border-l-0 rounded-r-md border-gray-500"
+                >{{ params.symbol }}</div>
+              </div>
+              <div
+                v-if="v$.quantity.$error"
+                class="text-sm text-red-500 mt-1"
+              >Please enter a quantity greater than zero.</div>
+            </div>
+
+            <div class="mb-3" v-if="params.action === 'transfer'">
+              <label for="memo" class="block mb-2 font-bold">Memo</label>
+              <input
+                type="text"
+                class="rounded-md dark:bg-slate-600 w-full"
+                id="memo"
+                v-model="memo"
+              />
+            </div>
+
+            <button
+              class="btn"
+              :disabled="quantity > params.available"
+              @click="requestAction(params)"
+            >
+              <Spinner v-if="btnBusy" />
+              {{ " " }} {{ actionName }}
+            </button>
+          </template>
         </template>
-      </template>
+      </div>
     </div>
   </vue-final-modal>
 </template>

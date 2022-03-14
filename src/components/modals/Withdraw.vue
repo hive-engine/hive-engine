@@ -2,171 +2,175 @@
   <vue-final-modal
     v-model="show"
     v-slot="{ params, close }"
-    classes="flex justify-center items-center"
-    content-class="w-full max-w-xl relative flex flex-col max-h-full border dark:border-gray-800 rounded bg-white dark:bg-gray-600 dark:text-gray-300"
+    classes="flex justify-center items-center overflow-y-auto"
+    content-class="w-full max-w-xl relative flex flex-col max-h-full"
     name="withdrawModal"
     @before-open="beforeOpen"
     @closed="modalClose"
   >
-    <div class="flex items-center justify-between px-6 py-4">
-      <div class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300">Withdraw Tokens</div>
+    <div class="border dark:border-gray-800 rounded bg-white dark:bg-gray-600 dark:text-gray-300">
+      <div class="flex items-center justify-between px-6 py-4">
+        <div class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300">Withdraw Tokens</div>
 
-      <button class="dark:text-gray-300" @click="close">
-        <x-icon class="h-5 w-5" aria-hidden="true" />
-      </button>
-    </div>
+        <button class="dark:text-gray-300" @click="close">
+          <x-icon class="h-5 w-5" aria-hidden="true" />
+        </button>
+      </div>
 
-    <div class="p-6 flex-grow overflow-y-auto">
-      <Loading small v-if="modalBusy" />
+      <div class="p-6 flex-grow">
+        <Loading small v-if="modalBusy" />
 
-      <template v-else>
-        <div class="alert-warning mb-5 font-bold">
-          There is a 0.75% fee on withdrawals. For Ethereum, ERC-20, BNB, BEP-20, Polygon (MATIC)
-          and Polygon ERC-20 withdrawals fee is 1% and you will also pay for the Ethereum / BSC /
-          Polygon network gas fee.
-        </div>
+        <template v-else>
+          <div class="alert-warning mb-5 font-bold">
+            There is a 0.75% fee on withdrawals. For Ethereum, ERC-20, BNB, BEP-20, Polygon (MATIC)
+            and Polygon ERC-20 withdrawals fee is 1% and you will also pay for the Ethereum / BSC /
+            Polygon network gas fee.
+          </div>
 
-        <SearchSelect
-          class="rounded-md mb-3"
-          menu-class="rounded-md"
-          :options="tokens"
-          v-model="selectedToken"
-        />
+          <SearchSelect
+            class="rounded-md mb-3"
+            menu-class="rounded-md"
+            :options="tokens"
+            v-model="selectedToken"
+          />
 
-        <template v-if="selectedToken">
-          <template v-if="isWithdrawalDisabled.disabled">
-            <div class="alert-warning">{{ isWithdrawalDisabled.reason }}</div>
-          </template>
-
-          <template v-else>
-            <template v-if="isEvmToken">
-              <SearchSelect
-                class="rounded-md mb-3"
-                menu-class="rounded-md"
-                :options="evmTokenOptions"
-                v-model="evmToken"
-              />
+          <template v-if="selectedToken">
+            <template v-if="isWithdrawalDisabled.disabled">
+              <div class="alert-warning">{{ isWithdrawalDisabled.reason }}</div>
             </template>
 
-            <div class="mb-3">
-              <label class="block mb-2 font-bold">Available Balance</label>
-              <div
-                class="cursor-pointer"
-                @click="withdrawAmount = tokenBalance"
-              >{{ tokenBalance }} {{ isEvmToken ? evmToken : selectedToken }}</div>
-            </div>
+            <template v-else>
+              <template v-if="isEvmToken">
+                <SearchSelect
+                  class="rounded-md mb-3"
+                  menu-class="rounded-md"
+                  :options="evmTokenOptions"
+                  v-model="evmToken"
+                />
+              </template>
 
-            <div class="mb-3">
-              <label for="withdrawAmount" class="block mb-2 font-bold">Withdraw Amount</label>
+              <div class="mb-3">
+                <label class="block mb-2 font-bold">Available Balance</label>
+                <div
+                  class="cursor-pointer"
+                  @click="withdrawAmount = tokenBalance"
+                >{{ tokenBalance }} {{ isEvmToken ? evmToken : selectedToken }}</div>
+              </div>
 
-              <div class="flex items-center">
+              <div class="mb-3">
+                <label for="withdrawAmount" class="block mb-2 font-bold">Withdraw Amount</label>
+
+                <div class="flex items-center">
+                  <input
+                    id="withdrawAmount"
+                    type="number"
+                    step="any"
+                    :class="[
+                      v$.withdrawAmount.$error
+                        ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
+                        : '',
+                      'rounded-l-md w-full dark:bg-slate-600 dark:border-gray-500',
+                    ]"
+                    v-model="withdrawAmount"
+                  />
+                  <div
+                    class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400"
+                  >{{ isEvmToken && evmToken ? evmToken : selectedToken }}</div>
+                </div>
+                <div
+                  v-if="v$.withdrawAmount.$error"
+                  class="text-sm text-red-500 mt-1"
+                >Please enter a valid amount to withdraw.</div>
+              </div>
+
+              <div class="mb-3">
+                <label for="withdrawAddress" class="block mb-2 font-bold">Withdraw Address</label>
                 <input
-                  id="withdrawAmount"
-                  type="number"
-                  step="any"
+                  id="withdrawAddress"
+                  type="text"
                   :class="[
-                    v$.withdrawAmount.$error
+                    v$.withdrawAddress.$error
                       ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
                       : '',
-                    'rounded-l-md w-full dark:bg-slate-600 dark:border-gray-500',
+                    'rounded-md w-full dark:bg-slate-600 dark:border-gray-500',
                   ]"
-                  v-model="withdrawAmount"
+                  :disabled="selectedToken === 'SWAP.HIVE'"
+                  v-model="withdrawAddress"
                 />
                 <div
-                  class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400"
-                >{{ isEvmToken && evmToken ? evmToken : selectedToken }}</div>
+                  v-if="v$.withdrawAddress.$error"
+                  class="text-sm text-red-500 mt-1"
+                >Please enter a valid receiving address.</div>
               </div>
-              <div
-                v-if="v$.withdrawAmount.$error"
-                class="text-sm text-red-500 mt-1"
-              >Please enter a valid amount to withdraw.</div>
-            </div>
 
-            <div class="mb-3">
-              <label for="withdrawAddress" class="block mb-2 font-bold">Withdraw Address</label>
-              <input
-                id="withdrawAddress"
-                type="text"
-                :class="[
-                  v$.withdrawAddress.$error
-                    ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
-                    : '',
-                  'rounded-md w-full dark:bg-slate-600 dark:border-gray-500',
-                ]"
-                :disabled="selectedToken === 'SWAP.HIVE'"
-                v-model="withdrawAddress"
-              />
-              <div
-                v-if="v$.withdrawAddress.$error"
-                class="text-sm text-red-500 mt-1"
-              >Please enter a valid receiving address.</div>
-            </div>
-
-            <div class="mb-3" v-if="showMemoField">
-              <label for="withdrawMemo" class="block mb-2 font-bold">Withdraw Memo</label>
-              <input
-                id="withdrawMemo"
-                type="text"
-                class="rounded-md w-full dark:bg-slate-600 dark:border-gray-500"
-                v-model="withdrawMemo"
-              />
-            </div>
-
-            <template v-if="isEvmToken && evmToken">
-              <div class="flex items-center justify-between">
-                <div class="mb-3">
-                  <div class="mb-2 font-bold">Gas Fee</div>
-                  <div>{{ evmGasFee }} {{ evmFeeSymbol }}</div>
-                  <a
-                    class="cursor-pointer text-sm font-bold text-red-500"
-                    @click.prevent="walletStore.fetchGasFee(network, evmToken)"
-                  >Refresh</a>
-                </div>
-
-                <div class="mb-3">
-                  <div class="mb-2 font-bold">Fee Balance</div>
-                  <div>{{ gasFeeBalance }} {{ evmFeeSymbol }}</div>
-                  <a
-                    class="cursor-pointer text-sm font-bold text-red-500 mr-5"
-                    @click.prevent="walletStore.fetchFeeBalance(network)"
-                  >Refresh</a>
-                  <a
-                    class="cursor-pointer text-sm font-bold text-red-500"
-                    @click.prevent="vfm$.show('feeDepositModal')"
-                  >Deposit</a>
-                </div>
+              <div class="mb-3" v-if="showMemoField">
+                <label for="withdrawMemo" class="block mb-2 font-bold">Withdraw Memo</label>
+                <input
+                  id="withdrawMemo"
+                  type="text"
+                  class="rounded-md w-full dark:bg-slate-600 dark:border-gray-500"
+                  v-model="withdrawMemo"
+                />
               </div>
+
+              <template v-if="isEvmToken && evmToken">
+                <div class="flex items-center justify-between">
+                  <div class="mb-3">
+                    <div class="mb-2 font-bold">Gas Fee</div>
+                    <div>{{ evmGasFee }} {{ evmFeeSymbol }}</div>
+                    <a
+                      class="cursor-pointer text-sm font-bold text-red-500"
+                      @click.prevent="walletStore.fetchGasFee(network, evmToken)"
+                    >Refresh</a>
+                  </div>
+
+                  <div class="mb-3">
+                    <div class="mb-2 font-bold">Fee Balance</div>
+                    <div>{{ gasFeeBalance }} {{ evmFeeSymbol }}</div>
+                    <a
+                      class="cursor-pointer text-sm font-bold text-red-500 mr-5"
+                      @click.prevent="walletStore.fetchFeeBalance(network)"
+                    >Refresh</a>
+                    <a
+                      class="cursor-pointer text-sm font-bold text-red-500"
+                      @click.prevent="vfm$.show('feeDepositModal')"
+                    >Deposit</a>
+                  </div>
+                </div>
+              </template>
+
+              <div
+                v-if="minimumWithdrawAmount > 0"
+                class="mb-3"
+              >Minimum withdrawal amount: {{ minimumWithdrawAmount }} {{ selectedToken }}</div>
+
+              <div
+                class="mb-3"
+              >You will receive (estimated): {{ receiveAmount }} {{ receiveSymbol }}</div>
+
+              <div v-if="selectedToken === 'SWAP.BLURT'" class="text-sm mb-3">
+                SWAP.BLURT withdrawal has 0.100 SWAP.BLURT transaction fee of the Blurt Blockchain on
+                top of the 0.75% withdrawal fee of Hive-Engine.
+              </div>
+
+              <button
+                class="btn"
+                :disabled="
+                  minimumWithdrawAmount > tokenBalance ||
+                  withdrawAmount <= 0 ||
+                  withdrawAmount > tokenBalance ||
+                  (isEvmToken && evmGasFee > gasFeeBalance)
+                "
+                @click.prevent="withdrawToken"
+              >
+                <Spinner v-if="btnBusy" />
+                {{ " " }} Withdraw
+                {{ isEvmToken ? evmToken : selectedToken }}
+              </button>
             </template>
-
-            <div
-              v-if="minimumWithdrawAmount > 0"
-              class="mb-3"
-            >Minimum withdrawal amount: {{ minimumWithdrawAmount }} {{ selectedToken }}</div>
-
-            <div class="mb-3">You will receive (estimated): {{ receiveAmount }} {{ receiveSymbol }}</div>
-
-            <div v-if="selectedToken === 'SWAP.BLURT'" class="text-sm mb-3">
-              SWAP.BLURT withdrawal has 0.100 SWAP.BLURT transaction fee of the Blurt Blockchain on
-              top of the 0.75% withdrawal fee of Hive-Engine.
-            </div>
-
-            <button
-              class="btn"
-              :disabled="
-                minimumWithdrawAmount > tokenBalance ||
-                withdrawAmount <= 0 ||
-                withdrawAmount > tokenBalance ||
-                (isEvmToken && evmGasFee > gasFeeBalance)
-              "
-              @click.prevent="withdrawToken"
-            >
-              <Spinner v-if="btnBusy" />
-              {{ " " }} Withdraw
-              {{ isEvmToken ? evmToken : selectedToken }}
-            </button>
           </template>
         </template>
-      </template>
+      </div>
     </div>
   </vue-final-modal>
 

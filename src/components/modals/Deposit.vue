@@ -2,119 +2,59 @@
   <vue-final-modal
     v-model="show"
     v-slot="{ params, close }"
-    classes="flex justify-center items-center"
-    content-class="w-full max-w-xl relative flex flex-col max-h-full border dark:border-gray-800 rounded bg-white dark:bg-gray-600 dark:text-gray-300"
+    classes="flex justify-center items-center overflow-y-auto"
+    content-class="w-full max-w-xl relative flex flex-col max-h-full"
     name="depositModal"
     @before-open="beforeOpen"
     @closed="modalClose"
   >
-    <div class="flex items-center justify-between px-6 py-4">
-      <div class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300">Deposit Tokens</div>
+    <div class="border dark:border-gray-800 rounded bg-white dark:bg-gray-600 dark:text-gray-300">
+      <div class="flex items-center justify-between px-6 py-4">
+        <div class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300">Deposit Tokens</div>
 
-      <button class="dark:text-gray-300" @click="close">
-        <x-icon class="h-5 w-5" aria-hidden="true" />
-      </button>
-    </div>
+        <button class="dark:text-gray-300" @click="close">
+          <x-icon class="h-5 w-5" aria-hidden="true" />
+        </button>
+      </div>
 
-    <div class="p-6 flex-grow overflow-y-auto">
-      <Loading small v-if="modalBusy" />
+      <div class="p-6 flex-grow">
+        <Loading small v-if="modalBusy" />
 
-      <template v-else>
-        <div class="alert-warning mb-5 font-bold">
-          There is a 0.75% fee on deposits. Ethereum, ERC-20, BNB, BEP-20, Polygon (MATIC) and
-          Polygon ERC-20 deposits have no deposit fees, but you'll pay the Ethereum / BSC / Polygon
-          network gas fee.
-        </div>
-
-        <div v-if="!selectedToken && !depositInfo" class="alert-warning">
-          We have optimized our internal
-          <strong>Bitcoin (BTC) wallet</strong>. As a result, all deposit addresses generated before
-          <strong>July 15, 2021</strong> are invalid. We may not be able to recover funds sent to an
-          old address. Make sure you generate a new address by selecting BTC from the select box
-          below.
-        </div>
-
-        <template v-if="!depositInfo">
-          <SearchSelect
-            class="rounded-md"
-            menu-class="rounded-md"
-            :options="tokens"
-            v-model="selectedToken"
-          />
-        </template>
-
-        <template v-else-if="isDepositDisabled.disabled">
-          <div class="alert-warning">{ isDepositDisabled.reason }}</div>
-        </template>
-
-        <template v-else-if="selectedToken === 'HIVE' && depositInfo">
-          <div class="mb-3">
-            <label class="block mb-2 font-bold">Available Balance</label>
-            <div
-              class="cursor-pointer"
-              @click="depositAmount = depositInfo.balance"
-            >{{ depositInfo.balance }} HIVE</div>
+        <template v-else>
+          <div class="alert-warning mb-5 font-bold">
+            There is a 0.75% fee on deposits. Ethereum, ERC-20, BNB, BEP-20, Polygon (MATIC) and
+            Polygon ERC-20 deposits have no deposit fees, but you'll pay the Ethereum / BSC / Polygon
+            network gas fee.
           </div>
 
-          <div class="mb-3">
-            <label for="depositAmount" class="block mb-2 font-bold">Deposit Amount</label>
-            <input
-              id="depositAmount"
-              type="number"
-              step="any"
-              class="rounded-md w-full dark:bg-slate-600 dark:border-gray-500"
-              v-model="depositAmount"
+          <div v-if="!selectedToken && !depositInfo" class="alert-warning">
+            We have optimized our internal
+            <strong>Bitcoin (BTC) wallet</strong>. As a result, all deposit addresses generated before
+            <strong>July 15, 2021</strong> are invalid. We may not be able to recover funds sent to an
+            old address. Make sure you generate a new address by selecting BTC from the select box
+            below.
+          </div>
+
+          <template v-if="!depositInfo">
+            <SearchSelect
+              class="rounded-md"
+              menu-class="rounded-md"
+              :options="tokens"
+              v-model="selectedToken"
             />
-          </div>
+          </template>
 
-          <div class="mb-3">You will receive: {{ hiveReceiveAmount }} HIVE</div>
+          <template v-else-if="isDepositDisabled.disabled">
+            <div class="alert-warning">{ isDepositDisabled.reason }}</div>
+          </template>
 
-          <button
-            class="btn"
-            :disabled="depositAmount <= 0 || depositAmount > depositInfo.balance"
-            @click.prevent="depositHive"
-          >
-            <Spinner v-if="btnBusy" />
-            {{ " " }} Deposit {{ selectedToken }}
-          </button>
-        </template>
-
-        <template v-else-if="isEvmToken && depositInfo">
-          <div class="mb-3">
-            <label for="evmAddress" class="block mb-2 font-bold">Your {{ evmToken }} Address</label>
-
-            <div class="flex items-center">
-              <input
-                id="evmAddress"
-                type="text"
-                class="rounded-l-md w-full dark:bg-slate-600 dark:border-gray-500"
-                v-model="evmAddress"
-                placeholder="0x...."
-              />
-
-              <button
-                class="btn-sm self-stretch rounded-none border-r-red-800"
-                title="Refresh address"
-                @click="fetchEvmAddress(networks[selectedToken])"
-              >
-                <refresh-icon class="h-5 w-5" />
-              </button>
-
-              <button
-                class="btn-sm self-stretch rounded-l-none"
-                title="Add or update address"
-                @click="updateEvmAddress(networks[selectedToken])"
-              >Update</button>
-            </div>
-          </div>
-
-          <template v-if="['ETH', 'BNB', 'MATIC'].includes(selectedToken)">
+          <template v-else-if="selectedToken === 'HIVE' && depositInfo">
             <div class="mb-3">
               <label class="block mb-2 font-bold">Available Balance</label>
               <div
                 class="cursor-pointer"
                 @click="depositAmount = depositInfo.balance"
-              >{{ depositInfo.balance }} {{ selectedToken }}</div>
+              >{{ depositInfo.balance }} HIVE</div>
             </div>
 
             <div class="mb-3">
@@ -128,122 +68,184 @@
               />
             </div>
 
+            <div class="mb-3">You will receive: {{ hiveReceiveAmount }} HIVE</div>
+
             <button
               class="btn"
               :disabled="depositAmount <= 0 || depositAmount > depositInfo.balance"
-              @click.prevent="depositEvmAsset(networks[selectedToken])"
+              @click.prevent="depositHive"
             >
               <Spinner v-if="btnBusy" />
               {{ " " }} Deposit {{ selectedToken }}
             </button>
           </template>
 
+          <template v-else-if="isEvmToken && depositInfo">
+            <div class="mb-3">
+              <label for="evmAddress" class="block mb-2 font-bold">Your {{ evmToken }} Address</label>
+
+              <div class="flex items-center">
+                <input
+                  id="evmAddress"
+                  type="text"
+                  class="rounded-l-md w-full dark:bg-slate-600 dark:border-gray-500"
+                  v-model="evmAddress"
+                  placeholder="0x...."
+                />
+
+                <button
+                  class="btn-sm self-stretch rounded-none border-r-red-800"
+                  title="Refresh address"
+                  @click="fetchEvmAddress(networks[selectedToken])"
+                >
+                  <refresh-icon class="h-5 w-5" />
+                </button>
+
+                <button
+                  class="btn-sm self-stretch rounded-l-none"
+                  title="Add or update address"
+                  @click="updateEvmAddress(networks[selectedToken])"
+                >Update</button>
+              </div>
+            </div>
+
+            <template v-if="['ETH', 'BNB', 'MATIC'].includes(selectedToken)">
+              <div class="mb-3">
+                <label class="block mb-2 font-bold">Available Balance</label>
+                <div
+                  class="cursor-pointer"
+                  @click="depositAmount = depositInfo.balance"
+                >{{ depositInfo.balance }} {{ selectedToken }}</div>
+              </div>
+
+              <div class="mb-3">
+                <label for="depositAmount" class="block mb-2 font-bold">Deposit Amount</label>
+                <input
+                  id="depositAmount"
+                  type="number"
+                  step="any"
+                  class="rounded-md w-full dark:bg-slate-600 dark:border-gray-500"
+                  v-model="depositAmount"
+                />
+              </div>
+
+              <button
+                class="btn"
+                :disabled="depositAmount <= 0 || depositAmount > depositInfo.balance"
+                @click.prevent="depositEvmAsset(networks[selectedToken])"
+              >
+                <Spinner v-if="btnBusy" />
+                {{ " " }} Deposit {{ selectedToken }}
+              </button>
+            </template>
+
+            <template v-else>
+              <div class="mb-3">
+                <label class="block mb-2 font-bold">Tokens</label>
+                <SearchSelect
+                  class="border border-gray-500 rounded-md"
+                  :options="evmTokenOptions"
+                  v-model="evmToken"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label class="block mb-2 font-bold">Available Balance</label>
+                <div
+                  class="cursor-pointer"
+                  @click="depositAmount = depositInfo.balance"
+                >{{ depositInfo.balance }} {{ evmToken }}</div>
+              </div>
+
+              <div class="mb-3">
+                <label for="depositAmount" class="block mb-2 font-bold">Deposit Amount</label>
+                <input
+                  id="depositAmount"
+                  type="number"
+                  step="any"
+                  class="rounded-md w-full dark:bg-slate-600 dark:border-gray-500"
+                  v-model="depositAmount"
+                />
+              </div>
+
+              <button
+                class="btn"
+                :disabled="depositAmount <= 0 || depositAmount > depositInfo.balance"
+                @click.prevent="depositEvmToken(networks[selectedToken])"
+              >
+                <Spinner v-if="btnBusy" />
+                {{ " " }} Deposit {{ evmToken }}
+              </button>
+            </template>
+          </template>
+
           <template v-else>
-            <div class="mb-3">
-              <label class="block mb-2 font-bold">Tokens</label>
-              <SearchSelect
-                class="border border-gray-500 rounded-md"
-                :options="evmTokenOptions"
-                v-model="evmToken"
-              />
+            <div class="font-bold mb-5">
+              Please send any amount of {{ selectedToken }} to the following address and you will
+              receive an equal amount of {{ depositInfo.pegged_token_symbol }} in the @{{
+                depositInfo.destination
+              }}
+              account once the transaction has received the required number of confirmations on the
+              external chain.
             </div>
 
-            <div class="mb-3">
-              <label class="block mb-2 font-bold">Available Balance</label>
-              <div
-                class="cursor-pointer"
-                @click="depositAmount = depositInfo.balance"
-              >{{ depositInfo.balance }} {{ evmToken }}</div>
+            <div v-if="depositInfo.address">
+              <div class="mb-3">
+                <label for="address" class="block mb-2 font-bold">Deposit Address</label>
+                <div class="flex items-center">
+                  <input
+                    type="text"
+                    class="rounded-l-md w-full dark:bg-slate-600 dark:border-gray-500"
+                    readonly
+                    :value="depositInfo.address"
+                  />
+
+                  <button
+                    class="btn-sm leading-4 py-3 rounded-l-none border-l-0"
+                    @click="copyAddress(depositInfo.address)"
+                  >{{ addressCopied ? "Copied" : "Copy" }}</button>
+                </div>
+              </div>
             </div>
 
-            <div class="mb-3">
-              <label for="depositAmount" class="block mb-2 font-bold">Deposit Amount</label>
-              <input
-                id="depositAmount"
-                type="number"
-                step="any"
-                class="rounded-md w-full dark:bg-slate-600 dark:border-gray-500"
-                v-model="depositAmount"
-              />
-            </div>
+            <div v-else-if="depositInfo.account && depositInfo.memo">
+              <div class="mb-3">
+                <label for="account" class="block mb-2 font-bold">Deposit Account</label>
+                <div class="flex items-center">
+                  <input
+                    type="text"
+                    class="rounded-l-md w-full dark:bg-slate-600 dark:border-gray-500"
+                    readonly
+                    :value="depositInfo.account"
+                  />
 
-            <button
-              class="btn"
-              :disabled="depositAmount <= 0 || depositAmount > depositInfo.balance"
-              @click.prevent="depositEvmToken(networks[selectedToken])"
-            >
-              <Spinner v-if="btnBusy" />
-              {{ " " }} Deposit {{ evmToken }}
-            </button>
+                  <button
+                    class="btn-sm leading-4 py-3 rounded-l-none border-l-0"
+                    @click="copyAddress(depositInfo.account)"
+                  >{{ addressCopied ? "Copied" : "Copy" }}</button>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="memo" class="block mb-2 font-bold">Memo</label>
+                <div class="flex items-center">
+                  <input
+                    type="text"
+                    class="rounded-l-md w-full dark:bg-slate-600 dark:border-gray-500"
+                    readonly
+                    :value="depositInfo.memo"
+                  />
+
+                  <button
+                    class="btn-sm leading-4 py-3 rounded-l-none border-l-0"
+                    @click="copyMemo(depositInfo.memo)"
+                  >{{ memoCopied ? "Copied" : "Copy" }}</button>
+                </div>
+              </div>
+            </div>
           </template>
         </template>
-
-        <template v-else>
-          <div class="font-bold mb-5">
-            Please send any amount of {{ selectedToken }} to the following address and you will
-            receive an equal amount of {{ depositInfo.pegged_token_symbol }} in the @{{
-              depositInfo.destination
-            }}
-            account once the transaction has received the required number of confirmations on the
-            external chain.
-          </div>
-
-          <div v-if="depositInfo.address">
-            <div class="mb-3">
-              <label for="address" class="block mb-2 font-bold">Deposit Address</label>
-              <div class="flex items-center">
-                <input
-                  type="text"
-                  class="rounded-l-md w-full dark:bg-slate-600 dark:border-gray-500"
-                  readonly
-                  :value="depositInfo.address"
-                />
-
-                <button
-                  class="btn-sm leading-4 py-3 rounded-l-none border-l-0"
-                  @click="copyAddress(depositInfo.address)"
-                >{{ addressCopied ? "Copied" : "Copy" }}</button>
-              </div>
-            </div>
-          </div>
-
-          <div v-else-if="depositInfo.account && depositInfo.memo">
-            <div class="mb-3">
-              <label for="account" class="block mb-2 font-bold">Deposit Account</label>
-              <div class="flex items-center">
-                <input
-                  type="text"
-                  class="rounded-l-md w-full dark:bg-slate-600 dark:border-gray-500"
-                  readonly
-                  :value="depositInfo.account"
-                />
-
-                <button
-                  class="btn-sm leading-4 py-3 rounded-l-none border-l-0"
-                  @click="copyAddress(depositInfo.account)"
-                >{{ addressCopied ? "Copied" : "Copy" }}</button>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label for="memo" class="block mb-2 font-bold">Memo</label>
-              <div class="flex items-center">
-                <input
-                  type="text"
-                  class="rounded-l-md w-full dark:bg-slate-600 dark:border-gray-500"
-                  readonly
-                  :value="depositInfo.memo"
-                />
-
-                <button
-                  class="btn-sm leading-4 py-3 rounded-l-none border-l-0"
-                  @click="copyMemo(depositInfo.memo)"
-                >{{ memoCopied ? "Copied" : "Copy" }}</button>
-              </div>
-            </div>
-          </div>
-        </template>
-      </template>
+      </div>
     </div>
   </vue-final-modal>
 </template>
