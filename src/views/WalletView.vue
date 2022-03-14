@@ -46,10 +46,12 @@
       </div>
     </div>
 
-    <CustomTable :fields="walletTableFields" :items="wallet" :per-page="20">
+    <CustomTable :fields="walletTableFields" :items="wallet" :per-page="50">
       <template #cell(icon)="{ item }">
         <img :src="item.icon" class="w-6" />
       </template>
+
+      <template #cell(usdValue)="{ item }">{{ item.usdValue.toLocaleString() }}</template>
 
       <template #cell(changePct)="{ item }">
         <span

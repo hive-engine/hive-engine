@@ -10,29 +10,25 @@
             scope="col"
             :class="[
               thClass,
-              'p-2 font-bold first-of-type:text-left last-of-type:text-right',
+              'px-4 py-2 font-bold first-of-type:text-left last-of-type:text-right',
               th.class,
             ]"
             role="columnheader"
             :aria-sort="sortKey === th.key ? sortDirection : 'none'"
             v-if="th.sortable"
             @click="sortItems(th.key)"
-          >
-            {{ th.label }}
-          </th>
+          >{{ th.label }}</th>
 
           <th
             scope="col"
             :class="[
               thClass,
-              'p-2 font-bold first-of-type:text-left last-of-type:text-right',
+              'px-4 py-2 font-bold first-of-type:text-left last-of-type:text-right',
               th.class,
             ]"
             role="columnheader"
             v-else
-          >
-            {{ th.label }}
-          </th>
+          >{{ th.label }}</th>
         </template>
       </tr>
     </thead>
@@ -46,11 +42,13 @@
       >
         <td
           v-for="(td, k) of fields"
-          :class="[tdClass, 'p-2 first-of-type:text-left last-of-type:text-right', td.class]"
+          :class="[tdClass, 'px-4 py-2 first-of-type:text-left last-of-type:text-right', td.class]"
         >
-          <slot :name="`cell(${td.key})`" :item="tr">{{
-            tr[td.key] !== undefined ? tr[td.key] : ""
-          }}</slot>
+          <slot :name="`cell(${td.key})`" :item="tr">
+            {{
+              tr[td.key] !== undefined ? tr[td.key] : ""
+            }}
+          </slot>
         </td>
       </tr>
 
@@ -58,7 +56,7 @@
         v-else
         class="odd:bg-gray-300 even:bg-gray-200 odd:dark:bg-slate-800 even:dark:bg-slate-700 dark:border-slate-700"
       >
-        <td class="p-2 text-center" :colspan="fields.length">No results</td>
+        <td class="px-4 py-2 text-center" :colspan="fields.length">No results</td>
       </tr>
     </tbody>
   </table>
@@ -72,9 +70,11 @@
         Showing {{ " " }}
         <span class="font-bold">{{ (currentPage - 1) * perPage + 1 }}</span>
         {{ " " }} to {{ " " }}
-        <span class="font-bold">{{
-          currentPage * perPage > tableItems.length ? tableItems.length : currentPage * perPage
-        }}</span>
+        <span class="font-bold">
+          {{
+            currentPage * perPage > tableItems.length ? tableItems.length : currentPage * perPage
+          }}
+        </span>
         {{ " " }} of {{ " " }}
         <span class="font-bold">{{ tableItems.length }}</span>
         {{ " " }} results
