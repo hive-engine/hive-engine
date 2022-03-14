@@ -34,41 +34,35 @@
                 :to="{ name: 'tokens' }"
                 class="text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
                 active-class="bg-gray-700 text-white"
-                >Tokens</router-link
-              >
+              >Tokens</router-link>
               <router-link
                 :to="{ name: 'trade', params: { symbol: 'BEE' } }"
                 class="text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
                 active-class="bg-gray-700 text-white"
-                >Market</router-link
-              >
+              >Market</router-link>
               <a
                 v-if="isLoggedIn"
                 class="text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold cursor-pointer"
                 @click="vfm$.show('swapModal')"
-                >Swap</a
-              >
+              >Swap</a>
               <router-link
                 :to="{ name: 'faq' }"
                 class="text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
                 active-class="bg-gray-700 text-white"
-                >FAQ</router-link
-              >
+              >FAQ</router-link>
               <a
                 href="https://he.dtools.dev"
                 target="_blank"
                 class="text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
                 active-class="bg-gray-700 text-white"
-                >Explorer</a
-              >
+              >Explorer</a>
 
               <router-link
                 v-if="isLoggedIn"
-                :to="{ name: 'wallet' }"
+                :to="{ name: 'wallet', params: { account: username } }"
                 class="text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
                 active-class="bg-gray-700 text-white"
-                >Wallet</router-link
-              >
+              >Wallet</router-link>
             </div>
           </div>
         </div>
@@ -97,38 +91,34 @@
               leave-to-class="transform opacity-0 scale-95"
             >
               <MenuItems
-                class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+                class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
               >
                 <MenuItem v-slot="{ active }">
                   <router-link
                     :to="{ name: 'rewards' }"
                     :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-gray-700']"
-                    >Rewards</router-link
-                  >
+                  >Rewards</router-link>
                 </MenuItem>
 
                 <MenuItem v-slot="{ active }">
                   <router-link
                     :to="{ name: 'orders' }"
                     :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-gray-700']"
-                    >Open Orders</router-link
-                  >
+                  >Open Orders</router-link>
                 </MenuItem>
 
                 <MenuItem v-slot="{ active }">
                   <router-link
                     :to="{ name: 'swaps' }"
                     :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-gray-700']"
-                    >Swaps</router-link
-                  >
+                  >Swaps</router-link>
                 </MenuItem>
 
                 <MenuItem v-slot="{ active }">
                   <router-link
                     :to="{ name: 'conversion-history' }"
                     :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-gray-700']"
-                    >Conversion History</router-link
-                  >
+                  >Conversion History</router-link>
                 </MenuItem>
 
                 <MenuItem v-slot="{ active }">
@@ -136,8 +126,7 @@
                     href="#"
                     :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-gray-700']"
                     @click.prevent="requestLogout"
-                    >Logout</a
-                  >
+                  >Logout</a>
                 </MenuItem>
               </MenuItems>
             </transition>
@@ -147,8 +136,7 @@
             v-else
             class="text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold cursor-pointer"
             @click="vfm$.show('loginModal')"
-            >Login</a
-          >
+          >Login</a>
         </div>
       </div>
     </div>
@@ -159,40 +147,34 @@
           :to="{ name: 'tokens' }"
           class="block text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
           active-class="bg-gray-700 text-white"
-          >Tokens</router-link
-        >
+        >Tokens</router-link>
         <router-link
           :to="{ name: 'trade', params: { symbol: 'BEE' } }"
           class="block text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
           active-class="bg-gray-700 text-white"
-          >Market</router-link
-        >
+        >Market</router-link>
         <a
           v-if="isLoggedIn"
           class="block text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold cursor-pointer"
           @click="vfm$.show('swapModal')"
-          >Swap</a
-        >
+        >Swap</a>
         <router-link
           :to="{ name: 'faq' }"
           class="block text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
           active-class="bg-gray-700 text-white"
-          >FAQ</router-link
-        >
+        >FAQ</router-link>
         <a
           href="https://he.dtools.dev"
           target="_blank"
           class="block text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
           active-class="bg-gray-700 text-white"
-          >Explorer</a
-        >
+        >Explorer</a>
         <router-link
           v-if="isLoggedIn"
-          :to="{ name: 'wallet' }"
+          :to="{ name: 'wallet', params: { account: username } }"
           class="block text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
           active-class="bg-gray-700 text-white"
-          >Wallet</router-link
-        >
+        >Wallet</router-link>
       </div>
     </DisclosurePanel>
   </Disclosure>

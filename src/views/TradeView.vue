@@ -573,7 +573,7 @@ export default defineComponent({
       if (loggedIn) {
         await Promise.all([
           marketStore.fetchUserOrders(symbol.value, username.value),
-          walletStore.fetchWallet(["SWAP.HIVE", symbol.value]),
+          walletStore.fetchWallet(username.value, ["SWAP.HIVE", symbol.value]),
         ]);
       }
     });
@@ -767,7 +767,7 @@ export default defineComponent({
 
       if (isLoggedIn.value) {
         requests.push(marketStore.fetchUserOrders(symbol.value, username.value));
-        requests.push(walletStore.fetchWallet(["SWAP.HIVE", symbol.value]));
+        requests.push(walletStore.fetchWallet(username.value, ["SWAP.HIVE", symbol.value]));
       }
 
       await Promise.all(requests);

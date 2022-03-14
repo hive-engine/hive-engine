@@ -19,7 +19,7 @@
     </div>
 
     <div class="p-6 flex-grow overflow-y-auto">
-      <template v-if="modalBusy"></template>
+      <Loading small v-if="modalBusy" />
 
       <template v-else>
         <CustomTable

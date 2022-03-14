@@ -21,7 +21,7 @@ export const useWalletStore = defineStore({
   }),
 
   actions: {
-    async fetchWallet(symbols) {
+    async fetchWallet(account, symbols) {
       try {
         const store = useStore();
         const userStore = useUserStore();
@@ -30,7 +30,7 @@ export const useWalletStore = defineStore({
           await store.fetchSettings();
         }
 
-        const balances = await sidechain.getBalance(userStore.username, symbols);
+        const balances = await sidechain.getBalance(account || userStore.username, symbols);
 
         this.wallet = balances
           .filter((b) => !store.settings.disabled_tokens.includes(b.symbol))
@@ -40,11 +40,11 @@ export const useWalletStore = defineStore({
       }
     },
 
-    async fetchPendingUnstakes() {
+    async fetchPendingUnstakes(account) {
       try {
         const userStore = useUserStore();
 
-        let pendingUnstakes = await sidechain.getPendingUnstakes(userStore.username);
+        let pendingUnstakes = await sidechain.getPendingUnstakes(account || userStore.username);
 
         pendingUnstakes = pendingUnstakes.map((p) => ({
           ...p,

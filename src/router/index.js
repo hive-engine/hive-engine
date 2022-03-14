@@ -25,11 +25,13 @@ const router = createRouter({
       component: loadView("Trade"),
     },
     {
-      path: "/wallet",
+      path: "/@:account/wallet",
       name: "wallet",
       component: loadView("Wallet"),
-      meta: {
-        requiresAuth: true,
+      beforeEnter: (to) => {
+        const { account } = to.params;
+
+        return /^[a-z][a-z0-9-.]{2,14}$/.test(account);
       },
     },
     {

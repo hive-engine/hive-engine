@@ -3,7 +3,7 @@
     <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 text-gray-200">
       <div class="grid md:grid-cols-4 text-center md:text-left min-h-[160px] items-center">
         <div class="col-span-full md:col-span-3">
-          <h1 class="text-4xl uppercase">My Token Wallet</h1>
+          <h1 class="text-4xl uppercase">{{ disableActions ? `@${account}'s` : 'My' }} Token Wallet</h1>
 
           <div
             v-if="!loading"
@@ -12,9 +12,17 @@
         </div>
 
         <div class="col-span-full md:col-span-1">
-          <button class="btn mr-3 mt-3" @click="vfm$.show('depositModal')">Deposit</button>
+          <button
+            :disabled="disableActions"
+            class="btn mr-3 mt-3"
+            @click="vfm$.show('depositModal')"
+          >Deposit</button>
 
-          <button class="btn mt-3" @click="vfm$.show('withdrawModal')">Withdraw</button>
+          <button
+            :disabled="disableActions"
+            class="btn mt-3"
+            @click="vfm$.show('withdrawModal')"
+          >Withdraw</button>
         </div>
       </div>
     </div>
@@ -83,7 +91,7 @@
         <span v-else>--</span>
       </template>
 
-      <template #cell(actions)="{ item }">
+      <template #cell(actions)="{ item }" v-if="!disableActions">
         <button
           class="btn-sm mr-1 mt-1 mb-1"
           title="Transfer"
@@ -224,12 +232,14 @@ import { useStorage } from '@vueuse/core'
 import { useStore } from "../stores";
 import { useTokenStore } from "../stores/token";
 import { useWalletStore } from "../stores/wallet";
+import { useUserStore } from "../stores/user";
 import { toFixedWithoutRounding } from "../utils";
 import CustomTable from "../components/utilities/CustomTable.vue";
 import WalletAction from "../components/modals/WalletAction.vue";
 import Deposit from "../components/modals/Deposit.vue";
 import Withdraw from "../components/modals/Withdraw.vue";
 import PageFooter from "../components/PageFooter.vue";
+import { useRoute } from "vue-router";
 
 export default defineComponent({
   name: "Wallet",
@@ -255,6 +265,10 @@ export default defineComponent({
     const vfm$ = inject("$vfm");
     const event = inject("eventBus");
 
+    const route = useRoute()
+
+    const { account } = route.params
+
     const filter = ref("");
     const hiveZeroBalance = useStorage('hide-small-balances', false);
     const includeAll = useStorage('value-includes-all', false);
@@ -263,7 +277,10 @@ export default defineComponent({
 
     const store = useStore();
     const tokenStore = useTokenStore();
+    const userStore = useUserStore();
     const walletStore = useWalletStore();
+
+    const disableActions = computed(() => !userStore.isLoggedIn || userStore.username !== account)
 
     const mappedTokens = computed(() => new Map(tokenStore.tokens.map((t) => [t.symbol, t])));
     const mappedMetrics = computed(() => new Map(tokenStore.metrics.map((t) => [t.symbol, t])));
@@ -311,17 +328,15 @@ export default defineComponent({
           const delegationsOut =
             b.delegationsOut && Number(b.delegationsOut) > 0 ? Number(b.delegationsOut) : 0;
 
-          let stake = b.stake && Number(b.stake) > 0 ? Number(b.stake) : 0;
+          const stake = b.stake && Number(b.stake) > 0 ? Number(b.stake) : 0;
           const pendingUnstake = Number(b.pendingUnstake);
           const lockedStake = lockedStakes.value[b.symbol] || 0;
-          const availableStake = toFixedWithoutRounding(stake - lockedStake, token.precision);
+          const availableStake = toFixedWithoutRounding(Math.max(0, stake - lockedStake), token.precision);
           const changePct = metrics ? parseFloat(metrics.priceChangePercent) : 0;
 
           const balance = b.balance;
 
-          stake = toFixedWithoutRounding(stake + pendingUnstake - lockedStake, token.precision);
-
-          const stakesAndDelegated = delegationsOut + stake
+          const stakesAndDelegated = delegationsOut + stake + (pendingUnstake - lockedStake)
 
           const valueHive = metrics
             ? (balance + (includeAll.value ? stakesAndDelegated : 0)) * metrics.lastPrice
@@ -374,7 +389,7 @@ export default defineComponent({
 
     const fetchWallet = async () => {
       await Promise.all([
-        walletStore.fetchWallet(),
+        walletStore.fetchWallet(account),
         walletStore.fetchPendingUnstakes(),
         tokenStore.fetchTokens(),
         tokenStore.fetchMetrics(),
@@ -417,6 +432,8 @@ export default defineComponent({
     return {
       loading,
       vfm$,
+      account,
+      disableActions,
 
       filter,
       hiveZeroBalance,
