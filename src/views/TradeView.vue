@@ -195,7 +195,13 @@
         </div>
 
         <div class="flex items-center justify-between mt-3">
-          <div class="w-3/4">Balance: {{ hiveBalance }} HIVE</div>
+          <div class="w-3/4">
+            Balance:
+            <a
+              class="cursor-pointer"
+              @click="buyQuantity = toFixedWithoutRounding(hiveBalance / buyPrice, token.precision)"
+            >{{ hiveBalance }} HIVE</a>
+          </div>
 
           <button
             :disabled="disabledBuyButton"
@@ -204,8 +210,8 @@
                 action: 'buy',
                 type: buyOrderType,
                 symbol,
-                price: buyPrice,
-                quantity: buyQuantity,
+                price: toFixedWithoutRounding(buyPrice, 8),
+                quantity: toFixedWithoutRounding(buyQuantity, token.precision),
                 total: buyTotal,
               })
             "
@@ -290,7 +296,13 @@
         </div>
 
         <div class="flex items-center justify-between mt-3">
-          <div class="w-3/4">Balance: {{ symbolBalance }} {{ symbol }}</div>
+          <div class="w-3/4">
+            Balance:
+            <a
+              class="cursor-pointer"
+              @click="sellQuantity = symbolBalance"
+            >{{ symbolBalance }} {{ symbol }}</a>
+          </div>
 
           <button
             :disabled="disabledSellButton"
@@ -299,8 +311,8 @@
                 action: 'sell',
                 type: sellOrderType,
                 symbol,
-                price: sellPrice,
-                quantity: sellQuantity,
+                price: toFixedWithoutRounding(sellPrice, 8),
+                quantity: toFixedWithoutRounding(sellQuantity, token.precision),
                 total: sellTotal,
               })
             "
@@ -862,6 +874,8 @@ export default defineComponent({
       candleChartData,
       depthChartData,
       volumeChartData,
+
+      toFixedWithoutRounding,
     };
   },
 });
