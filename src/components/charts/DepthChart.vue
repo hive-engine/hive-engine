@@ -80,12 +80,20 @@ export default defineComponent({
       scales: {
         y: {
           ticks: {
-            fontColor: "#565d69",
+            color: "#647882",
+          },
+          grid: {
+            color: 'rgba(100, 100, 100, .2)',
+            borderWidth: 0,
           },
         },
         x: {
           ticks: {
-            fontColor: "#565d69",
+            color: "#647882",
+          },
+          grid: {
+            color: 'rgba(100, 100, 100, .2)',
+            borderWidth: 0,
           },
         },
       },

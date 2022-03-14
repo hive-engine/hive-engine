@@ -34,15 +34,23 @@ export default defineComponent({
       scales: {
         y: {
           ticks: {
-            fontColor: "#565d69",
+            color: "#647882",
           },
-          type: "logarithmic",
+          grid: {
+            color: 'rgba(100, 100, 100, .2)',
+            borderWidth: 0,
+          },
+          type: 'logarithmic'
         },
         x: {
           ticks: {
-            fontColor: "#565d69",
+            color: "#647882",
           },
-          stacked: true,
+          grid: {
+            color: 'rgba(100, 100, 100, .2)',
+            borderWidth: 0,
+          },
+          stacked: true
         },
       },
       plugins: {
