@@ -12,7 +12,7 @@ import {
   CategoryScale,
   Filler,
 } from "chart.js";
-import { defineComponent, ref, toRefs } from "vue";
+import { defineComponent, ref } from "vue";
 import { defineChartComponent } from "vue-chart-3";
 
 class CustomLineChart extends LineController {
@@ -68,8 +68,7 @@ export default defineComponent({
     chartData: { type: Object, required: true },
   },
 
-  setup(props) {
-    const { chartData } = toRefs(props);
+  setup() {
 
     const options = ref({
       maintainAspectRatio: false,
@@ -100,7 +99,6 @@ export default defineComponent({
     });
 
     return {
-      chartData,
       options,
     };
   },

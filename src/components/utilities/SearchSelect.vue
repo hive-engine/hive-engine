@@ -1,15 +1,15 @@
 <template>
   <div
     class="relative bg-white text-gray-700 border border-gray-400 dark:bg-slate-600 dark:text-gray-300 dark:border-gray-500"
-    :class="class"
+    :class="classes"
   >
     <input
       ref="input"
       type="text"
       autocomplete="off"
       class="input bg-transparent w-full px-3 py-2 top-0 border-0 focus:ring-0 z-10"
-      @input="searchText = $event.target.value"
       :value="searchText"
+      @input="searchText = $event.target.value"
       @focus.prevent="openMenu"
       @blur="blurInput"
     />
@@ -29,12 +29,12 @@
       @mousedown.prevent
     >
       <div
+        v-for="(option, i) of filteredOptions"
+        :key="i"
         :class="[
           'p-2 border-gray-400 border-t dark:border-gray-500 cursor-pointer hover:bg-[rgba(0,0,0,.05)]',
           optionClass,
         ]"
-        v-for="(option, i) of filteredOptions"
-        :key="i"
         @click.stop="selectItem(option)"
         @mousedown="mousedownItem"
       >{{ option.text }}</div>
@@ -55,9 +55,9 @@ export default defineComponent({
 
   props: {
     options: { type: Array, required: true },
-    modelValue: { type: [String, Object] },
+    modelValue: { type: [String, Object], default: null },
     placeholder: { type: String, default: "" },
-    class: { type: String, default: "" },
+    classes: { type: String, default: "" },
     menuClass: { type: String, default: "" },
     optionClass: { type: String, default: "" },
   },

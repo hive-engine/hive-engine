@@ -1,7 +1,7 @@
 <template>
   <vue-final-modal
-    v-model="show"
     v-slot="{ params, close }"
+    v-model="show"
     classes="flex justify-center items-center overflow-y-auto"
     content-class="w-full max-w-xl relative flex flex-col max-h-full"
     name="walletActionModal"
@@ -20,7 +20,7 @@
       </div>
 
       <div class="p-6 flex-grow">
-        <Loading small v-if="modalBusy" />
+        <Loading v-if="modalBusy" small />
 
         <template v-else>
           <CustomTable
@@ -72,9 +72,11 @@
               @click="quantity = params.available"
             >{{ params.available }} {{ params.symbol }}</div>
 
-            <div class="mb-3" v-if="showTo">
+            <div v-if="showTo" class="mb-3">
               <label for="to" class="block mb-2 font-bold">To</label>
               <input
+                id="to"
+                v-model="to"
                 type="text"
                 :class="[
                   v$.to.$error
@@ -82,8 +84,6 @@
                     : '',
                   'rounded-md dark:bg-slate-600 w-full',
                 ]"
-                id="to"
-                v-model="to"
                 @input="(event) => (to = event.target.value.toLowerCase())"
               />
               <div
@@ -92,9 +92,11 @@
               >Please enter a valid hive username.</div>
             </div>
 
-            <div class="mb-3" v-if="showFrom">
+            <div v-if="showFrom" class="mb-3">
               <label for="from" class="block mb-2 font-bold">From</label>
               <input
+                id="from"
+                v-model="from"
                 type="text"
                 :class="[
                   v$.from.$error
@@ -102,8 +104,6 @@
                     : '',
                   'rounded-md dark:bg-slate-600 w-full',
                 ]"
-                id="from"
-                v-model="from"
                 @input="(event) => (from = event.target.value.toLowerCase())"
               />
               <div
@@ -117,6 +117,8 @@
 
               <div class="flex items-center w-full">
                 <input
+                  id="quantity"
+                  v-model="quantity"
                   type="number"
                   :class="[
                     v$.quantity.$error
@@ -124,8 +126,6 @@
                       : '',
                     'rounded-l-md dark:bg-slate-600 w-full',
                   ]"
-                  id="quantity"
-                  v-model="quantity"
                 />
                 <div
                   class="bg-gray-200 dark:bg-slate-600 h-full p-2 border border-l-0 rounded-r-md border-gray-500"
@@ -137,13 +137,13 @@
               >Please enter a quantity greater than zero.</div>
             </div>
 
-            <div class="mb-3" v-if="params.action === 'transfer'">
+            <div v-if="params.action === 'transfer'" class="mb-3">
               <label for="memo" class="block mb-2 font-bold">Memo</label>
               <input
-                type="text"
-                class="rounded-md dark:bg-slate-600 w-full"
                 id="memo"
                 v-model="memo"
+                type="text"
+                class="rounded-md dark:bg-slate-600 w-full"
               />
             </div>
 

@@ -1,7 +1,7 @@
 <template>
   <Modal
-    name="swapModal"
     v-model="show"
+    name="swapModal"
     :click-to-close="false"
     @before-open="beforeOpen"
     @before-close="beforeClose"
@@ -9,7 +9,7 @@
   >
     <template #title>Swap Tokens</template>
 
-    <Loading small v-if="modalBusy" />
+    <Loading v-if="modalBusy" small />
 
     <template v-else>
       <div class="text-center">
@@ -24,7 +24,11 @@
         <div class="mb-5 mt-10">
           <label for="fromSymbol" class="block mb-2 font-bold">From</label>
 
-          <SearchSelect :options="fromSymbolOptions" v-model="fromSymbol" class="mb-3" />
+          <SearchSelect
+            v-model="fromSymbol"
+            :options="fromSymbolOptions"
+            classes="mb-3 rounded-md"
+          />
 
           <template v-if="fromSymbol">
             <div class="mb-3">Current balance: {{ fromSymbolBalance }} {{ fromSymbol }}</div>
@@ -32,9 +36,9 @@
             <div class="flex items-center w-full">
               <input
                 id="fromQuantity"
+                v-model="fromQuantity"
                 type="number"
                 class="w-full h-10 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
-                v-model="fromQuantity"
               />
               <div
                 class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
@@ -46,7 +50,7 @@
         <div class="mb-5">
           <label for="toSymbol" class="block mb-2 font-bold">To</label>
 
-          <SearchSelect :options="toSymbolOptions" v-model="toSymbol" class="mb-3" />
+          <SearchSelect v-model="toSymbol" :options="toSymbolOptions" classes="mb-3 rounded-md" />
 
           <template v-if="toSymbol">
             <div class="mb-3">Current balance: {{ toSymbolBalance }} {{ toSymbol }}</div>
@@ -54,9 +58,9 @@
             <div class="flex items-center w-full">
               <input
                 id="toQuantity"
+                v-model="toQuantity"
                 type="number"
                 class="w-full h-10 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
-                v-model="toQuantity"
                 readonly
               />
               <div
@@ -74,9 +78,9 @@
 
             <div class="flex items-center">
               <input
+                v-model="slippageOne"
                 type="number"
                 class="w-16 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
-                v-model="slippageOne"
               />
               <div
                 class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400"
@@ -92,9 +96,9 @@
 
             <div class="flex items-center">
               <input
+                v-model="slippageTwo"
                 type="number"
                 class="w-16 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
-                v-model="slippageTwo"
               />
               <div
                 class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400"
@@ -105,8 +109,8 @@
       </LoadingOverlay>
 
       <div
-        class="alert-warning text-center font-bold"
         v-if="swapInProgress"
+        class="alert-warning text-center font-bold"
       >Swap request is in progress. Please do not close this modal.</div>
 
       <div class="text-center mt-10">

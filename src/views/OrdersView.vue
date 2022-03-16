@@ -14,7 +14,7 @@
   <div v-else class="page-content">
     <custom-table :fields="openOrdersFields" :items="openOrders">
       <template #cell(checkbox)="{ item }">
-        <input type="checkbox" v-model="selectedOrders" :value="item" />
+        <input v-model="selectedOrders" type="checkbox" :value="item" />
       </template>
 
       <template #cell(type)="{ item }">
@@ -32,16 +32,16 @@
       </template>
 
       <template #cell(txId)="{ item }">
-        <button @click="marketStore.requestCancelOrders([item])" class="btn-sm">
+        <button class="btn-sm" @click="marketStore.requestCancelOrders([item])">
           <XIcon class="h-5 w-5" />
         </button>
       </template>
     </custom-table>
 
-    <div class="mt-5 text-right" v-if="selectedOrders.length > 1">
+    <div v-if="selectedOrders.length > 1" class="mt-5 text-right">
       <button
-        @click="marketStore.requestCancelOrders(selectedOrders)"
         class="btn-sm px-4"
+        @click="marketStore.requestCancelOrders(selectedOrders)"
       >Cancel All</button>
     </div>
   </div>

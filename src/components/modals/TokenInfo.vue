@@ -42,7 +42,7 @@
         <div class="col-span-1 mt-3">
           <div class="font-bold">Staking</div>
           <div>{{ params.stakingEnabled ? "Yes" : "No" }}</div>
-          <div class="text-sm" v-if="params.stakingEnabled">
+          <div v-if="params.stakingEnabled" class="text-sm">
             Cooldown: {{ params.unstakingCooldown }} days in
             {{ params.numberTransactions }} transction(s)
           </div>
@@ -51,9 +51,10 @@
         <div class="col-span-1 mt-3">
           <div class="font-bold">Delegation</div>
           <div>{{ params.delegationEnabled ? "Yes" : "No" }}</div>
-          <div class="text-sm" v-if="params.delegationEnabled">
-            Cooldown: {{ params.undelegationCooldown }} days
-          </div>
+          <div
+            v-if="params.delegationEnabled"
+            class="text-sm"
+          >Cooldown: {{ params.undelegationCooldown }} days</div>
         </div>
       </div>
     </template>

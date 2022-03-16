@@ -202,7 +202,7 @@ const sidechain = {
 export { sidechain };
 
 export default {
-  install: (app, options) => {
+  install: (app) => {
     app.config.globalProperties.$sidechain = sidechain;
 
     app.provide("sidechain", sidechain);

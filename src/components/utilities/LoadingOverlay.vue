@@ -1,9 +1,9 @@
 <template>
   <div class="relative">
     <Loading
+      v-if="show"
       small
       :show-text="false"
-      v-if="show"
       class="absolute top-0 bottom-0 left-0 right-0 z-50"
     />
 
@@ -20,12 +20,12 @@ import Loading from "./Loading.vue";
 export default defineComponent({
   name: "LoadingOverlay",
 
-  props: {
-    show: { type: Boolean, default: false },
-  },
-
   components: {
     Loading,
+  },
+
+  props: {
+    show: { type: Boolean, default: false },
   },
 });
 </script>

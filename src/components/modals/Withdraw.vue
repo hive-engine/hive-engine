@@ -1,7 +1,7 @@
 <template>
   <vue-final-modal
-    v-model="show"
     v-slot="{ params, close }"
+    v-model="show"
     classes="flex justify-center items-center overflow-y-auto"
     content-class="w-full max-w-xl relative flex flex-col max-h-full"
     name="withdrawModal"
@@ -18,7 +18,7 @@
       </div>
 
       <div class="p-6 flex-grow">
-        <Loading small v-if="modalBusy" />
+        <Loading v-if="modalBusy" small />
 
         <template v-else>
           <div class="alert-warning mb-5 font-bold">
@@ -28,10 +28,10 @@
           </div>
 
           <SearchSelect
-            class="rounded-md mb-3"
+            v-model="selectedToken"
+            classes="rounded-md mb-3"
             menu-class="rounded-md"
             :options="tokens"
-            v-model="selectedToken"
           />
 
           <template v-if="selectedToken">
@@ -42,10 +42,10 @@
             <template v-else>
               <template v-if="isEvmToken">
                 <SearchSelect
-                  class="rounded-md mb-3"
+                  v-model="evmToken"
+                  classes="rounded-md mb-3"
                   menu-class="rounded-md"
                   :options="evmTokenOptions"
-                  v-model="evmToken"
                 />
               </template>
 
@@ -63,6 +63,7 @@
                 <div class="flex items-center">
                   <input
                     id="withdrawAmount"
+                    v-model="withdrawAmount"
                     type="number"
                     step="any"
                     :class="[
@@ -71,7 +72,6 @@
                         : '',
                       'rounded-l-md w-full dark:bg-slate-600 dark:border-gray-500',
                     ]"
-                    v-model="withdrawAmount"
                   />
                   <div
                     class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400"
@@ -87,6 +87,7 @@
                 <label for="withdrawAddress" class="block mb-2 font-bold">Withdraw Address</label>
                 <input
                   id="withdrawAddress"
+                  v-model="withdrawAddress"
                   type="text"
                   :class="[
                     v$.withdrawAddress.$error
@@ -95,7 +96,6 @@
                     'rounded-md w-full dark:bg-slate-600 dark:border-gray-500',
                   ]"
                   :disabled="selectedToken === 'SWAP.HIVE'"
-                  v-model="withdrawAddress"
                 />
                 <div
                   v-if="v$.withdrawAddress.$error"
@@ -103,13 +103,13 @@
                 >Please enter a valid receiving address.</div>
               </div>
 
-              <div class="mb-3" v-if="showMemoField">
+              <div v-if="showMemoField" class="mb-3">
                 <label for="withdrawMemo" class="block mb-2 font-bold">Withdraw Memo</label>
                 <input
                   id="withdrawMemo"
+                  v-model="withdrawMemo"
                   type="text"
                   class="rounded-md w-full dark:bg-slate-600 dark:border-gray-500"
-                  v-model="withdrawMemo"
                 />
               </div>
 
@@ -175,8 +175,8 @@
   </vue-final-modal>
 
   <vue-final-modal
-    v-model="feeDepositModalshow"
     v-slot="{ params, close }"
+    v-model="feeDepositModalshow"
     classes="flex justify-center items-center"
     content-class="w-full max-w-lg relative flex flex-col max-h-full border dark:border-gray-800 rounded bg-white dark:bg-gray-600 dark:text-gray-300"
     name="feeDepositModal"
@@ -191,7 +191,7 @@
       </button>
     </div>
 
-    <div class="p-6 flex-grow" v-if="!modalBusy">
+    <div v-if="!modalBusy" class="p-6 flex-grow">
       <div class="mb-3">
         In order to withdraw {{ selectedToken }} tokens, you must provide enough
         {{ evmFeeSymbol }} to cover the network gas fee. This reserved fee balance is
@@ -214,10 +214,10 @@
         <div class="flex items-center">
           <input
             id="depositAmount"
+            v-model="feeDepositAmount"
             type="number"
             step="any"
             class="rounded-l-md w-full dark:bg-slate-600 dark:border-gray-500"
-            v-model="feeDepositAmount"
           />
           <div
             class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400"

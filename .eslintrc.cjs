@@ -10,9 +10,11 @@ module.exports = {
   ],
   env: {
     node: true,
-    "vue/setup-compiler-macros": true,
+    "vue/setup-compiler-macros": 1,
   },
   rules: {
-    "vue/multi-word-component-names": false,
+    "vue/multi-word-component-names": 0,
+    "prettier/prettier": 0,
+    "vue/no-v-html": 0,
   },
 };

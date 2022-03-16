@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, toRefs } from "vue";
+import { defineComponent, ref } from "vue";
 import { Chart, LinearScale, TimeSeriesScale, Tooltip } from "chart.js";
 import { defineChartComponent } from "vue-chart-3";
 import { CandlestickController, CandlestickElement } from "chartjs-chart-financial";
@@ -61,9 +61,7 @@ export default defineComponent({
     chartData: { type: Object, required: true },
   },
 
-  setup(props) {
-    const { chartData } = toRefs(props);
-
+  setup() {
     const options = ref({
       maintainAspectRatio: false,
       scales: {
@@ -97,7 +95,6 @@ export default defineComponent({
     });
 
     return {
-      chartData,
       options,
     };
   },

@@ -14,15 +14,15 @@
 
   <div v-else class="page-content pt-5">
     <div
-      class="flex flex-wrap items-center justify-center sm:justify-between mb-5 border-b border-gray-400 dark:border-gray-600 pb-5"
       v-if="metrics"
+      class="flex flex-wrap items-center justify-center sm:justify-between mb-5 border-b border-gray-400 dark:border-gray-600 pb-5"
     >
       <div class="mb-3 pr-2 sm:basis-0 sm:flex-grow md:basis-12">
         <div class="flex items-center">
           <SearchSelect
-            class="rounded-l-md"
-            menu-class="rounded-md"
             v-model="symbol"
+            classes="rounded-l-md"
+            menu-class="rounded-md"
             :options="tokens"
           />
 
@@ -83,14 +83,14 @@
       <div class="text-right">
         <button
           :disabled="interval === 'daily'"
-          @click="interval = 'daily'"
           class="btn-sm px-4 py-1 rounded-l-md rounded-r-none"
+          @click="interval = 'daily'"
         >Daily</button>
 
         <button
           :disabled="interval === 'hourly'"
-          @click="interval = 'hourly'"
           class="btn-sm px-4 py-1 rounded-l-none rounded-r-md"
+          @click="interval = 'hourly'"
         >Hourly</button>
       </div>
 
@@ -102,20 +102,20 @@
     <div class="text-center mb-8">
       <button
         :disabled="chartType === 'candle'"
-        @click="chartType = 'candle'"
         class="btn-sm px-4 py-1 rounded-l-md rounded-r-none"
+        @click="chartType = 'candle'"
       >Candle</button>
 
       <button
         :disabled="chartType === 'depth'"
-        @click="chartType = 'depth'"
         class="btn-sm px-4 py-1 rounded-none"
+        @click="chartType = 'depth'"
       >Depth</button>
 
       <button
         :disabled="chartType === 'volume'"
-        @click="chartType = 'volume'"
         class="btn-sm px-4 py-1 rounded-l-none rounded-r-md"
+        @click="chartType = 'volume'"
       >Volume</button>
     </div>
 
@@ -151,9 +151,9 @@
           <div class="flex items-center w-full">
             <input
               id="buyPrice"
+              v-model="buyPrice"
               type="number"
               class="w-full dark:bg-slate-600 dark:border-gray-500 rounded-l-md h-10 focus:ring-0 border-r-inherit border-gray-400"
-              v-model="buyPrice"
             />
             <div
               class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
@@ -167,9 +167,9 @@
           <div class="flex items-center w-full">
             <input
               id="buyQuantity"
+              v-model="buyQuantity"
               type="number"
               class="w-full dark:bg-slate-600 dark:border-gray-500 rounded-l-md h-10 focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
-              v-model="buyQuantity"
               :disabled="buyOrderType === 'market'"
             />
             <div
@@ -184,9 +184,9 @@
           <div class="flex items-center w-full">
             <input
               id="buyTotal"
+              v-model="buyTotal"
               type="number"
               class="w-full dark:bg-slate-600 dark:border-gray-500 rounded-l-md h-10 focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
-              v-model="buyTotal"
             />
             <div
               class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
@@ -205,6 +205,7 @@
 
           <button
             :disabled="disabledBuyButton"
+            class="btn"
             @click="
               marketStore.requestPlaceOrder({
                 action: 'buy',
@@ -215,7 +216,6 @@
                 total: buyTotal,
               })
             "
-            class="btn"
           >Buy {{ symbol }}</button>
         </div>
       </div>
@@ -251,9 +251,9 @@
           <div class="flex items-center w-full">
             <input
               id="sellPrice"
+              v-model="sellPrice"
               type="number"
               class="w-full h-10 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400"
-              v-model="sellPrice"
             />
             <div
               class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
@@ -267,9 +267,9 @@
           <div class="flex items-center w-full">
             <input
               id="sellQuantity"
+              v-model="sellQuantity"
               type="number"
               class="w-full h-10 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
-              v-model="sellQuantity"
             />
             <div
               class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
@@ -283,9 +283,9 @@
           <div class="flex items-center w-full">
             <input
               id="sellTotal"
+              v-model="sellTotal"
               type="number"
               class="w-full h-10 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
-              v-model="sellTotal"
               :readonly="sellOrderType === 'limit'"
               :disabled="sellOrderType === 'market'"
             />
@@ -306,6 +306,7 @@
 
           <button
             :disabled="disabledSellButton"
+            class="btn"
             @click="
               marketStore.requestPlaceOrder({
                 action: 'sell',
@@ -316,7 +317,6 @@
                 total: sellTotal,
               })
             "
-            class="btn"
           >Sell {{ symbol }}</button>
         </div>
       </div>
@@ -364,17 +364,17 @@
       <div class="flex items-center">
         <h3 class="w-3/4 text-xl font-bold mt-5 mb-3">Open Orders</h3>
 
-        <div class="w-full text-right" v-if="selectedOrders.length > 1">
+        <div v-if="selectedOrders.length > 1" class="w-full text-right">
           <button
-            @click="marketStore.requestCancelOrders(selectedOrders)"
             class="btn-sm px-4"
+            @click="marketStore.requestCancelOrders(selectedOrders)"
           >Cancel All</button>
         </div>
       </div>
 
       <custom-table :fields="openOrdersFields" :items="openOrders">
         <template #cell(checkbox)="{ item }">
-          <input type="checkbox" v-model="selectedOrders" :value="item" />
+          <input v-model="selectedOrders" type="checkbox" :value="item" />
         </template>
 
         <template #cell(type)="{ item }">
@@ -384,7 +384,7 @@
         </template>
 
         <template #cell(txId)="{ item }">
-          <button @click="marketStore.requestCancelOrders([item])" class="btn-sm">
+          <button class="btn-sm" @click="marketStore.requestCancelOrders([item])">
             <XIcon class="h-5 w-5" />
           </button>
         </template>
@@ -421,10 +421,6 @@ import { useRoute, useRouter } from "vue-router";
 import {
   RadioGroup,
   RadioGroupOption,
-  Listbox,
-  ListboxButton,
-  ListboxOptions,
-  ListboxOption,
 } from "@headlessui/vue";
 import { InformationCircleIcon, XIcon } from "@heroicons/vue/outline";
 import { format } from "date-fns";
@@ -448,10 +444,6 @@ export default defineComponent({
   components: {
     RadioGroup,
     RadioGroupOption,
-    Listbox,
-    ListboxButton,
-    ListboxOptions,
-    ListboxOption,
     InformationCircleIcon,
     XIcon,
     CustomTable,

@@ -10,14 +10,14 @@
   </div>
 
   <div class="page-content">
-    <div class="mb-10" v-for="(category, c) of faqCategories" :key="c">
+    <div v-for="(category, c) of faqCategories" :key="c" class="mb-10">
       <h3 class="text-2xl font-bold mb-3">{{ makeTitle(category) }}</h3>
 
       <Disclosure
-        as="div"
-        v-slot="{ open }"
         v-for="(faq, i) of FAQ[category]"
+        v-slot="{ open }"
         :key="i"
+        as="div"
         class="mb-3"
       >
         <DisclosureButton
@@ -44,7 +44,7 @@
 <script>
 import { defineComponent } from "vue";
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
-import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/vue/outline";
+import { ChevronUpIcon } from "@heroicons/vue/outline";
 import FAQ from "../assets/jsons/faq.json";
 import PageFooter from "../components/PageFooter.vue";
 
@@ -56,7 +56,6 @@ export default defineComponent({
     DisclosureButton,
     DisclosurePanel,
     ChevronUpIcon,
-    ChevronDownIcon,
     PageFooter,
   },
 

@@ -8,6 +8,7 @@
         <tr>
           <template v-for="(th, i) of fields" :key="i">
             <th
+              v-if="th.sortable"
               scope="col"
               :class="[
                 thClass,
@@ -16,11 +17,11 @@
               ]"
               role="columnheader"
               :aria-sort="sortKey === th.key ? sortDirection : 'none'"
-              v-if="th.sortable"
               @click="sortItems(th.key)"
             >{{ th.label }}</th>
 
             <th
+              v-else
               scope="col"
               :class="[
                 thClass,
@@ -28,30 +29,31 @@
                 th.class,
               ]"
               role="columnheader"
-              v-else
             >{{ th.label }}</th>
           </template>
         </tr>
       </thead>
 
       <tbody class="divide-y divide-gray-200 dark:divide-slate-600 dark:text-gray-300">
-        <tr
-          v-if="items.length > 0"
-          v-for="(tr, i) of items"
-          key="i"
-          class="odd:bg-gray-300 even:bg-gray-200 odd:dark:bg-slate-800 even:dark:bg-slate-700 dark:border-slate-700"
-        >
-          <td
-            v-for="(td, k) of fields"
-            :class="[tdClass, 'px-4 py-2 first-of-type:text-left last-of-type:text-right', td.class]"
+        <template v-if="computedItems.length > 0">
+          <tr
+            v-for="(tr, i) of computedItems"
+            :key="i"
+            class="odd:bg-gray-300 even:bg-gray-200 odd:dark:bg-slate-800 even:dark:bg-slate-700 dark:border-slate-700"
           >
-            <slot :name="`cell(${td.key})`" :item="tr">
-              {{
-                tr[td.key] !== undefined ? tr[td.key] : ""
-              }}
-            </slot>
-          </td>
-        </tr>
+            <td
+              v-for="(td, k) of fields"
+              :key="k"
+              :class="[tdClass, 'px-4 py-2 first-of-type:text-left last-of-type:text-right', td.class]"
+            >
+              <slot :name="`cell(${td.key})`" :item="tr">
+                {{
+                  tr[td.key] !== undefined ? tr[td.key] : ""
+                }}
+              </slot>
+            </td>
+          </tr>
+        </template>
 
         <tr
           v-else
@@ -109,17 +111,11 @@ export default defineComponent({
   },
 
   setup(props) {
-    const fields = computed(() => props.fields);
-    const perPage = computed(() => props.perPage);
-
-    const thClass = props.thClass;
-    const tdClass = props.tdClass;
-
     const sortKey = ref(null);
     const sortDirection = ref("none");
 
     const tableItems = computed(() => {
-      const items = props.items.slice();
+      const items = props.items;
 
       if (sortDirection.value !== "none") {
         items.sort((a, b) => {
@@ -142,21 +138,21 @@ export default defineComponent({
 
     let currentPage = ref(1);
 
-    const totalPages = computed(() => Math.ceil(tableItems.value.length / perPage.value));
+    const totalPages = computed(() => Math.ceil(tableItems.value.length / props.perPage));
 
     let start = null;
     let end = null;
 
-    if (perPage.value > 0) {
-      start = computed(() => (currentPage.value - 1) * perPage.value);
+    if (props.perPage > 0) {
+      start = computed(() => (currentPage.value - 1) * props.perPage);
       end = computed(() =>
-        start.value + perPage.value < tableItems.value.length
-          ? start.value + perPage.value
+        start.value + props.perPage < tableItems.value.length
+          ? start.value + props.perPage
           : tableItems.value.length
       );
     }
 
-    const items = computed(() => {
+    const computedItems = computed(() => {
       if (start && end) {
         return tableItems.value.slice(start.value, end.value);
       }
@@ -171,14 +167,10 @@ export default defineComponent({
     };
 
     return {
-      thClass,
-      tdClass,
-      fields,
       tableItems,
-      items,
+      computedItems,
       sortKey,
       sortDirection,
-      perPage,
       currentPage,
       totalPages,
 

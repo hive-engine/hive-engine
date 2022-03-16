@@ -28,7 +28,7 @@
 
       <template #cell(marketCap)="{ item }">${{ item.marketCap.toLocaleString() }}</template>
 
-      <template #cell(price)="{ item }">${{ item.price.toLocaleString() }}</template>
+      <template #cell(price)="{ item }">${{ addCommas(item.price, true) }}</template>
 
       <template #cell(change)="{ item }">
         <span
@@ -39,7 +39,7 @@
         >{{ item.change }}</span>
       </template>
 
-      <template #cell(volume)="{ item }">${{ item.volume.toLocaleString() }}</template>
+      <template #cell(volume)="{ item }">${{ addCommas(item.volume, true) }}</template>
 
       <template #cell(circulatingSupply)="{ item }">
         {{
@@ -71,6 +71,7 @@ import { computed, defineComponent, inject, onBeforeMount, ref } from "vue";
 import { useTokenStore } from "../stores/token";
 import { SwitchHorizontalIcon, InformationCircleIcon } from "@heroicons/vue/outline";
 import { useStore } from "../stores";
+import { addCommas } from '../utils'
 import CustomTable from "../components/utilities/CustomTable.vue";
 import TokenInfo from "../components/modals/TokenInfo.vue";
 import PageFooter from "../components/PageFooter.vue";
@@ -191,6 +192,8 @@ export default defineComponent({
       filter,
       fields,
       tokens,
+
+      addCommas,
     };
   },
 });

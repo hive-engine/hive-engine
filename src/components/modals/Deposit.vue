@@ -1,7 +1,7 @@
 <template>
   <vue-final-modal
+    v-slot="{ close }"
     v-model="show"
-    v-slot="{ params, close }"
     classes="flex justify-center items-center overflow-y-auto"
     content-class="w-full max-w-xl relative flex flex-col max-h-full"
     name="depositModal"
@@ -18,7 +18,7 @@
       </div>
 
       <div class="p-6 flex-grow">
-        <Loading small v-if="modalBusy" />
+        <Loading v-if="modalBusy" small />
 
         <template v-else>
           <div class="alert-warning mb-5 font-bold">
@@ -37,10 +37,10 @@
 
           <template v-if="!depositInfo">
             <SearchSelect
-              class="rounded-md"
+              v-model="selectedToken"
+              classes="rounded-md"
               menu-class="rounded-md"
               :options="tokens"
-              v-model="selectedToken"
             />
           </template>
 
@@ -61,10 +61,10 @@
               <label for="depositAmount" class="block mb-2 font-bold">Deposit Amount</label>
               <input
                 id="depositAmount"
+                v-model="depositAmount"
                 type="number"
                 step="any"
                 class="rounded-md w-full dark:bg-slate-600 dark:border-gray-500"
-                v-model="depositAmount"
               />
             </div>
 
@@ -87,9 +87,9 @@
               <div class="flex items-center">
                 <input
                   id="evmAddress"
+                  v-model="evmAddress"
                   type="text"
                   class="rounded-l-md w-full dark:bg-slate-600 dark:border-gray-500"
-                  v-model="evmAddress"
                   placeholder="0x...."
                 />
 
@@ -122,10 +122,10 @@
                 <label for="depositAmount" class="block mb-2 font-bold">Deposit Amount</label>
                 <input
                   id="depositAmount"
+                  v-model="depositAmount"
                   type="number"
                   step="any"
                   class="rounded-md w-full dark:bg-slate-600 dark:border-gray-500"
-                  v-model="depositAmount"
                 />
               </div>
 
@@ -143,9 +143,9 @@
               <div class="mb-3">
                 <label class="block mb-2 font-bold">Tokens</label>
                 <SearchSelect
-                  class="border border-gray-500 rounded-md"
-                  :options="evmTokenOptions"
                   v-model="evmToken"
+                  classes="border border-gray-500 rounded-md"
+                  :options="evmTokenOptions"
                 />
               </div>
 
@@ -161,10 +161,10 @@
                 <label for="depositAmount" class="block mb-2 font-bold">Deposit Amount</label>
                 <input
                   id="depositAmount"
+                  v-model="depositAmount"
                   type="number"
                   step="any"
                   class="rounded-md w-full dark:bg-slate-600 dark:border-gray-500"
-                  v-model="depositAmount"
                 />
               </div>
 

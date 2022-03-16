@@ -3,7 +3,7 @@
     <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 text-gray-200">
       <div class="grid md:grid-cols-4 text-center md:text-left min-h-[160px] items-center">
         <div class="col-span-full md:col-span-3">
-          <h1 class="text-4xl uppercase">{{ disableActions ? `@${account}'s` : 'My' }} Token Wallet</h1>
+          <h1 class="text-4xl uppercase">{{ disableActions ? `@${account}'s` : "My" }} Token Wallet</h1>
 
           <div
             v-if="!loading"
@@ -45,11 +45,11 @@
 
       <div>
         <label class="mb-1 block">
-          <input type="checkbox" v-model="hiveZeroBalance" /> Hide small balances
+          <input v-model="hiveZeroBalance" type="checkbox" /> Hide small balances
         </label>
 
         <label class="mb-3 block">
-          <input type="checkbox" v-model="includeAll" /> Value includes stake and delegated
+          <input v-model="includeAll" type="checkbox" /> Value includes stake and delegated
         </label>
       </div>
     </div>
@@ -59,7 +59,9 @@
         <img :src="item.icon" class="w-6" />
       </template>
 
-      <template #cell(usdValue)="{ item }">{{ item.usdValue.toLocaleString() }}</template>
+      <template #cell(balance)="{ item }">{{ addCommas(item.balance) }}</template>
+
+      <template #cell(usdValue)="{ item }">${{ addCommas(item.usdValue, true) }}</template>
 
       <template #cell(changePct)="{ item }">
         <span
@@ -74,7 +76,7 @@
             content: `Available: ${item.availableStake}<br>Locked: ${item.lockedStake}<br>Pending: ${item.pendingUnstake}`,
             html: true,
           }"
-        >{{ item.stake }}</span>
+        >{{ addCommas(item.stake) }}</span>
 
         <span v-else>--</span>
       </template>
@@ -91,7 +93,7 @@
         <span v-else>--</span>
       </template>
 
-      <template #cell(actions)="{ item }" v-if="!disableActions">
+      <template v-if="!disableActions" #cell(actions)="{ item }">
         <button
           class="btn-sm mr-1 mt-1 mb-1"
           title="Transfer"
@@ -239,12 +241,12 @@ import {
   TrendingDownIcon,
   SwitchHorizontalIcon,
 } from "@heroicons/vue/outline";
-import { useStorage } from '@vueuse/core'
+import { useStorage } from "@vueuse/core";
 import { useStore } from "../stores";
 import { useTokenStore } from "../stores/token";
 import { useWalletStore } from "../stores/wallet";
 import { useUserStore } from "../stores/user";
-import { toFixedWithoutRounding } from "../utils";
+import { toFixedWithoutRounding, addCommas } from "../utils";
 import CustomTable from "../components/utilities/CustomTable.vue";
 import WalletAction from "../components/modals/WalletAction.vue";
 import Deposit from "../components/modals/Deposit.vue";
@@ -270,7 +272,7 @@ export default defineComponent({
     Deposit,
     Withdraw,
     PageFooter,
-    TokenInfo
+    TokenInfo,
   },
 
   setup() {
@@ -278,13 +280,13 @@ export default defineComponent({
     const vfm$ = inject("$vfm");
     const event = inject("eventBus");
 
-    const route = useRoute()
+    const route = useRoute();
 
-    const { account } = route.params
+    const { account } = route.params;
 
     const filter = ref("");
-    const hiveZeroBalance = useStorage('hide-small-balances', false);
-    const includeAll = useStorage('value-includes-all', false);
+    const hiveZeroBalance = useStorage("hide-small-balances", false);
+    const includeAll = useStorage("value-includes-all", false);
 
     let refreshTimeout = null;
 
@@ -293,7 +295,7 @@ export default defineComponent({
     const userStore = useUserStore();
     const walletStore = useWalletStore();
 
-    const disableActions = computed(() => !userStore.isLoggedIn || userStore.username !== account)
+    const disableActions = computed(() => !userStore.isLoggedIn || userStore.username !== account);
 
     const mappedTokens = computed(() => new Map(tokenStore.tokens.map((t) => [t.symbol, t])));
     const mappedMetrics = computed(() => new Map(tokenStore.metrics.map((t) => [t.symbol, t])));
@@ -349,7 +351,7 @@ export default defineComponent({
 
           const balance = b.balance;
 
-          const stakesAndDelegated = delegationsOut + stake + (pendingUnstake - lockedStake)
+          const stakesAndDelegated = delegationsOut + stake + (pendingUnstake - lockedStake);
 
           const valueHive = metrics
             ? (balance + (includeAll.value ? stakesAndDelegated : 0)) * metrics.lastPrice
@@ -420,13 +422,13 @@ export default defineComponent({
       await vfm$.hideAll();
 
       await store.validateTransaction(ntrx > 1 ? `${id}-0` : id);
-    }
+    };
 
     const onTransactionValidated = async () => {
       await fetchWallet();
 
       loading.value = false;
-    }
+    };
 
     onBeforeMount(async () => {
       loading.value = true;
@@ -463,6 +465,8 @@ export default defineComponent({
       walletTableFields,
       wallet,
       estimatedValue,
+
+      addCommas,
     };
   },
 });
