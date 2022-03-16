@@ -1,5 +1,5 @@
 <template>
-  <Disclosure as="nav" v-slot="{ open }">
+  <Disclosure v-slot="{ open }" as="nav">
     <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
       <div class="relative flex items-center justify-between h-16">
         <div class="absolute inset-y-0 left-0 flex items-center md:hidden">
@@ -23,8 +23,8 @@
             </router-link>
 
             <button class="ml-5 p-1" @click="toggleDark">
-              <sun-icon class="h-6 w-6" v-if="isDark" />
-              <moon-icon class="h-6 w-6" v-else />
+              <sun-icon v-if="isDark" class="h-6 w-6" />
+              <moon-icon v-else class="h-6 w-6" />
             </button>
           </div>
 
@@ -93,6 +93,10 @@
               <MenuItems
                 class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
               >
+                <MenuItem>
+                  <div class="block font-bold px-4 py-2 text-gray-700 border-b">@{{ username }}</div>
+                </MenuItem>
+
                 <MenuItem v-slot="{ active }">
                   <router-link
                     :to="{ name: 'rewards' }"
