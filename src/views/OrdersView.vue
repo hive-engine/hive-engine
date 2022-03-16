@@ -89,8 +89,8 @@ export default defineComponent({
 
     const openOrdersFields = [
       { key: "checkbox", label: "" },
-      { key: "timestamp", label: "DATE" },
-      { key: "type", label: "TYPE" },
+      { key: "timestamp", label: "DATE", sortable: true },
+      { key: "type", label: "TYPE", sortable: true },
       { key: "quantity", label: "QUANTITY" },
       { key: "symbol", label: "SYMBOL" },
       { key: "price", label: "PRICE" },
