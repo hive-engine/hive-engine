@@ -176,7 +176,7 @@ export const useMarketStore = defineStore({
       try {
         const metrics = await sidechain.getMetrics(symbol);
 
-        if (new Date(metrics.volumeExpiration).getTime() < Date.now()) {
+        if (metrics && metrics.volumeExpiration * 1000 < Date.now()) {
           metrics.volume = 0;
         }
 
