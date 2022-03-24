@@ -1,5 +1,6 @@
 import axios from "axios";
 import { defineStore } from "pinia";
+import { $vfm } from "vue-final-modal";
 import { TRIBALDEX_API } from "../config";
 import { emitter } from "../plugins/mitt";
 import { sidechain } from "../plugins/sidechain";
@@ -30,17 +31,23 @@ export const useStore = defineStore({
   actions: {
     async requestKeychain(fn, ...args) {
       return new Promise((resolve) => {
-        window.hive_keychain[fn](...args, (r) => {
-          if (r.error === "user_cancel") {
-            return resolve({ success: false, cancel: true, ...r });
-          }
+        if (window.hive_keychain) {
+          window.hive_keychain[fn](...args, (r) => {
+            if (r.error === "user_cancel") {
+              return resolve({ success: false, cancel: true, ...r });
+            }
 
-          if (r.success) {
-            return resolve({ success: true, ...r });
-          }
+            if (r.success) {
+              return resolve({ success: true, ...r });
+            }
 
-          return resolve({ success: false, ...r });
-        });
+            return resolve({ success: false, ...r });
+          });
+        } else {
+          $vfm.show("installKeychain");
+
+          return resolve({ success: false });
+        }
       });
     },
 

@@ -189,6 +189,8 @@
 
   <Swap />
 
+  <Keychain />
+
   <notifications :duration="15000" />
 </template>
 
@@ -210,6 +212,7 @@ import { useUserStore } from "./stores/user";
 import { useStore } from "./stores";
 import LoginModal from "./components/modals/Login.vue";
 import Swap from "./components/modals/Swap.vue";
+import Keychain from "./components/modals/Keychain.vue";
 
 export default {
   components: {
@@ -228,6 +231,7 @@ export default {
     RouterView,
     LoginModal,
     Swap,
+    Keychain
   },
 
   setup() {
