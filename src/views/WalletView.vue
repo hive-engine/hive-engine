@@ -310,10 +310,7 @@ export default defineComponent({
               acc[cur.symbol] = 0;
             }
 
-            acc[cur.symbol] += toFixedWithoutRounding(
-              Number(cur.quantityLeft) - Number(Number(cur.quantity) / token.numberTransactions),
-              token.precision
-            );
+            acc[cur.symbol] += Number(cur.quantityLeft) - (Number(cur.quantity) / token.numberTransactions)
           }
 
           return acc;

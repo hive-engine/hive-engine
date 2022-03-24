@@ -3,7 +3,7 @@ import { utils } from "@hiveio/dhive";
 export const toFixedWithoutRounding = (t, l = 3) => {
   const a = 10 ** l;
   const s = t * a;
-  return Math.trunc(s) / a;
+  return Math.floor(s) / a;
 };
 
 // Adapted from https://stackoverflow.com/a/56883420
