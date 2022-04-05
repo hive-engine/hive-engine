@@ -66,6 +66,11 @@
               </template>
             </CustomTable>
 
+            <div
+              v-if="params.symbol && params.symbol.startsWith('SWAP.')"
+              class="alert-warning font-bold"
+            >If you are trying to withdraw to an external chain, please use the Withdraw menu. This window is for transferring to another Hive account.</div>
+
             <div class="block mb-2 font-bold">Available</div>
             <div
               class="cursor-pointer mb-4"
@@ -84,6 +89,7 @@
                     : '',
                   'rounded-md dark:bg-slate-600 w-full',
                 ]"
+                placeholder="Hive username"
                 @input="(event) => (to = event.target.value.toLowerCase())"
               />
               <div
@@ -104,6 +110,7 @@
                     : '',
                   'rounded-md dark:bg-slate-600 w-full',
                 ]"
+                placeholder="Hive username"
                 @input="(event) => (from = event.target.value.toLowerCase())"
               />
               <div
@@ -126,6 +133,7 @@
                       : '',
                     'rounded-l-md dark:bg-slate-600 w-full',
                   ]"
+                  placeholder="Amount"
                 />
                 <div
                   class="bg-gray-200 dark:bg-slate-600 h-full p-2 border border-l-0 rounded-r-md border-gray-500"
