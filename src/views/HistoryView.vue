@@ -38,7 +38,7 @@
 
 <script>
 import { computed, defineComponent, inject, onBeforeMount, ref } from "vue";
-import { ChevronLeftIcon, InformationCircleIcon } from '@heroicons/vue/outline'
+import { ChevronLeftIcon, InformationCircleIcon } from "@heroicons/vue/outline";
 import { format } from "date-fns";
 import { useRoute } from "vue-router";
 import { useUserStore } from "../stores/user";
@@ -56,12 +56,12 @@ export default defineComponent({
     InformationCircleIcon,
     CustomTable,
     PageFooter,
-    TransactionInfo
+    TransactionInfo,
   },
 
   setup() {
-    const loading = ref(true)
-    const vfm$ = inject('$vfm')
+    const loading = ref(true);
+    const vfm$ = inject("$vfm");
     const route = useRoute();
 
     const userStore = useUserStore();
@@ -69,61 +69,62 @@ export default defineComponent({
 
     const offset = ref(0);
     const limit = ref(20);
-    const disabledLoadMore = ref(false)
-    const symbol = computed(() => route.params.symbol)
+    const disabledLoadMore = ref(false);
+    const symbol = computed(() => route.params.symbol);
 
-    const rawHistory = ref([])
+    const rawHistory = ref([]);
     const historyTableFields = [
-      { key: 'date', label: 'DATE' },
-      { key: 'operation', label: 'OPERATION' },
-      { key: 'from', label: 'FROM' },
-      { key: 'to', label: 'TO' },
-      { key: 'amount', label: 'AMOUNT' },
-      { key: 'action', label: '' }
-    ]
+      { key: "date", label: "DATE" },
+      { key: "operation", label: "OPERATION" },
+      { key: "from", label: "FROM" },
+      { key: "to", label: "TO" },
+      { key: "amount", label: "AMOUNT" },
+      { key: "action", label: "" },
+    ];
 
     const history = computed(() => {
       return rawHistory.value.map((h) => {
-        let amount = h.quantity ? Number(h.quantity) : 0
+        let amount = h.quantity ? Number(h.quantity) : 0;
 
-        if (h.operation === 'market_sell' || h.operation === 'market_buy') {
-          amount = Number(h.quantityTokens)
-        } else if (h.operation === 'market_placeOrder') {
-          amount = toFixedWithoutRounding(Number(h.quantityLocked) / Number(h.price), 8)
-        } else if (h.operation === 'market_cancel') {
-          amount = Number(h.quantityReturned)
-        } else if (h.operation === 'market_expire') {
-          amount = Number(h.quantityUnlocked)
+        if (h.operation === "market_sell" || h.operation === "market_buy") {
+          amount = Number(h.quantityTokens);
+        } else if (h.operation === "market_placeOrder") {
+          amount = toFixedWithoutRounding(Number(h.quantityLocked) / Number(h.price), 8);
+        } else if (h.operation === "market_cancel") {
+          amount = Number(h.quantityReturned);
+        } else if (h.operation === "market_expire") {
+          amount = Number(h.quantityUnlocked);
         }
 
         return {
           ...h,
-          date: format(new Date(h.timestamp * 1000), 'Pp'),
+          date: format(new Date(h.timestamp * 1000), "Pp"),
           operation: titleCase(h.operation),
-          to: h.to ? h.to : 'N/A',
-          from: h.from ? getContractName(h.from) : 'N/A',
+          to: h.to ? h.to : "N/A",
+          from: h.from ? getContractName(h.from) : "N/A",
           amount,
-          symbol: h.symbol
-        }
-      })
-    })
+          symbol: h.symbol,
+        };
+      });
+    });
 
     const titleCase = (str) => {
-      return str.split('_')
-        .map(w => w[0].toUpperCase() + w.substr(1))
-        .join(' ')
-        .replace(/([A-Z])/g, ' $1')
-    }
+      return str
+        .split("_")
+        .map((w) => w[0].toUpperCase() + w.substr(1))
+        .join(" ")
+        .replace(/([A-Z])/g, " $1");
+    };
 
     const getContractName = (str) => {
-      if (str.startsWith('contract_')) {
-        const contract = str.replace('contract_', '')
+      if (str.startsWith("contract_")) {
+        const contract = str.replace("contract_", "");
 
-        return `${contract.charAt(0).toUpperCase() + contract.substring(1)} Contract`
+        return `${contract.charAt(0).toUpperCase() + contract.substring(1)} Contract`;
       }
 
-      return str
-    }
+      return str;
+    };
 
     const fetchAccountHistory = async (more = false) => {
       try {
@@ -158,12 +159,12 @@ export default defineComponent({
     };
 
     onBeforeMount(async () => {
-      loading.value = true
+      loading.value = true;
 
-      await fetchAccountHistory()
+      await fetchAccountHistory();
 
-      loading.value = false
-    })
+      loading.value = false;
+    });
 
     return {
       loading,
@@ -177,7 +178,7 @@ export default defineComponent({
       disabledLoadMore,
 
       fetchAccountHistory,
-    }
+    };
   },
 });
 </script>

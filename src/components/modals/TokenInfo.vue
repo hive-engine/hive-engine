@@ -51,10 +51,9 @@
         <div class="col-span-1 mt-3">
           <div class="font-bold">Delegation</div>
           <div>{{ params.delegationEnabled ? "Yes" : "No" }}</div>
-          <div
-            v-if="params.delegationEnabled"
-            class="text-sm"
-          >Cooldown: {{ params.undelegationCooldown }} days</div>
+          <div v-if="params.delegationEnabled" class="text-sm">
+            Cooldown: {{ params.undelegationCooldown }} days
+          </div>
         </div>
       </div>
     </template>

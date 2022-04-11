@@ -36,15 +36,14 @@
             'text-green-500': parseFloat(item.change) > 0,
             'text-red-500': parseFloat(item.change) < 0,
           }"
-        >{{ item.change }}</span>
+          >{{ item.change }}</span
+        >
       </template>
 
       <template #cell(volume)="{ item }">${{ addCommas(item.volume, true) }}</template>
 
       <template #cell(circulatingSupply)="{ item }">
-        {{
-          item.circulatingSupply.toLocaleString()
-        }}
+        {{ item.circulatingSupply.toLocaleString() }}
       </template>
 
       <template #cell(actions)="{ item }">
@@ -71,7 +70,7 @@ import { computed, defineComponent, inject, onBeforeMount, ref } from "vue";
 import { useTokenStore } from "../stores/token";
 import { SwitchHorizontalIcon, InformationCircleIcon } from "@heroicons/vue/outline";
 import { useStore } from "../stores";
-import { addCommas } from '../utils'
+import { addCommas } from "../utils";
 import CustomTable from "../components/utilities/CustomTable.vue";
 import TokenInfo from "../components/modals/TokenInfo.vue";
 import PageFooter from "../components/PageFooter.vue";

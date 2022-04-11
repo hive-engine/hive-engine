@@ -49,14 +49,17 @@
               'text-green-500': parseFloat(metrics.priceChangePercent) > 0,
               'text-red-500': parseFloat(metrics.priceChangePercent) < 0,
             }"
-          >{{ metrics.priceChangePercent }}</span>
+            >{{ metrics.priceChangePercent }}</span
+          >
         </div>
         <div
           :class="{
             'text-green-500': parseFloat(metrics.priceChangePercent) > 0,
             'text-red-500': parseFloat(metrics.priceChangePercent) < 0,
           }"
-        >{{ metrics.priceChangeHive }}</div>
+        >
+          {{ metrics.priceChangeHive }}
+        </div>
         <div class="text-gray-500">${{ (metrics.priceChangeHive * hivePrice).toFixed(7) }}</div>
       </div>
 
@@ -85,13 +88,17 @@
           :disabled="interval === 'daily'"
           class="btn-sm px-4 py-1 rounded-l-md rounded-r-none"
           @click="interval = 'daily'"
-        >Daily</button>
+        >
+          Daily
+        </button>
 
         <button
           :disabled="interval === 'hourly'"
           class="btn-sm px-4 py-1 rounded-l-none rounded-r-md"
           @click="interval = 'hourly'"
-        >Hourly</button>
+        >
+          Hourly
+        </button>
       </div>
 
       <CandleChart v-if="chartType === 'candle'" :chart-data="candleChartData" />
@@ -104,19 +111,25 @@
         :disabled="chartType === 'candle'"
         class="btn-sm px-4 py-1 rounded-l-md rounded-r-none"
         @click="chartType = 'candle'"
-      >Candle</button>
+      >
+        Candle
+      </button>
 
       <button
         :disabled="chartType === 'depth'"
         class="btn-sm px-4 py-1 rounded-none"
         @click="chartType = 'depth'"
-      >Depth</button>
+      >
+        Depth
+      </button>
 
       <button
         :disabled="chartType === 'volume'"
         class="btn-sm px-4 py-1 rounded-l-none rounded-r-md"
         @click="chartType = 'volume'"
-      >Volume</button>
+      >
+        Volume
+      </button>
     </div>
 
     <div v-if="isLoggedIn" class="grid md:grid-cols-2 gap-10">
@@ -131,7 +144,8 @@
                   checked ? 'bg-red-700 shadow-red-800 shadow-inner' : 'bg-red-600',
                   'cursor-pointer p-2 text-white font-bold rounded-l-md',
                 ]"
-              >Limit</span>
+                >Limit</span
+              >
             </RadioGroupOption>
 
             <RadioGroupOption v-slot="{ checked }" value="market">
@@ -140,7 +154,8 @@
                   checked ? 'bg-red-700 shadow-red-800 shadow-inner' : 'bg-red-600',
                   'cursor-pointer p-2 text-white font-bold rounded-r-md',
                 ]"
-              >Market</span>
+                >Market</span
+              >
             </RadioGroupOption>
           </RadioGroup>
         </div>
@@ -157,7 +172,9 @@
             />
             <div
               class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
-            >HIVE/{{ symbol }}</div>
+            >
+              HIVE/{{ symbol }}
+            </div>
           </div>
         </div>
 
@@ -174,7 +191,9 @@
             />
             <div
               class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
-            >{{ symbol }}</div>
+            >
+              {{ symbol }}
+            </div>
           </div>
         </div>
 
@@ -190,7 +209,9 @@
             />
             <div
               class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
-            >HIVE</div>
+            >
+              HIVE
+            </div>
           </div>
         </div>
 
@@ -200,7 +221,8 @@
             <a
               class="cursor-pointer"
               @click="buyQuantity = toFixedWithoutRounding(hiveBalance / buyPrice, token.precision)"
-            >{{ hiveBalance }} HIVE</a>
+              >{{ hiveBalance }} HIVE</a
+            >
           </div>
 
           <button
@@ -216,7 +238,9 @@
                 total: buyTotal,
               })
             "
-          >Buy {{ symbol }}</button>
+          >
+            Buy {{ symbol }}
+          </button>
         </div>
       </div>
 
@@ -231,7 +255,8 @@
                   checked ? 'bg-red-700 shadow-red-800 shadow-inner' : 'bg-red-600',
                   'cursor-pointer p-2 text-white font-bold rounded-l-md',
                 ]"
-              >Limit</span>
+                >Limit</span
+              >
             </RadioGroupOption>
 
             <RadioGroupOption v-slot="{ checked }" value="market">
@@ -240,7 +265,8 @@
                   checked ? 'bg-red-700 shadow-red-800 shadow-inner' : 'bg-red-600',
                   'cursor-pointer p-2 text-white font-bold rounded-r-md',
                 ]"
-              >Market</span>
+                >Market</span
+              >
             </RadioGroupOption>
           </RadioGroup>
         </div>
@@ -257,7 +283,9 @@
             />
             <div
               class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
-            >HIVE/{{ symbol }}</div>
+            >
+              HIVE/{{ symbol }}
+            </div>
           </div>
         </div>
 
@@ -273,7 +301,9 @@
             />
             <div
               class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
-            >{{ symbol }}</div>
+            >
+              {{ symbol }}
+            </div>
           </div>
         </div>
 
@@ -291,17 +321,18 @@
             />
             <div
               class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
-            >HIVE</div>
+            >
+              HIVE
+            </div>
           </div>
         </div>
 
         <div class="flex items-center justify-between mt-3">
           <div class="w-3/4">
             Balance:
-            <a
-              class="cursor-pointer"
-              @click="sellQuantity = symbolBalance"
-            >{{ symbolBalance }} {{ symbol }}</a>
+            <a class="cursor-pointer" @click="sellQuantity = symbolBalance"
+              >{{ symbolBalance }} {{ symbol }}</a
+            >
           </div>
 
           <button
@@ -317,7 +348,9 @@
                 total: sellTotal,
               })
             "
-          >Sell {{ symbol }}</button>
+          >
+            Sell {{ symbol }}
+          </button>
         </div>
       </div>
     </div>
@@ -335,8 +368,14 @@
           <template #cell(price)="{ item }">
             <a
               class="cursor-pointer"
-              @click="sellPrice = item.price; buyPrice = item.price; sellQuantity = item.quantity; buyQuantity = item.quantity;"
-            >{{ item.price.toFixed(8) }}</a>
+              @click="
+                sellPrice = item.price;
+                buyPrice = item.price;
+                sellQuantity = item.quantity;
+                buyQuantity = item.quantity;
+              "
+              >{{ item.price.toFixed(8) }}</a
+            >
           </template>
         </custom-table>
       </div>
@@ -353,8 +392,14 @@
           <template #cell(price)="{ item }">
             <a
               class="cursor-pointer"
-              @click="sellPrice = item.price; buyPrice = item.price; sellQuantity = item.quantity; buyQuantity = item.quantity;"
-            >{{ item.price.toFixed(8) }}</a>
+              @click="
+                sellPrice = item.price;
+                buyPrice = item.price;
+                sellQuantity = item.quantity;
+                buyQuantity = item.quantity;
+              "
+              >{{ item.price.toFixed(8) }}</a
+            >
           </template>
         </custom-table>
       </div>
@@ -365,10 +410,9 @@
         <h3 class="w-3/4 text-xl font-bold mt-5 mb-3">Open Orders</h3>
 
         <div v-if="selectedOrders.length > 1" class="w-full text-right">
-          <button
-            class="btn-sm px-4"
-            @click="marketStore.requestCancelOrders(selectedOrders)"
-          >Cancel All</button>
+          <button class="btn-sm px-4" @click="marketStore.requestCancelOrders(selectedOrders)">
+            Cancel All
+          </button>
         </div>
       </div>
 
@@ -380,7 +424,8 @@
         <template #cell(type)="{ item }">
           <span
             :class="{ 'text-red-500': item.type === 'SELL', 'text-green-500': item.type === 'BUY' }"
-          >{{ item.type }}</span>
+            >{{ item.type }}</span
+          >
         </template>
 
         <template #cell(txId)="{ item }">
@@ -397,7 +442,8 @@
       <template #cell(type)="{ item }">
         <span
           :class="{ 'text-red-500': item.type === 'SELL', 'text-green-500': item.type === 'BUY' }"
-        >{{ item.type }}</span>
+          >{{ item.type }}</span
+        >
       </template>
     </custom-table>
   </div>
@@ -418,10 +464,7 @@ import {
   watch,
 } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import {
-  RadioGroup,
-  RadioGroupOption,
-} from "@headlessui/vue";
+import { RadioGroup, RadioGroupOption } from "@headlessui/vue";
 import { InformationCircleIcon, XIcon } from "@heroicons/vue/outline";
 import { format } from "date-fns";
 import { useStore } from "../stores";
@@ -791,7 +834,7 @@ export default defineComponent({
       loading.value = true;
 
       await store.validateTransaction(ntrx > 1 ? `${id}-0` : id);
-    }
+    };
 
     const onTransactionValidated = async () => {
       resetForm();
@@ -799,7 +842,7 @@ export default defineComponent({
       await fetchTokenMarket();
 
       loading.value = false;
-    }
+    };
 
     let refreshTimeout = null;
 
@@ -817,7 +860,7 @@ export default defineComponent({
       event.on("broadcast-success", onBroadcastSuccess);
 
       event.on("transaction-validated", onTransactionValidated);
-    })
+    });
 
     onBeforeUnmount(() => {
       clearInterval(refreshTimeout);

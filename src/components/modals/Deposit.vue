@@ -10,7 +10,9 @@
   >
     <div class="border dark:border-gray-800 rounded bg-white dark:bg-gray-600 dark:text-gray-300">
       <div class="flex items-center justify-between px-6 py-4">
-        <div class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300">Deposit Tokens</div>
+        <div class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300">
+          Deposit Tokens
+        </div>
 
         <button class="dark:text-gray-300" @click="close">
           <x-icon class="h-5 w-5" aria-hidden="true" />
@@ -23,16 +25,16 @@
         <template v-else>
           <div class="alert-warning mb-5 font-bold">
             There is a 0.75% fee on deposits. Ethereum, ERC-20, BNB, BEP-20, Polygon (MATIC) and
-            Polygon ERC-20 deposits have no deposit fees, but you'll pay the Ethereum / BSC / Polygon
-            network gas fee.
+            Polygon ERC-20 deposits have no deposit fees, but you'll pay the Ethereum / BSC /
+            Polygon network gas fee.
           </div>
 
           <div v-if="!selectedToken && !depositInfo" class="alert-warning">
             We have optimized our internal
-            <strong>Bitcoin (BTC) wallet</strong>. As a result, all deposit addresses generated before
-            <strong>July 15, 2021</strong> are invalid. We may not be able to recover funds sent to an
-            old address. Make sure you generate a new address by selecting BTC from the select box
-            below.
+            <strong>Bitcoin (BTC) wallet</strong>. As a result, all deposit addresses generated
+            before <strong>July 15, 2021</strong> are invalid. We may not be able to recover funds
+            sent to an old address. Make sure you generate a new address by selecting BTC from the
+            select box below.
           </div>
 
           <template v-if="!depositInfo">
@@ -51,10 +53,9 @@
           <template v-else-if="selectedToken === 'HIVE' && depositInfo">
             <div class="mb-3">
               <label class="block mb-2 font-bold">Available Balance</label>
-              <div
-                class="cursor-pointer"
-                @click="depositAmount = depositInfo.balance"
-              >{{ depositInfo.balance }} HIVE</div>
+              <div class="cursor-pointer" @click="depositAmount = depositInfo.balance">
+                {{ depositInfo.balance }} HIVE
+              </div>
             </div>
 
             <div class="mb-3">
@@ -82,7 +83,9 @@
 
           <template v-else-if="isEvmToken && depositInfo">
             <div class="mb-3">
-              <label for="evmAddress" class="block mb-2 font-bold">Your {{ evmToken }} Address</label>
+              <label for="evmAddress" class="block mb-2 font-bold"
+                >Your {{ evmToken }} Address</label
+              >
 
               <div class="flex items-center">
                 <input
@@ -105,17 +108,18 @@
                   class="btn-sm self-stretch rounded-l-none"
                   title="Add or update address"
                   @click="updateEvmAddress(networks[selectedToken])"
-                >Update</button>
+                >
+                  Update
+                </button>
               </div>
             </div>
 
             <template v-if="['ETH', 'BNB', 'MATIC'].includes(selectedToken)">
               <div class="mb-3">
                 <label class="block mb-2 font-bold">Available Balance</label>
-                <div
-                  class="cursor-pointer"
-                  @click="depositAmount = depositInfo.balance"
-                >{{ depositInfo.balance }} {{ selectedToken }}</div>
+                <div class="cursor-pointer" @click="depositAmount = depositInfo.balance">
+                  {{ depositInfo.balance }} {{ selectedToken }}
+                </div>
               </div>
 
               <div class="mb-3">
@@ -151,10 +155,9 @@
 
               <div class="mb-3">
                 <label class="block mb-2 font-bold">Available Balance</label>
-                <div
-                  class="cursor-pointer"
-                  @click="depositAmount = depositInfo.balance"
-                >{{ depositInfo.balance }} {{ evmToken }}</div>
+                <div class="cursor-pointer" @click="depositAmount = depositInfo.balance">
+                  {{ depositInfo.balance }} {{ evmToken }}
+                </div>
               </div>
 
               <div class="mb-3">
@@ -203,7 +206,9 @@
                   <button
                     class="btn-sm leading-4 py-3 rounded-l-none border-l-0"
                     @click="copyAddress(depositInfo.address)"
-                  >{{ addressCopied ? "Copied" : "Copy" }}</button>
+                  >
+                    {{ addressCopied ? "Copied" : "Copy" }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -222,7 +227,9 @@
                   <button
                     class="btn-sm leading-4 py-3 rounded-l-none border-l-0"
                     @click="copyAddress(depositInfo.account)"
-                  >{{ addressCopied ? "Copied" : "Copy" }}</button>
+                  >
+                    {{ addressCopied ? "Copied" : "Copy" }}
+                  </button>
                 </div>
               </div>
 
@@ -239,7 +246,9 @@
                   <button
                     class="btn-sm leading-4 py-3 rounded-l-none border-l-0"
                     @click="copyMemo(depositInfo.memo)"
-                  >{{ memoCopied ? "Copied" : "Copy" }}</button>
+                  >
+                    {{ memoCopied ? "Copied" : "Copy" }}
+                  </button>
                 </div>
               </div>
             </div>

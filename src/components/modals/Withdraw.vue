@@ -1,6 +1,6 @@
 <template>
   <vue-final-modal
-    v-slot="{ params, close }"
+    v-slot="{ close }"
     v-model="show"
     classes="flex justify-center items-center overflow-y-auto"
     content-class="w-full max-w-xl relative flex flex-col max-h-full"
@@ -10,7 +10,9 @@
   >
     <div class="border dark:border-gray-800 rounded bg-white dark:bg-gray-600 dark:text-gray-300">
       <div class="flex items-center justify-between px-6 py-4">
-        <div class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300">Withdraw Tokens</div>
+        <div class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300">
+          Withdraw Tokens
+        </div>
 
         <button class="dark:text-gray-300" @click="close">
           <x-icon class="h-5 w-5" aria-hidden="true" />
@@ -51,10 +53,9 @@
 
               <div class="mb-3">
                 <label class="block mb-2 font-bold">Available Balance</label>
-                <div
-                  class="cursor-pointer"
-                  @click="withdrawAmount = tokenBalance"
-                >{{ tokenBalance }} {{ isEvmToken ? evmToken : selectedToken }}</div>
+                <div class="cursor-pointer" @click="withdrawAmount = tokenBalance">
+                  {{ tokenBalance }} {{ isEvmToken ? evmToken : selectedToken }}
+                </div>
               </div>
 
               <div class="mb-3">
@@ -75,12 +76,13 @@
                   />
                   <div
                     class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400"
-                  >{{ isEvmToken && evmToken ? evmToken : selectedToken }}</div>
+                  >
+                    {{ isEvmToken && evmToken ? evmToken : selectedToken }}
+                  </div>
                 </div>
-                <div
-                  v-if="v$.withdrawAmount.$error"
-                  class="text-sm text-red-500 mt-1"
-                >Please enter a valid amount to withdraw.</div>
+                <div v-if="v$.withdrawAmount.$error" class="text-sm text-red-500 mt-1">
+                  Please enter a valid amount to withdraw.
+                </div>
               </div>
 
               <div class="mb-3">
@@ -97,10 +99,9 @@
                   ]"
                   :disabled="selectedToken === 'SWAP.HIVE'"
                 />
-                <div
-                  v-if="v$.withdrawAddress.$error"
-                  class="text-sm text-red-500 mt-1"
-                >Please enter a valid receiving address.</div>
+                <div v-if="v$.withdrawAddress.$error" class="text-sm text-red-500 mt-1">
+                  Please enter a valid receiving address.
+                </div>
               </div>
 
               <div v-if="showMemoField" class="mb-3">
@@ -121,7 +122,8 @@
                     <a
                       class="cursor-pointer text-sm font-bold text-red-500"
                       @click.prevent="walletStore.fetchGasFee(network, evmToken)"
-                    >Refresh</a>
+                      >Refresh</a
+                    >
                   </div>
 
                   <div class="mb-3">
@@ -130,27 +132,28 @@
                     <a
                       class="cursor-pointer text-sm font-bold text-red-500 mr-5"
                       @click.prevent="walletStore.fetchFeeBalance(network)"
-                    >Refresh</a>
+                      >Refresh</a
+                    >
                     <a
                       class="cursor-pointer text-sm font-bold text-red-500"
                       @click.prevent="vfm$.show('feeDepositModal')"
-                    >Deposit</a>
+                      >Deposit</a
+                    >
                   </div>
                 </div>
               </template>
 
-              <div
-                v-if="minimumWithdrawAmount > 0"
-                class="mb-3"
-              >Minimum withdrawal amount: {{ minimumWithdrawAmount }} {{ selectedToken }}</div>
+              <div v-if="minimumWithdrawAmount > 0" class="mb-3">
+                Minimum withdrawal amount: {{ minimumWithdrawAmount }} {{ selectedToken }}
+              </div>
 
-              <div
-                class="mb-3"
-              >You will receive (estimated): {{ receiveAmount }} {{ receiveSymbol }}</div>
+              <div class="mb-3">
+                You will receive (estimated): {{ receiveAmount }} {{ receiveSymbol }}
+              </div>
 
               <div v-if="selectedToken === 'SWAP.BLURT'" class="text-sm mb-3">
-                SWAP.BLURT withdrawal has 0.100 SWAP.BLURT transaction fee of the Blurt Blockchain on
-                top of the 0.75% withdrawal fee of Hive-Engine.
+                SWAP.BLURT withdrawal has 0.100 SWAP.BLURT transaction fee of the Blurt Blockchain
+                on top of the 0.75% withdrawal fee of Hive-Engine.
               </div>
 
               <button
@@ -175,7 +178,7 @@
   </vue-final-modal>
 
   <vue-final-modal
-    v-slot="{ params, close }"
+    v-slot="{ close }"
     v-model="feeDepositModalshow"
     classes="flex justify-center items-center"
     content-class="w-full max-w-lg relative flex flex-col max-h-full border dark:border-gray-800 rounded bg-white dark:bg-gray-600 dark:text-gray-300"
@@ -184,7 +187,9 @@
     @closed="onFeeDepositModalClose"
   >
     <div class="flex items-center justify-between px-6 py-4">
-      <div class="text-2xl font-bold leading-6 text-gray-900 dark:text-gray-300">Deposit Gas Fee</div>
+      <div class="text-2xl font-bold leading-6 text-gray-900 dark:text-gray-300">
+        Deposit Gas Fee
+      </div>
 
       <button class="dark:text-gray-300" @click="close">
         <x-icon class="h-5 w-5" aria-hidden="true" />
@@ -202,10 +207,9 @@
 
       <div class="mb-3">
         <label class="block mb-2 font-bold">Available Balance</label>
-        <div
-          class="cursor-pointer"
-          @click="feeDepositAmount = evmFeeSymbolBalance"
-        >{{ evmFeeSymbolBalance }} {{ evmFeeSymbol }}</div>
+        <div class="cursor-pointer" @click="feeDepositAmount = evmFeeSymbolBalance">
+          {{ evmFeeSymbolBalance }} {{ evmFeeSymbol }}
+        </div>
       </div>
 
       <div class="mb-3">
@@ -221,7 +225,9 @@
           />
           <div
             class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400"
-          >{{ evmFeeSymbol }}</div>
+          >
+            {{ evmFeeSymbol }}
+          </div>
         </div>
       </div>
 
@@ -229,7 +235,9 @@
         class="btn"
         :disabled="feeDepositAmount <= 0 || feeDepositAmount > evmFeeSymbolBalance"
         @click.prevent="depositGasFee"
-      >Deposit Fee</button>
+      >
+        Deposit Fee
+      </button>
     </div>
   </vue-final-modal>
 </template>

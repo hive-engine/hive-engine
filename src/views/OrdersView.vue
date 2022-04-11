@@ -20,14 +20,13 @@
       <template #cell(type)="{ item }">
         <span
           :class="{ 'text-red-500': item.type === 'SELL', 'text-green-500': item.type === 'BUY' }"
-        >{{ item.type }}</span>
+          >{{ item.type }}</span
+        >
       </template>
 
       <template #cell(symbol)="{ item }">
         <router-link :to="{ name: 'trade', params: { symbol: item.symbol } }">
-          {{
-            item.symbol
-          }}
+          {{ item.symbol }}
         </router-link>
       </template>
 
@@ -39,10 +38,9 @@
     </custom-table>
 
     <div v-if="selectedOrders.length > 1" class="mt-5 text-right">
-      <button
-        class="btn-sm px-4"
-        @click="marketStore.requestCancelOrders(selectedOrders)"
-      >Cancel All</button>
+      <button class="btn-sm px-4" @click="marketStore.requestCancelOrders(selectedOrders)">
+        Cancel All
+      </button>
     </div>
   </div>
 
@@ -102,13 +100,13 @@ export default defineComponent({
       loading.value = true;
 
       await store.validateTransaction(ntrx > 1 ? `${id}-0` : id);
-    }
+    };
 
     const onTransactionValidated = async () => {
       await marketStore.fetchUserOrders(null, username.value);
 
       loading.value = false;
-    }
+    };
 
     onBeforeMount(async () => {
       loading.value = true;

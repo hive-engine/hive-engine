@@ -69,7 +69,6 @@ export default defineComponent({
   },
 
   setup() {
-
     const options = ref({
       maintainAspectRatio: false,
       interaction: {
@@ -82,7 +81,7 @@ export default defineComponent({
             color: "#647882",
           },
           grid: {
-            color: 'rgba(100, 100, 100, .2)',
+            color: "rgba(100, 100, 100, .2)",
             borderWidth: 0,
           },
         },
@@ -91,7 +90,7 @@ export default defineComponent({
             color: "#647882",
           },
           grid: {
-            color: 'rgba(100, 100, 100, .2)',
+            color: "rgba(100, 100, 100, .2)",
             borderWidth: 0,
           },
         },

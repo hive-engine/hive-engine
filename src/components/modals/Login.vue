@@ -19,7 +19,7 @@
         ]"
         required
         @blur="v$.username.$touch()"
-        @input="event => username = event.target.value.toLowerCase()"
+        @input="(event) => (username = event.target.value.toLowerCase())"
         @keyup.enter="requestLogin"
       />
 
@@ -87,7 +87,7 @@ export default defineComponent({
     let loggedInUser = localStorage.getItem("username");
 
     if (loggedInUser && loggedInUser !== "") {
-      loggedInUser = loggedInUser.toLowerCase()
+      loggedInUser = loggedInUser.toLowerCase();
 
       username.value = loggedInUser;
 
@@ -102,7 +102,7 @@ export default defineComponent({
       if (redirect) {
         redirect = atob(redirect);
 
-        const resolved = router.resolve(redirect)
+        const resolved = router.resolve(redirect);
 
         if (resolved.name) {
           router.push(redirect);

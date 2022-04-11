@@ -10,9 +10,9 @@
   >
     <div class="border dark:border-gray-800 rounded bg-white dark:bg-gray-600 dark:text-gray-300">
       <div class="flex items-center justify-between px-6 py-4">
-        <div
-          class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300"
-        >{{ actionName }} {{ params.symbol }}</div>
+        <div class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300">
+          {{ actionName }} {{ params.symbol }}
+        </div>
 
         <button class="dark:text-gray-300" @click="close">
           <x-icon class="h-5 w-5" aria-hidden="true" />
@@ -35,14 +35,20 @@
               <small>({{ item.numberTransactionsLeft }} Transactions)</small>
             </template>
 
-            <template
-              #cell(nextTransactionTimestamp)="{ item }"
-            >{{ item.quantityLeft / item.numberTransactionsLeft }} {{ params.symbol }} at {{ new Date(item.nextTransactionTimestamp).toLocaleString() }}</template>
+            <template #cell(nextTransactionTimestamp)="{ item }"
+              >{{ item.quantityLeft / item.numberTransactionsLeft }} {{ params.symbol }} at
+              {{ new Date(item.nextTransactionTimestamp).toLocaleString() }}</template
+            >
 
             <template #cell(actions)="{ item }">
               <button
                 class="btn-sm"
-                @click.prevent="requestCancelUnstake({ symbol: params.symbol, trxId: item.txID })"
+                @click.prevent="
+                  requestCancelUnstake({
+                    symbol: params.symbol,
+                    trxId: item.txID,
+                  })
+                "
               >
                 <XIcon class="h-5 w-5" />
               </button>
@@ -59,7 +65,11 @@
               <template #cell(actions)="{ item }">
                 <button
                   class="btn-sm"
-                  @click.prevent="quantity = item.quantity; from = item.to; requestAction(params)"
+                  @click.prevent="
+                    quantity = item.quantity;
+                    from = item.to;
+                    requestAction(params);
+                  "
                 >
                   <XIcon class="h-5 w-5" />
                 </button>
@@ -69,13 +79,15 @@
             <div
               v-if="params.symbol && params.symbol.startsWith('SWAP.')"
               class="alert-warning font-bold"
-            >If you are trying to withdraw to an external chain, please use the Withdraw menu. This window is for transferring to another Hive account.</div>
+            >
+              If you are trying to withdraw to an external chain, please use the Withdraw menu. This
+              window is for transferring to another Hive account.
+            </div>
 
             <div class="block mb-2 font-bold">Available</div>
-            <div
-              class="cursor-pointer mb-4"
-              @click="quantity = params.available"
-            >{{ params.available }} {{ params.symbol }}</div>
+            <div class="cursor-pointer mb-4" @click="quantity = params.available">
+              {{ params.available }} {{ params.symbol }}
+            </div>
 
             <div v-if="showTo" class="mb-3">
               <label for="to" class="block mb-2 font-bold">To</label>
@@ -92,10 +104,19 @@
                 placeholder="Hive username"
                 @input="(event) => (to = event.target.value.toLowerCase())"
               />
-              <div
-                v-if="v$.to.$error"
-                class="text-sm text-red-500 mt-1"
-              >Please enter a valid hive username.</div>
+              <div v-if="v$.to.$error" class="text-sm text-red-500 mt-1">
+                Please enter a valid hive username.
+              </div>
+              <div v-if="popularChoices.length" class="text-sm mt-1">
+                Popular choice:
+                <a
+                  v-for="(choice, i) of popularChoices"
+                  :key="i"
+                  class="cursor-pointer"
+                  @click="to = choice.value"
+                  >{{ choice.text }}</a
+                >
+              </div>
             </div>
 
             <div v-if="showFrom" class="mb-3">
@@ -113,10 +134,9 @@
                 placeholder="Hive username"
                 @input="(event) => (from = event.target.value.toLowerCase())"
               />
-              <div
-                v-if="v$.from.$error"
-                class="text-sm text-red-500 mt-1"
-              >Please enter a valid hive username.</div>
+              <div v-if="v$.from.$error" class="text-sm text-red-500 mt-1">
+                Please enter a valid hive username.
+              </div>
             </div>
 
             <div class="mb-3">
@@ -137,12 +157,13 @@
                 />
                 <div
                   class="bg-gray-200 dark:bg-slate-600 h-full p-2 border border-l-0 rounded-r-md border-gray-500"
-                >{{ params.symbol }}</div>
+                >
+                  {{ params.symbol }}
+                </div>
               </div>
-              <div
-                v-if="v$.quantity.$error"
-                class="text-sm text-red-500 mt-1"
-              >Please enter a quantity greater than zero.</div>
+              <div v-if="v$.quantity.$error" class="text-sm text-red-500 mt-1">
+                Please enter a quantity greater than zero.
+              </div>
             </div>
 
             <div v-if="params.action === 'transfer'" class="mb-3">
@@ -185,7 +206,7 @@ export default defineComponent({
 
   components: {
     XIcon,
-    CustomTable
+    CustomTable,
   },
 
   setup() {
@@ -204,20 +225,22 @@ export default defineComponent({
     const quantity = ref("");
     const memo = ref("");
 
-    const delegations = ref([])
-    const delegationFields = [
-      { key: 'to', label: 'From' },
-      { key: 'quantity', label: 'Amount' },
-      { key: 'actions', label: '' }
-    ]
+    const tokenSymbol = ref("");
 
-    const pendingUnstakes = ref([])
+    const delegations = ref([]);
+    const delegationFields = [
+      { key: "to", label: "From" },
+      { key: "quantity", label: "Amount" },
+      { key: "actions", label: "" },
+    ];
+
+    const pendingUnstakes = ref([]);
     const pendingUnstakeFields = [
-      { key: 'quantity', label: 'Quantity' },
-      { key: 'quantityLeft', label: 'Remaining' },
-      { key: 'nextTransactionTimestamp', label: 'Next Withdrawal' },
-      { key: 'actions', label: '' }
-    ]
+      { key: "quantity", label: "Quantity" },
+      { key: "quantityLeft", label: "Remaining" },
+      { key: "nextTransactionTimestamp", label: "Next Withdrawal" },
+      { key: "actions", label: "" },
+    ];
 
     const username = computed(() => userStore.username);
 
@@ -267,7 +290,7 @@ export default defineComponent({
         undelegate: { from, quantity },
         stake: { to, quantity },
         unstake: { quantity },
-        pendingUnstakes: {}
+        pendingUnstakes: {},
       };
 
       return Object.keys(obj[modalAction.value]).reduce((a, c) => {
@@ -285,7 +308,7 @@ export default defineComponent({
         undelegate: "Undelegate",
         stake: "Stake",
         unstake: "Unstake",
-        pendingUnstakes: 'Pending Unstakes'
+        pendingUnstakes: "Pending Unstakes",
       };
 
       return obj[modalAction.value] || "";
@@ -313,32 +336,70 @@ export default defineComponent({
       }
     };
 
+    const popularChoices = computed(() => {
+      if (
+        [
+          "ORB",
+          "ALPHA",
+          "BETA",
+          "UNTAMED",
+          "DEC",
+          "SLDICE",
+          "PLOT",
+          "ZONE",
+          "SECTOR",
+          "TRACT",
+          "REGION",
+          "RAFFLE",
+          "TOTEMC",
+          "TOTEMR",
+          "TOTEME",
+          "TOTEML",
+          "SPS",
+          "CHAOS",
+          "VOUCHER",
+        ].includes(tokenSymbol.value)
+      ) {
+        return [{ text: "Splinterlands", value: "steemmonsters" }];
+      }
+
+      return [];
+    });
+
     const showTo = computed(() => ["transfer", "stake", "delegate"].includes(modalAction.value));
     const showFrom = computed(() => ["undelegate"].includes(modalAction.value));
 
     const beforeOpen = async (e) => {
       modalBusy.value = true;
 
-      const { action, symbol } = e.ref.params.value
+      const { action, symbol } = e.ref.params.value;
       modalAction.value = action;
+      tokenSymbol.value = symbol;
 
       if (modalAction.value === "stake") {
         to.value = username.value;
       } else if (modalAction.value === "undelegate") {
         const result = await sidechain.contract({
-          method: 'find',
+          method: "find",
           params: {
-            contract: 'tokens',
-            table: 'delegations',
-            query: { symbol, from: username.value }
-          }
-        })
+            contract: "tokens",
+            table: "delegations",
+            query: { symbol, from: username.value },
+          },
+        });
 
-        delegations.value = result.map(d => ({ ...d, quantity: Number(d.quantity) }))
+        delegations.value = result.map((d) => ({
+          ...d,
+          quantity: Number(d.quantity),
+        }));
       } else if (modalAction.value === "pendingUnstakes") {
-        const result = await sidechain.getPendingUnstakes(username.value, symbol)
+        const result = await sidechain.getPendingUnstakes(username.value, symbol);
 
-        pendingUnstakes.value = result.map(p => ({ ...p, quantity: Number(p.quantity), quantityLeft: Number(p.quantityLeft) }))
+        pendingUnstakes.value = result.map((p) => ({
+          ...p,
+          quantity: Number(p.quantity),
+          quantityLeft: Number(p.quantityLeft),
+        }));
       }
 
       modalBusy.value = false;
@@ -347,15 +408,15 @@ export default defineComponent({
     const modalClose = () => {
       v$.value.$reset();
 
-      modalAction.value = 'transfer'
+      modalAction.value = "transfer";
 
       to.value = "";
       from.value = "";
       quantity.value = "";
       memo.value = "";
 
-      delegations.value = []
-      pendingUnstakes.value = []
+      delegations.value = [];
+      pendingUnstakes.value = [];
     };
 
     onMounted(() => {
@@ -398,12 +459,13 @@ export default defineComponent({
       actionName,
       showTo,
       showFrom,
+      popularChoices,
 
       requestAction,
       beforeOpen,
       modalClose,
 
-      requestCancelUnstake: walletStore.requestCancelUnstake
+      requestCancelUnstake: walletStore.requestCancelUnstake,
     };
   },
 });

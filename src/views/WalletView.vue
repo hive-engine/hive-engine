@@ -3,12 +3,13 @@
     <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 text-gray-200">
       <div class="grid md:grid-cols-4 text-center md:text-left min-h-[160px] items-center">
         <div class="col-span-full md:col-span-3">
-          <h1 class="text-4xl uppercase">{{ disableActions ? `@${account}'s` : "My" }} Token Wallet</h1>
+          <h1 class="text-4xl uppercase">
+            {{ disableActions ? `@${account}'s` : "My" }} Token Wallet
+          </h1>
 
-          <div
-            v-if="!loading"
-            class="text-lg"
-          >Estimated value: ${{ estimatedValue.toLocaleString() }} USD</div>
+          <div v-if="!loading" class="text-lg">
+            Estimated value: ${{ estimatedValue.toLocaleString() }} USD
+          </div>
         </div>
 
         <div class="col-span-full md:col-span-1">
@@ -16,13 +17,13 @@
             :disabled="disableActions"
             class="btn mr-3 mt-3"
             @click="vfm$.show('depositModal')"
-          >Deposit</button>
+          >
+            Deposit
+          </button>
 
-          <button
-            :disabled="disableActions"
-            class="btn mt-3"
-            @click="vfm$.show('withdrawModal')"
-          >Withdraw</button>
+          <button :disabled="disableActions" class="btn mt-3" @click="vfm$.show('withdrawModal')">
+            Withdraw
+          </button>
         </div>
       </div>
     </div>
@@ -64,9 +65,9 @@
       <template #cell(usdValue)="{ item }">${{ addCommas(item.usdValue, true) }}</template>
 
       <template #cell(changePct)="{ item }">
-        <span
-          :class="{ 'text-red-500': item.changePct < 0, 'text-green-500': item.changePct > 0 }"
-        >{{ item.changePct.toFixed(2) }}%</span>
+        <span :class="{ 'text-red-500': item.changePct < 0, 'text-green-500': item.changePct > 0 }"
+          >{{ item.changePct.toFixed(2) }}%</span
+        >
       </template>
 
       <template #cell(stake)="{ item }">
@@ -76,7 +77,8 @@
             content: `Available: ${item.availableStake}<br>Locked: ${item.lockedStake}<br>Pending: ${item.pendingUnstake}`,
             html: true,
           }"
-        >{{ addCommas(item.stake) }}</span>
+          >{{ addCommas(item.stake) }}</span
+        >
 
         <span v-else>--</span>
       </template>
@@ -88,7 +90,8 @@
             content: `In: ${item.delegationsIn}<br>Out: ${item.delegationsOut}<br>Pending: ${item.pendingUndelegations}`,
             html: true,
           }"
-        >{{ item.delegationsIn + item.delegationsOut + item.pendingUndelegations }}</span>
+          >{{ item.delegationsIn + item.delegationsOut + item.pendingUndelegations }}</span
+        >
 
         <span v-else>--</span>
       </template>
@@ -310,7 +313,8 @@ export default defineComponent({
               acc[cur.symbol] = 0;
             }
 
-            acc[cur.symbol] += Number(cur.quantityLeft) - (Number(cur.quantity) / token.numberTransactions)
+            acc[cur.symbol] +=
+              Number(cur.quantityLeft) - Number(cur.quantity) / token.numberTransactions;
           }
 
           return acc;

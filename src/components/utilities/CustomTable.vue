@@ -18,7 +18,9 @@
               role="columnheader"
               :aria-sort="sortKey === th.key ? sortDirection : 'none'"
               @click="sortItems(th.key)"
-            >{{ th.label }}</th>
+            >
+              {{ th.label }}
+            </th>
 
             <th
               v-else
@@ -29,7 +31,9 @@
                 th.class,
               ]"
               role="columnheader"
-            >{{ th.label }}</th>
+            >
+              {{ th.label }}
+            </th>
           </template>
         </tr>
       </thead>
@@ -44,12 +48,14 @@
             <td
               v-for="(td, k) of fields"
               :key="k"
-              :class="[tdClass, 'px-4 py-2 first-of-type:text-left last-of-type:text-right', td.class]"
+              :class="[
+                tdClass,
+                'px-4 py-2 first-of-type:text-left last-of-type:text-right',
+                td.class,
+              ]"
             >
               <slot :name="`cell(${td.key})`" :item="tr">
-                {{
-                  tr[td.key] !== undefined ? tr[td.key] : ""
-                }}
+                {{ tr[td.key] !== undefined ? tr[td.key] : "" }}
               </slot>
             </td>
           </tr>

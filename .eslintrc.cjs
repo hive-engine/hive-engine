@@ -4,8 +4,8 @@ require("@rushstack/eslint-patch/modern-module-resolution");
 module.exports = {
   root: true,
   extends: [
-    "plugin:vue/vue3-recommended",
     "eslint:recommended",
+    "plugin:vue/vue3-recommended",
     "@vue/eslint-config-prettier",
   ],
   env: {
@@ -14,7 +14,7 @@ module.exports = {
   },
   rules: {
     "vue/multi-word-component-names": 0,
-    "prettier/prettier": 0,
+    // "prettier/prettier": 0,
     "vue/no-v-html": 0,
   },
 };

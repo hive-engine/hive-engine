@@ -12,7 +12,9 @@
   <Loading v-if="loading" />
 
   <div v-else class="page-content">
-    <div class="alert-warning">You can only claim a token once a day, including manual and auto.</div>
+    <div class="alert-warning">
+      You can only claim a token once a day, including manual and auto.
+    </div>
 
     <CustomTable :fields="rewardsTableFields" :items="rewards">
       <template #cell(actions)="{ item }">
@@ -80,7 +82,7 @@ export default defineComponent({
       await fetchRewards();
 
       loading.value = false;
-    }
+    };
 
     onBeforeMount(async () => {
       loading.value = true;

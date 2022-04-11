@@ -14,25 +14,21 @@
   <div v-else class="page-content">
     <div class="alert-warning">
       For swap request details containing transactions, please go to
-      <a
-        href="https://dswap.trade"
-        target="_blank"
-        class="font-bold"
-      >DSwap website</a>.
+      <a href="https://dswap.trade" target="_blank" class="font-bold">DSwap website</a>.
     </div>
 
     <CustomTable :fields="swapFields" :items="swaps">
       <template #cell(from)="{ item }">{{ item.fromAmount }} {{ item.fromSymbol }}</template>
 
-      <template #cell(requested)="{ item }">{{ item.amountRequested }} {{ item.toSymbol }}</template>
+      <template #cell(requested)="{ item }"
+        >{{ item.amountRequested }} {{ item.toSymbol }}</template
+      >
 
       <template #cell(realized)="{ item }">{{ item.actualAmount }} {{ item.toSymbol }}</template>
 
       <template #cell(status)="{ item }">
         <span :class="[getStatusClass(item.status), 'py-1 px-2 text-sm font-bold']">
-          {{
-            item.status
-          }}
+          {{ item.status }}
         </span>
       </template>
     </CustomTable>

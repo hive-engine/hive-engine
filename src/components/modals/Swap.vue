@@ -14,10 +14,7 @@
     <template v-else>
       <div class="text-center">
         Choose which token you would like to swap below. For more information about DSwap see the
-        <a
-          href="https://dswap.trade/faq"
-          target="_blank"
-        >FAQ</a>.
+        <a href="https://dswap.trade/faq" target="_blank">FAQ</a>.
       </div>
 
       <LoadingOverlay :show="showOverlay">
@@ -42,7 +39,9 @@
               />
               <div
                 class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
-              >{{ fromSymbol }}</div>
+              >
+                {{ fromSymbol }}
+              </div>
             </div>
           </template>
         </div>
@@ -65,7 +64,9 @@
               />
               <div
                 class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
-              >{{ toSymbol }}</div>
+              >
+                {{ toSymbol }}
+              </div>
             </div>
           </template>
         </div>
@@ -84,7 +85,9 @@
               />
               <div
                 class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400"
-              >%</div>
+              >
+                %
+              </div>
             </div>
           </div>
 
@@ -102,16 +105,17 @@
               />
               <div
                 class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400"
-              >%</div>
+              >
+                %
+              </div>
             </div>
           </div>
         </template>
       </LoadingOverlay>
 
-      <div
-        v-if="swapInProgress"
-        class="alert-warning text-center font-bold"
-      >Swap request is in progress. Please do not close this modal.</div>
+      <div v-if="swapInProgress" class="alert-warning text-center font-bold">
+        Swap request is in progress. Please do not close this modal.
+      </div>
 
       <div class="text-center mt-10">
         <button
@@ -165,7 +169,7 @@ export default defineComponent({
     const modalBusy = ref(true);
     const btnBusy = ref(false);
     const showOverlay = ref(false);
-    const swapInProgress = ref(false)
+    const swapInProgress = ref(false);
 
     const dswapAPI = axios.create({
       baseURL: DSWAP_API,
@@ -256,15 +260,19 @@ export default defineComponent({
 
     const beforeClose = async (e) => {
       if (swapInProgress.value) {
-        if (confirm('Swap request is in progress. If you close this modal, your swap will fail. Click cancel to stop closing the modal.')) {
-          await vfm$.hideAll()
+        if (
+          confirm(
+            "Swap request is in progress. If you close this modal, your swap will fail. Click cancel to stop closing the modal."
+          )
+        ) {
+          await vfm$.hideAll();
 
-          onClose()
+          onClose();
         } else {
-          e.stop()
+          e.stop();
         }
       }
-    }
+    };
 
     const onClose = () => {
       fromSymbol.value = null;
@@ -277,7 +285,7 @@ export default defineComponent({
       slippageTwo.value = 5;
 
       showOverlay.value = false;
-      swapInProgress.value = false
+      swapInProgress.value = false;
 
       baseTokenAmount.value = 0;
     };
@@ -301,7 +309,7 @@ export default defineComponent({
       swapInProgress.value = true;
 
       await store.validateTransaction(id, 10);
-    }
+    };
 
     const onTransactionValidated = async ({ error, contract, action, payload, trx_id: trxId }) => {
       if (
@@ -333,7 +341,7 @@ export default defineComponent({
 
           await vfm$.hideAll();
 
-          onClose()
+          onClose();
 
           router.push({ name: "swaps" });
         } catch (e) {
@@ -343,7 +351,7 @@ export default defineComponent({
 
       swapInProgress.value = false;
       showOverlay.value = false;
-    }
+    };
 
     watch(fromSymbol, (value) => {
       if (toSymbol.value && value === toSymbol.value) {

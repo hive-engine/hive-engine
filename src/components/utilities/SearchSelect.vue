@@ -37,7 +37,9 @@
         ]"
         @click.stop="selectItem(option)"
         @mousedown="mousedownItem"
-      >{{ option.text }}</div>
+      >
+        {{ option.text }}
+      </div>
     </div>
   </div>
 </template>
