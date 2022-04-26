@@ -1,19 +1,19 @@
+import Big from "big.js";
 import axios from "axios";
 import { format } from "date-fns";
 import { defineStore } from "pinia";
 import { useStore } from ".";
 import { sidechain } from "../plugins/sidechain";
-import { toFixedWithoutRounding } from "../utils";
 
 const processOrderBook = (orderBook) => {
-  let volume = 0;
-  let hiveVolume = 0;
+  let volume = Big(0);
+  let hiveVolume = Big(0);
 
   return orderBook
     .map((o) => {
-      const price = parseFloat(o.price);
-      const quantity = parseFloat(o.quantity);
-      const total = price * quantity;
+      const price = Big(o.price);
+      const quantity = Big(o.quantity);
+      const total = price.times(quantity);
 
       return {
         price,
@@ -22,14 +22,14 @@ const processOrderBook = (orderBook) => {
       };
     })
     .reduce((acc, cur) => {
-      const exists = acc.find((o) => o.price === cur.price);
+      const exists = acc.find((o) => o.price.eq(cur.price));
 
-      volume += cur.quantity;
-      hiveVolume += cur.total;
+      volume = volume.plus(cur.quantity);
+      hiveVolume = hiveVolume.plus(cur.total);
 
       if (exists) {
-        exists.quantity += cur.quantity;
-        exists.total += cur.price * cur.quantity;
+        exists.quantity = exists.quantity.plus(cur.quantity);
+        exists.total = exists.total.plus(cur.price.times(cur.quantity));
         exists.volume = volume;
         exists.hive_volume = hiveVolume;
       } else {
@@ -45,10 +45,9 @@ const processOrderBook = (orderBook) => {
     .map((o) => {
       return {
         ...o,
-        quantity: toFixedWithoutRounding(o.quantity, 6),
-        total: toFixedWithoutRounding(o.total, 6),
-        volume: toFixedWithoutRounding(o.volume, 8),
-        hive_volume: toFixedWithoutRounding(o.hive_volume, 5),
+        total: o.total.toFixed(6),
+        volume: o.volume.toFixed(8),
+        hive_volume: o.hive_volume.toFixed(5),
       };
     });
 };
@@ -82,7 +81,7 @@ export const useMarketStore = defineStore({
         .map((o) => ({
           ...o,
           type: o.tokensLocked ? "BUY" : "SELL",
-          total: (parseFloat(o.quantity) * parseFloat(o.price)).toFixed(6),
+          total: Big(o.quantity).times(o.price),
           timestamp: format(new Date(o.timestamp * 1000), "Pp"),
         }));
     },
@@ -95,7 +94,7 @@ export const useMarketStore = defineStore({
         seller: o.seller,
         quantity: o.quantity,
         price: o.price,
-        total: (parseFloat(o.quantity) * parseFloat(o.price)).toFixed(6),
+        total: Big(o.quantity).times(o.price).toFixed(8),
       }));
     },
   },

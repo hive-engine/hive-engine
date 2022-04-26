@@ -6,6 +6,21 @@ export const toFixedWithoutRounding = (t, l = 3) => {
   return Math.floor(s) / a;
 };
 
+export const toFixedNoRounding = (n, l) => {
+  const reg = new RegExp("^-?\\d+(?:\\.\\d{0," + l + "})?", "g");
+  const str = n.toString();
+  const a = str.match(reg)[0];
+  const expSplit = str.split("e");
+  const exp = expSplit.length > 1 ? "e" + expSplit[1] : "";
+  const dot = a.indexOf(".");
+  if (dot === -1) {
+    // integer, insert decimal dot and pad up zeros
+    return a + "." + "0".repeat(l) + exp;
+  }
+  const b = l - (a.length - dot) + 1;
+  return b > 0 ? a + "0".repeat(b) + exp : a + exp;
+};
+
 // Adapted from https://stackoverflow.com/a/56883420
 
 const getQuantile = (array, quantile) => {

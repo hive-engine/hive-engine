@@ -169,6 +169,7 @@
               v-model="buyPrice"
               type="number"
               class="w-full dark:bg-slate-600 dark:border-gray-500 rounded-l-md h-10 focus:ring-0 border-r-inherit border-gray-400"
+              :disabled="buyOrderType === 'market'"
             />
             <div
               class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
@@ -186,7 +187,7 @@
               id="buyQuantity"
               v-model="buyQuantity"
               type="number"
-              class="w-full dark:bg-slate-600 dark:border-gray-500 rounded-l-md h-10 focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
+              class="w-full dark:bg-slate-600 dark:border-gray-500 rounded-l-md h-10 focus:ring-0 border-r-inherit border-gray-400"
               :disabled="buyOrderType === 'market'"
             />
             <div
@@ -205,7 +206,8 @@
               id="buyTotal"
               v-model="buyTotal"
               type="number"
-              class="w-full dark:bg-slate-600 dark:border-gray-500 rounded-l-md h-10 focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
+              class="w-full dark:bg-slate-600 dark:border-gray-500 rounded-l-md h-10 focus:ring-0 border-r-inherit border-gray-400"
+              :readonly="buyOrderType === 'limit'"
             />
             <div
               class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
@@ -220,7 +222,11 @@
             Balance:
             <a
               class="cursor-pointer"
-              @click="buyQuantity = toFixedWithoutRounding(hiveBalance / buyPrice, token.precision)"
+              @click="
+                buyOrderType === 'limit'
+                  ? (buyQuantity = toFixedWithoutRounding(hiveBalance / buyPrice, token.precision))
+                  : (buyTotal = hiveBalance)
+              "
               >{{ hiveBalance }} HIVE</a
             >
           </div>
@@ -280,6 +286,7 @@
               v-model="sellPrice"
               type="number"
               class="w-full h-10 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400"
+              :disabled="sellOrderType === 'market'"
             />
             <div
               class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
@@ -361,7 +368,7 @@
 
         <custom-table
           :fields="buyBookFields"
-          :items="buyBook"
+          :items="buyBook.slice(0, 15)"
           th-class="md:text-right"
           td-class="md:text-right"
         >
@@ -385,7 +392,7 @@
 
         <custom-table
           :fields="sellBookFields"
-          :items="sellBook"
+          :items="sellBook.slice(0, 15)"
           th-class="md:text-left"
           td-class="md:text-left"
         >
@@ -552,11 +559,21 @@ export default defineComponent({
       tokenStore.tokens.map((t) => ({ text: t.symbol, value: t.symbol }))
     );
 
-    const buyBook = computed(() => marketStore.buyBookFormatted.slice(0, 15));
-    const sellBook = computed(() => marketStore.sellBookFormatted.slice(0, 15));
+    const token = computed(() => marketStore.token);
+    const buyBook = computed(() =>
+      marketStore.buyBookFormatted.map((b) => ({
+        ...b,
+        quantity: b.quantity.toFixed(token.value.precision),
+      }))
+    );
+    const sellBook = computed(() =>
+      marketStore.sellBookFormatted.map((b) => ({
+        ...b,
+        quantity: b.quantity.toFixed(token.value.precision),
+      }))
+    );
     const openOrders = computed(() => marketStore.openOrdersFormatted);
     const tradesHistory = computed(() => marketStore.tradesHistoryFormatted);
-    const token = computed(() => marketStore.token);
     const metrics = computed(() => marketStore.metrics);
     const marketHistory = computed(() => marketStore.marketHistory);
 
@@ -595,12 +612,18 @@ export default defineComponent({
     ];
 
     const disabledBuyButton = computed(() => {
-      return buyQuantity.value <= 0 || buyTotal.value <= 0 || buyTotal.value > hiveBalance.value;
+      return (
+        buyQuantity.value <= 0 ||
+        Number(buyTotal.value) <= 0 ||
+        Number(buyTotal.value) > hiveBalance.value
+      );
     });
 
     const disabledSellButton = computed(() => {
       return (
-        sellQuantity.value <= 0 || sellTotal.value <= 0 || sellQuantity.value > symbolBalance.value
+        sellQuantity.value <= 0 ||
+        Number(sellTotal.value) <= 0 ||
+        sellQuantity.value > symbolBalance.value
       );
     });
 
@@ -635,7 +658,10 @@ export default defineComponent({
 
       if (buyOrderType.value === "market") {
         for (let i = 0; i < sellBook.value.length; i += 1) {
-          const { quantity, price } = sellBook.value[i];
+          let { quantity, price } = sellBook.value[i];
+
+          quantity = Number(quantity);
+          price = price.toNumber();
 
           const totalPrice = quantity * price;
 
@@ -667,7 +693,10 @@ export default defineComponent({
         let total = 0;
 
         for (let i = 0; i < buyBook.value.length; i += 1) {
-          const { quantity, price } = buyBook.value[i];
+          let { quantity, price } = buyBook.value[i];
+
+          quantity = Number(quantity);
+          price = price.toNumber();
 
           if (quantity < totalQuantity) {
             total += quantity * price;

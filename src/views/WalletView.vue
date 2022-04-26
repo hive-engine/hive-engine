@@ -90,7 +90,7 @@
             content: `In: ${item.delegationsIn}<br>Out: ${item.delegationsOut}<br>Pending: ${item.pendingUndelegations}`,
             html: true,
           }"
-          >{{ item.delegationsIn + item.delegationsOut + item.pendingUndelegations }}</span
+          >{{ item.delegationsIn.plus(item.delegationsOut).plus(item.pendingUndelegations) }}</span
         >
 
         <span v-else>--</span>
@@ -223,6 +223,7 @@
 </template>
 
 <script>
+import Big from "big.js";
 import {
   computed,
   defineComponent,
@@ -249,7 +250,7 @@ import { useStore } from "../stores";
 import { useTokenStore } from "../stores/token";
 import { useWalletStore } from "../stores/wallet";
 import { useUserStore } from "../stores/user";
-import { toFixedWithoutRounding, addCommas } from "../utils";
+import { toFixedWithoutRounding, toFixedNoRounding, addCommas } from "../utils";
 import CustomTable from "../components/utilities/CustomTable.vue";
 import WalletAction from "../components/modals/WalletAction.vue";
 import Deposit from "../components/modals/Deposit.vue";
@@ -310,11 +311,17 @@ export default defineComponent({
 
           if (token) {
             if (!acc[cur.symbol]) {
-              acc[cur.symbol] = 0;
+              acc[cur.symbol] = Big(0);
             }
 
-            acc[cur.symbol] +=
-              Number(cur.quantityLeft) - Number(cur.quantity) / token.numberTransactions;
+            acc[cur.symbol] = acc[cur.symbol].plus(
+              cur.quantityLeft.minus(
+                toFixedNoRounding(
+                  cur.quantity.div(token.numberTransactions).toString(),
+                  token.precision
+                )
+              )
+            );
           }
 
           return acc;
@@ -338,41 +345,34 @@ export default defineComponent({
           const token = mappedTokens.value.get(b.symbol);
           const metrics = mappedMetrics.value.get(b.symbol);
 
-          const delegationsIn =
-            b.delegationsIn && Number(b.delegationsIn) > 0 ? Number(b.delegationsIn) : 0;
-
-          const delegationsOut =
-            b.delegationsOut && Number(b.delegationsOut) > 0 ? Number(b.delegationsOut) : 0;
-
-          const stake = b.stake && Number(b.stake) > 0 ? Number(b.stake) : 0;
-          const pendingUnstake = Number(b.pendingUnstake);
-          const lockedStake = lockedStakes.value[b.symbol] || 0;
-          const availableStake = toFixedWithoutRounding(stake - lockedStake, token.precision);
+          const lockedStake = lockedStakes.value[b.symbol]
+            ? lockedStakes.value[b.symbol].toFixed(token.precision, Big.roundHalfUp)
+            : 0;
+          const availableStake = b.stake.minus(lockedStake).toFixed(token.precision);
           const changePct = metrics ? parseFloat(metrics.priceChangePercent) : 0;
 
           const balance = b.balance;
 
-          const stakesAndDelegated = delegationsOut + stake + (pendingUnstake - lockedStake);
+          const stakesAndDelegated = b.delegationsOut
+            .plus(b.stake)
+            .plus(b.pendingUnstake.minus(lockedStake));
 
           const valueHive = metrics
-            ? (balance + (includeAll.value ? stakesAndDelegated : 0)) * metrics.lastPrice
-            : balance + (includeAll.value ? stakesAndDelegated : 0);
+            ? balance.plus(includeAll.value ? stakesAndDelegated : 0).times(metrics.lastPrice)
+            : balance.plus(includeAll.value ? stakesAndDelegated : 0);
 
           const valueUSD = toFixedWithoutRounding(valueHive * hivePrice.value);
 
           return {
+            ...b,
             token,
             icon: token.icon,
             symbol: b.symbol,
             name: token.name,
             balance,
-            delegationsIn,
-            delegationsOut,
             pendingUndelegations: Number(b.pendingUndelegations),
-            stake,
             lockedStake,
             availableStake,
-            pendingUnstake,
             stakingEnabled: token.stakingEnabled,
             delegationEnabled: token.delegationEnabled,
             usdValue: valueUSD,

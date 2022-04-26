@@ -1,3 +1,4 @@
+import Big from "big.js";
 import axios from "axios";
 import { format } from "date-fns";
 import { utils } from "ethers";
@@ -34,7 +35,18 @@ export const useWalletStore = defineStore({
 
         this.wallet = balances
           .filter((b) => !store.settings.disabled_tokens.includes(b.symbol))
-          .map((b) => ({ ...b, balance: Number(b.balance) }));
+          .map((b) => {
+            const balance = Big(b.balance);
+            const delegationsIn = Big(b.delegationsIn ? b.delegationsIn : 0);
+
+            const delegationsOut = Big(b.delegationsOut ? b.delegationsOut : 0);
+
+            const stake = Big(b.stake ? b.stake : 0);
+
+            const pendingUnstake = Big(b.pendingUnstake);
+
+            return { ...b, balance, delegationsIn, delegationsOut, stake, pendingUnstake };
+          });
       } catch {
         //
       }
@@ -48,8 +60,8 @@ export const useWalletStore = defineStore({
 
         pendingUnstakes = pendingUnstakes.map((p) => ({
           ...p,
-          quantity: Number(p.quantity),
-          quantityLeft: Number(p.quantityLeft),
+          quantity: Big(p.quantity),
+          quantityLeft: Big(p.quantityLeft),
         }));
 
         this.pendingUnstakes = pendingUnstakes;

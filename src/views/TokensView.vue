@@ -23,7 +23,7 @@
   <div v-else class="page-content">
     <custom-table :fields="fields" :items="tokens" :per-page="100">
       <template #cell(icon)="{ item }">
-        <img :src="item.icon" class="w-6" />
+        <img :src="item.icon" class="w-10" />
       </template>
 
       <template #cell(marketCap)="{ item }">${{ item.marketCap.toLocaleString() }}</template>

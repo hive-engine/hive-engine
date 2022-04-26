@@ -6,6 +6,11 @@
   a {
     @apply text-red-500;
   }
+
+  input[type='text'],
+  input[type='number'] {
+    @apply disabled:bg-[rgba(0,0,0,.05)] disabled:dark:bg-[rgba(255,255,255,.10)] disabled:cursor-not-allowed
+  }
 }
 
 @layer components {
