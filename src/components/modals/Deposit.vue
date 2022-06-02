@@ -465,7 +465,7 @@ export default defineComponent({
 
           await store.requestBrodcastTransfer({
             to: settings.value[bridgeConfig].account,
-            amount: 0.001,
+            amount: "0.001",
             memo,
             currency: "HIVE",
           });
