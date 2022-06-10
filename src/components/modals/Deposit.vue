@@ -47,7 +47,7 @@
           </template>
 
           <template v-else-if="isDepositDisabled.disabled">
-            <div class="alert-warning">{ isDepositDisabled.reason }}</div>
+            <div class="alert-warning">{{ isDepositDisabled.reason }}</div>
           </template>
 
           <template v-else-if="selectedToken === 'HIVE' && depositInfo">
