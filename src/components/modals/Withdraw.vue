@@ -29,6 +29,11 @@
             Polygon network gas fee.
           </div>
 
+          <div v-if="pendingWithdrawals >= 15" class="alert-warning text-center mb-5 font-bold">
+            There are <strong>{{ pendingWithdrawals }}</strong> pending withdrawals waiting to be
+            processed. So, your withdrawal might be delayed.
+          </div>
+
           <SearchSelect
             v-model="selectedToken"
             classes="rounded-md mb-3"
@@ -296,6 +301,8 @@ export default defineComponent({
     const isEvmToken = ref(false);
     const evmToken = ref(null);
 
+    const pendingWithdrawals = ref(0);
+
     const tokens = computed(() => {
       let tokens = [
         ...peggedTokens.value,
@@ -528,7 +535,12 @@ export default defineComponent({
         await store.fetchSettings();
       }
 
-      await tokenStore.fetchPeggedTokens();
+      const [pending] = await Promise.all([
+        sidechain.getPendingWithdrawals(),
+        tokenStore.fetchPeggedTokens(),
+      ]);
+
+      pendingWithdrawals.value = pending.length;
 
       modalBusy.value = false;
     };
@@ -640,6 +652,8 @@ export default defineComponent({
 
       feeDepositAmount,
       evmFeeSymbolBalance,
+
+      pendingWithdrawals,
 
       beforeOpen,
       modalClose,

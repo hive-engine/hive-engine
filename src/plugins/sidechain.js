@@ -183,6 +183,25 @@ const sidechain = {
     return this.contract(request);
   },
 
+  getPendingWithdrawals(recipient) {
+    const query = {};
+
+    if (recipient) {
+      query.recipient = recipient;
+    }
+
+    const request = {
+      method: "find",
+      params: {
+        contract: "hivepegged",
+        table: "withdrawals",
+        query,
+      },
+    };
+
+    return this.contract(request);
+  },
+
   getTransaction(txid) {
     const request = {
       method: "getTransactionInfo",
