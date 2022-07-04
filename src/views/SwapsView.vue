@@ -66,6 +66,7 @@ export default defineComponent({
       2: "In progress",
       3: "Success",
       4: "Failed",
+      7: "Expired"
     };
 
     const statusClass = {
@@ -73,6 +74,7 @@ export default defineComponent({
       "In progress": "bg-yellow-400 text-yellow-900",
       Success: "bg-green-400 text-green-900",
       Failed: "bg-red-400 text-red-900",
+      Expired: "bg-gray-400 text-black-900",
     };
 
     const swaps = ref([]);

@@ -21,25 +21,19 @@
         <div class="mb-5 mt-10">
           <label for="fromSymbol" class="block mb-2 font-bold">From</label>
 
-          <SearchSelect
-            v-model="fromSymbol"
-            :options="fromSymbolOptions"
-            classes="mb-3 rounded-md"
-          />
+          <SearchSelect v-model="fromSymbol"
+                        :options="fromSymbolOptions"
+                        classes="mb-3 rounded-md" />
 
           <template v-if="fromSymbol">
             <div class="mb-3">Current balance: {{ fromSymbolBalance }} {{ fromSymbol }}</div>
 
             <div class="flex items-center w-full">
-              <input
-                id="fromQuantity"
-                v-model="fromQuantity"
-                type="number"
-                class="w-full h-10 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
-              />
-              <div
-                class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
-              >
+              <input id="fromQuantity"
+                     v-model="fromQuantity"
+                     type="number"
+                     class="w-full h-10 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]" />
+              <div class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400">
                 {{ fromSymbol }}
               </div>
             </div>
@@ -55,16 +49,12 @@
             <div class="mb-3">Current balance: {{ toSymbolBalance }} {{ toSymbol }}</div>
 
             <div class="flex items-center w-full">
-              <input
-                id="toQuantity"
-                v-model="toQuantity"
-                type="number"
-                class="w-full h-10 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
-                readonly
-              />
-              <div
-                class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
-              >
+              <input id="toQuantity"
+                     v-model="toQuantity"
+                     type="number"
+                     class="w-full h-10 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
+                     readonly />
+              <div class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400">
                 {{ toSymbol }}
               </div>
             </div>
@@ -78,34 +68,24 @@
             <div class="text-sm font-bold mr-3">Max Slippage ({{ fromSymbol }} -> SWAP.HIVE)</div>
 
             <div class="flex items-center">
-              <input
-                v-model="slippageOne"
-                type="number"
-                class="w-16 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
-              />
-              <div
-                class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400"
-              >
+              <input v-model="slippageOne"
+                     type="number"
+                     class="w-16 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]" />
+              <div class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400">
                 %
               </div>
             </div>
           </div>
 
-          <div
-            v-if="toSymbol !== 'SWAP.HIVE'"
-            class="mb-3 flex flex-wrap items-center justify-between"
-          >
+          <div v-if="toSymbol !== 'SWAP.HIVE'"
+               class="mb-3 flex flex-wrap items-center justify-between">
             <div class="text-sm font-bold mr-3">Max Slippage (SWAP.HIVE -> {{ toSymbol }})</div>
 
             <div class="flex items-center">
-              <input
-                v-model="slippageTwo"
-                type="number"
-                class="w-16 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
-              />
-              <div
-                class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400"
-              >
+              <input v-model="slippageTwo"
+                     type="number"
+                     class="w-16 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]" />
+              <div class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400">
                 %
               </div>
             </div>
@@ -117,13 +97,16 @@
         Swap request is in progress. Please do not close this modal.
       </div>
 
+      <div v-if="swapSendTokens" class="alert-warning text-center font-bold">
+        Swap request is queued. Please transfer your tokens to initiate the Swapping process.
+      </div>
+
       <div class="text-center mt-10">
-        <button
-          class="btn w-4/5 text-lg"
-          :disabled="
-            !fromSymbol ||
-            !toSymbol ||
-            fromQuantity <= 0 ||
+        <button class="btn w-4/5 text-lg"
+                :disabled="
+                !fromSymbol ||
+                !toSymbol ||
+                fromQuantity <= 0 ||
             toQuantity <= 0 ||
             btnBusy ||
             showOverlay
@@ -143,7 +126,7 @@ import axios from "axios";
 import { computed, defineComponent, inject, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { debouncedWatch } from "@vueuse/core";
-import { DSWAP_API, DSWAP_ACCOUNT, DSWAP_SOURCE_ID } from "../../config";
+import { DSWAP_API, DSWAP_ACCOUNT, DSWAP_SOURCE_ID, DSWAP_API_VERSION } from "../../config";
 import { useStore } from "../../stores";
 import { useTokenStore } from "../../stores/token";
 import { useWalletStore } from "../../stores/wallet";
@@ -152,6 +135,7 @@ import { useUserStore } from "../../stores/user";
 import Modal from "./Modal.vue";
 import SearchSelect from "../utilities/SearchSelect.vue";
 import LoadingOverlay from "../utilities/LoadingOverlay.vue";
+import { uuid } from 'vue-uuid';
 
 export default defineComponent({
   name: "SwapModal",
@@ -170,6 +154,7 @@ export default defineComponent({
     const btnBusy = ref(false);
     const showOverlay = ref(false);
     const swapInProgress = ref(false);
+    const swapSendTokens = ref(false);
 
     const dswapAPI = axios.create({
       baseURL: DSWAP_API,
@@ -286,6 +271,7 @@ export default defineComponent({
 
       showOverlay.value = false;
       swapInProgress.value = false;
+      swapSendTokens.value = false;
 
       baseTokenAmount.value = 0;
     };
@@ -293,13 +279,38 @@ export default defineComponent({
     const requestSwap = async () => {
       btnBusy.value = true;
 
-      await walletStore.requestTransfer({
-        to: DSWAP_ACCOUNT,
-        symbol: fromSymbol.value,
-        quantity: fromQuantity.value.toString(),
-        memo: "SwapRequest",
-        eventName: "dswap-transfer-successful",
-      });
+      const postData = {
+        Chain: 1,
+        Account: username.value,
+        TokenInput: fromSymbol.value,
+        TokenInputAmount: fromQuantity.value,
+        TokenOutput: toSymbol.value,
+        TokenOutputAmount: toQuantity.value,
+        SwapSourceId: DSWAP_SOURCE_ID,
+        MaxSlippageInputToken: slippageOne.value,
+        MaxSlippageOutputToken: slippageTwo.value,
+        BaseTokenAmount: baseTokenAmount.value,
+        TokenInputMemo: uuid.v4(),
+      };
+
+      let postMethod = "SwapRequest";
+      if (DSWAP_API_VERSION && DSWAP_API_VERSION != "1.0") {
+        postMethod += `?api-version=${DSWAP_API_VERSION}`;
+      }
+
+      let postVal = await dswapAPI.post(postMethod, postData);
+
+      if (postVal && postVal.data && postVal.data.Id) {
+        swapSendTokens.value = true;
+
+        await walletStore.requestTransfer({
+          to: DSWAP_ACCOUNT,
+          symbol: fromSymbol.value,
+          quantity: fromQuantity.value.toString(),
+          memo: `SwapRequest ${postData.TokenInputMemo}`,
+          eventName: "dswap-transfer-successful",
+        });
+      }
 
       btnBusy.value = false;
     };
@@ -307,6 +318,7 @@ export default defineComponent({
     const onTransferSuccessful = async ({ id }) => {
       showOverlay.value = true;
       swapInProgress.value = true;
+      swapSendTokens.value = false;
 
       await store.validateTransaction(id, 10);
     };
@@ -319,25 +331,9 @@ export default defineComponent({
         payload.to === DSWAP_ACCOUNT
       ) {
         try {
-          const postData = {
-            Chain: 1,
-            Account: username.value,
-            TokenInput: fromSymbol.value,
-            TokenInputAmount: fromQuantity.value,
-            TokenOutput: toSymbol.value,
-            TokenOutputAmount: toQuantity.value,
-            SwapSourceId: DSWAP_SOURCE_ID,
-            ChainTransactionId: trxId,
-            MaxSlippageInputToken: slippageOne.value,
-            MaxSlippageOutputToken: slippageTwo.value,
-            BaseTokenAmount: baseTokenAmount.value,
-            TokenInputMemo: "",
-          };
-
-          await dswapAPI.post("SwapRequest", postData);
-
           swapInProgress.value = false;
           showOverlay.value = false;
+          swapSendTokens.value = false;
 
           await vfm$.hideAll();
 
@@ -351,6 +347,7 @@ export default defineComponent({
 
       swapInProgress.value = false;
       showOverlay.value = false;
+      swapSendTokens.value = false;
     };
 
     watch(fromSymbol, (value) => {
@@ -379,9 +376,14 @@ export default defineComponent({
               TokenOutput: toSymbol.value,
             };
 
+            let postMethod = "SwapRequest/CalculateSwapOutput";
+            if (DSWAP_API_VERSION && DSWAP_API_VERSION != "1.0") {
+              postMethod += `?api-version=${DSWAP_API_VERSION}`;
+            }
+
             const {
               data: { TokenOutputAmount, BaseTokenAmount },
-            } = await dswapAPI.post("SwapRequest/CalculateSwapOutput", postData);
+            } = await dswapAPI.post(postMethod, postData);
 
             toQuantity.value = toFixedWithoutRounding(TokenOutputAmount, 8);
             baseTokenAmount.value = BaseTokenAmount;
@@ -411,6 +413,7 @@ export default defineComponent({
       btnBusy,
       showOverlay,
       swapInProgress,
+      swapSendTokens,
 
       fromSymbol,
       toSymbol,
