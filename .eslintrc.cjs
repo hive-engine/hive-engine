@@ -16,5 +16,7 @@ module.exports = {
     "vue/multi-word-component-names": 0,
     // "prettier/prettier": 0,
     "vue/no-v-html": 0,
+    "vue/no-v-text-v-html-on-component": 0,
+    "vue/no-reserved-component-names": 0,
   },
 };

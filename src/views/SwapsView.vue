@@ -66,7 +66,7 @@ export default defineComponent({
       2: "In progress",
       3: "Success",
       4: "Failed",
-      7: "Expired"
+      7: "Expired",
     };
 
     const statusClass = {

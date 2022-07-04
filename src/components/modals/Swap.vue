@@ -21,19 +21,25 @@
         <div class="mb-5 mt-10">
           <label for="fromSymbol" class="block mb-2 font-bold">From</label>
 
-          <SearchSelect v-model="fromSymbol"
-                        :options="fromSymbolOptions"
-                        classes="mb-3 rounded-md" />
+          <SearchSelect
+            v-model="fromSymbol"
+            :options="fromSymbolOptions"
+            classes="mb-3 rounded-md"
+          />
 
           <template v-if="fromSymbol">
             <div class="mb-3">Current balance: {{ fromSymbolBalance }} {{ fromSymbol }}</div>
 
             <div class="flex items-center w-full">
-              <input id="fromQuantity"
-                     v-model="fromQuantity"
-                     type="number"
-                     class="w-full h-10 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]" />
-              <div class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400">
+              <input
+                id="fromQuantity"
+                v-model="fromQuantity"
+                type="number"
+                class="w-full h-10 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
+              />
+              <div
+                class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
+              >
                 {{ fromSymbol }}
               </div>
             </div>
@@ -49,12 +55,16 @@
             <div class="mb-3">Current balance: {{ toSymbolBalance }} {{ toSymbol }}</div>
 
             <div class="flex items-center w-full">
-              <input id="toQuantity"
-                     v-model="toQuantity"
-                     type="number"
-                     class="w-full h-10 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
-                     readonly />
-              <div class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400">
+              <input
+                id="toQuantity"
+                v-model="toQuantity"
+                type="number"
+                class="w-full h-10 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
+                readonly
+              />
+              <div
+                class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
+              >
                 {{ toSymbol }}
               </div>
             </div>
@@ -68,24 +78,34 @@
             <div class="text-sm font-bold mr-3">Max Slippage ({{ fromSymbol }} -> SWAP.HIVE)</div>
 
             <div class="flex items-center">
-              <input v-model="slippageOne"
-                     type="number"
-                     class="w-16 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]" />
-              <div class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400">
+              <input
+                v-model="slippageOne"
+                type="number"
+                class="w-16 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
+              />
+              <div
+                class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400"
+              >
                 %
               </div>
             </div>
           </div>
 
-          <div v-if="toSymbol !== 'SWAP.HIVE'"
-               class="mb-3 flex flex-wrap items-center justify-between">
+          <div
+            v-if="toSymbol !== 'SWAP.HIVE'"
+            class="mb-3 flex flex-wrap items-center justify-between"
+          >
             <div class="text-sm font-bold mr-3">Max Slippage (SWAP.HIVE -> {{ toSymbol }})</div>
 
             <div class="flex items-center">
-              <input v-model="slippageTwo"
-                     type="number"
-                     class="w-16 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]" />
-              <div class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400">
+              <input
+                v-model="slippageTwo"
+                type="number"
+                class="w-16 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
+              />
+              <div
+                class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400"
+              >
                 %
               </div>
             </div>
@@ -102,11 +122,12 @@
       </div>
 
       <div class="text-center mt-10">
-        <button class="btn w-4/5 text-lg"
-                :disabled="
-                !fromSymbol ||
-                !toSymbol ||
-                fromQuantity <= 0 ||
+        <button
+          class="btn w-4/5 text-lg"
+          :disabled="
+            !fromSymbol ||
+            !toSymbol ||
+            fromQuantity <= 0 ||
             toQuantity <= 0 ||
             btnBusy ||
             showOverlay
@@ -135,7 +156,7 @@ import { useUserStore } from "../../stores/user";
 import Modal from "./Modal.vue";
 import SearchSelect from "../utilities/SearchSelect.vue";
 import LoadingOverlay from "../utilities/LoadingOverlay.vue";
-import { uuid } from 'vue-uuid';
+import { uuid } from "vue-uuid";
 
 export default defineComponent({
   name: "SwapModal",
@@ -323,7 +344,7 @@ export default defineComponent({
       await store.validateTransaction(id, 10);
     };
 
-    const onTransactionValidated = async ({ error, contract, action, payload, trx_id: trxId }) => {
+    const onTransactionValidated = async ({ error, contract, action, payload }) => {
       if (
         !error &&
         contract === "tokens" &&
