@@ -15,7 +15,7 @@
         </div>
 
         <button class="dark:text-gray-300" @click="close">
-          <x-icon class="h-5 w-5" aria-hidden="true" />
+          <XMarkIcon class="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
 
@@ -44,13 +44,13 @@
               <button
                 class="btn-sm"
                 @click.prevent="
-                  requestCancelUnstake({
+                  walletStore.requestCancelUnstake({
                     symbol: params.symbol,
                     trxId: item.txID,
                   })
                 "
               >
-                <XIcon class="h-5 w-5" />
+                <XMarkIcon class="h-5 w-5" />
               </button>
             </template>
           </CustomTable>
@@ -71,7 +71,7 @@
                     requestAction(params);
                   "
                 >
-                  <XIcon class="h-5 w-5" />
+                  <XMarkIcon class="h-5 w-5" />
                 </button>
               </template>
             </CustomTable>
@@ -191,282 +191,242 @@
   </vue-final-modal>
 </template>
 
-<script>
-import { computed, defineComponent, inject, ref, onMounted, onBeforeUnmount } from "vue";
+<script setup>
+import { computed, inject, ref, onMounted, onBeforeUnmount } from "vue";
 import { useVuelidate } from "@vuelidate/core";
 import { required, minLength, maxLength } from "@vuelidate/validators";
-import { XIcon } from "@heroicons/vue/outline";
+import { XMarkIcon } from "@heroicons/vue/24/outline";
 import { useWalletStore } from "../../stores/wallet";
 import { useUserStore } from "../../stores/user";
 import { sidechain } from "../../plugins/sidechain";
 import CustomTable from "../utilities/CustomTable.vue";
 
-export default defineComponent({
-  name: "WalletAction",
+const eventBus = inject("eventBus");
+const show = ref(false);
 
-  components: {
-    XIcon,
-    CustomTable,
+const userStore = useUserStore();
+const walletStore = useWalletStore();
+
+const modalAction = ref("transfer");
+const modalBusy = ref(true);
+const btnBusy = ref(false);
+
+const to = ref("");
+const from = ref("");
+const quantity = ref("");
+const memo = ref("");
+
+const tokenSymbol = ref("");
+
+const delegations = ref([]);
+const delegationFields = [
+  { key: "to", label: "From" },
+  { key: "quantity", label: "Amount" },
+  { key: "actions", label: "" },
+];
+
+const pendingUnstakes = ref([]);
+const pendingUnstakeFields = [
+  { key: "quantity", label: "Quantity" },
+  { key: "quantityLeft", label: "Remaining" },
+  { key: "nextTransactionTimestamp", label: "Next Withdrawal" },
+  { key: "actions", label: "" },
+];
+
+const username = computed(() => userStore.username);
+
+const rules = {
+  to: {
+    required,
+    minLength: minLength(3),
+    maxLength: maxLength(16),
+    validUsername: (value) => {
+      if (value === "") {
+        return true;
+      }
+
+      return /^([a-z])[a-z0-9-.]*$/.test(value);
+    },
   },
 
-  setup() {
-    const eventBus = inject("eventBus");
-    const show = ref(false);
-
-    const userStore = useUserStore();
-    const walletStore = useWalletStore();
-
-    const modalAction = ref("transfer");
-    const modalBusy = ref(true);
-    const btnBusy = ref(false);
-
-    const to = ref("");
-    const from = ref("");
-    const quantity = ref("");
-    const memo = ref("");
-
-    const tokenSymbol = ref("");
-
-    const delegations = ref([]);
-    const delegationFields = [
-      { key: "to", label: "From" },
-      { key: "quantity", label: "Amount" },
-      { key: "actions", label: "" },
-    ];
-
-    const pendingUnstakes = ref([]);
-    const pendingUnstakeFields = [
-      { key: "quantity", label: "Quantity" },
-      { key: "quantityLeft", label: "Remaining" },
-      { key: "nextTransactionTimestamp", label: "Next Withdrawal" },
-      { key: "actions", label: "" },
-    ];
-
-    const username = computed(() => userStore.username);
-
-    const rules = {
-      to: {
-        required,
-        minLength: minLength(3),
-        maxLength: maxLength(16),
-        validUsername: (value) => {
-          if (value === "") {
-            return true;
-          }
-
-          return /^([a-z])[a-z0-9-.]*$/.test(value);
-        },
-      },
-
-      from: {
-        required,
-        minLength: minLength(3),
-        maxLength: maxLength(16),
-        validUsername: (value) => {
-          if (value === "") {
-            return true;
-          }
-
-          return /^([a-z])[a-z0-9-.]*$/.test(value);
-        },
-      },
-
-      quantity: {
-        required,
-        greaterThanZero: (v) => {
-          if (v === "") {
-            return true;
-          }
-
-          return v > 0;
-        },
-      },
-    };
-
-    const computedRules = computed(() => {
-      const obj = {
-        transfer: { to, quantity },
-        delegate: { to, quantity },
-        undelegate: { from, quantity },
-        stake: { to, quantity },
-        unstake: { quantity },
-        pendingUnstakes: {},
-      };
-
-      return Object.keys(obj[modalAction.value]).reduce((a, c) => {
-        a[c] = rules[c];
-        return a;
-      }, {});
-    });
-
-    const v$ = useVuelidate(computedRules, { to, from, quantity });
-
-    const actionName = computed(() => {
-      const obj = {
-        transfer: "Transfer",
-        delegate: "Delegate",
-        undelegate: "Undelegate",
-        stake: "Stake",
-        unstake: "Unstake",
-        pendingUnstakes: "Pending Unstakes",
-      };
-
-      return obj[modalAction.value] || "";
-    });
-
-    const requestAction = async (params) => {
-      v$.value.$touch();
-
-      if (!v$.value.$invalid) {
-        const actions = {
-          transfer: walletStore.requestTransfer,
-          delegate: walletStore.requestDelegate,
-          undelegate: walletStore.requestUndelegate,
-          stake: walletStore.requestStake,
-          unstake: walletStore.requestUnstake,
-        };
-
-        await actions[modalAction.value]({
-          symbol: params.symbol,
-          to: to.value.trim(),
-          from: from.value.trim(),
-          quantity: quantity.value.toString(),
-          memo: memo.value.trim(),
-        });
-      }
-    };
-
-    const popularChoices = computed(() => {
-      if (
-        [
-          "ORB",
-          "ALPHA",
-          "BETA",
-          "UNTAMED",
-          "DEC",
-          "SLDICE",
-          "PLOT",
-          "ZONE",
-          "SECTOR",
-          "TRACT",
-          "REGION",
-          "RAFFLE",
-          "TOTEMC",
-          "TOTEMR",
-          "TOTEME",
-          "TOTEML",
-          "SPS",
-          "CHAOS",
-          "VOUCHER",
-        ].includes(tokenSymbol.value)
-      ) {
-        return [{ text: "Splinterlands", value: "steemmonsters" }];
+  from: {
+    required,
+    minLength: minLength(3),
+    maxLength: maxLength(16),
+    validUsername: (value) => {
+      if (value === "") {
+        return true;
       }
 
-      return [];
-    });
-
-    const showTo = computed(() => ["transfer", "stake", "delegate"].includes(modalAction.value));
-    const showFrom = computed(() => ["undelegate"].includes(modalAction.value));
-
-    const beforeOpen = async (e) => {
-      modalBusy.value = true;
-
-      const { action, symbol } = e.ref.params.value;
-      modalAction.value = action;
-      tokenSymbol.value = symbol;
-
-      if (modalAction.value === "stake") {
-        to.value = username.value;
-      } else if (modalAction.value === "undelegate") {
-        const result = await sidechain.contract({
-          method: "find",
-          params: {
-            contract: "tokens",
-            table: "delegations",
-            query: { symbol, from: username.value },
-          },
-        });
-
-        delegations.value = result.map((d) => ({
-          ...d,
-          quantity: Number(d.quantity),
-        }));
-      } else if (modalAction.value === "pendingUnstakes") {
-        const result = await sidechain.getPendingUnstakes(username.value, symbol);
-
-        pendingUnstakes.value = result.map((p) => ({
-          ...p,
-          quantity: Number(p.quantity),
-          quantityLeft: Number(p.quantityLeft),
-        }));
-      }
-
-      modalBusy.value = false;
-    };
-
-    const modalClose = () => {
-      v$.value.$reset();
-
-      modalAction.value = "transfer";
-
-      to.value = "";
-      from.value = "";
-      quantity.value = "";
-      memo.value = "";
-
-      delegations.value = [];
-      pendingUnstakes.value = [];
-    };
-
-    onMounted(() => {
-      eventBus.on("broadcast-awaiting", () => {
-        btnBusy.value = true;
-      });
-
-      eventBus.on("broadcast-done", () => {
-        btnBusy.value = false;
-      });
-
-      eventBus.on("broadcast-success", () => {
-        show.value = false;
-      });
-    });
-
-    onBeforeUnmount(() => {
-      eventBus.off("broadcast-awaiting");
-      eventBus.off("broadcast-done");
-      eventBus.off("broadcast-success");
-    });
-
-    return {
-      show,
-      v$,
-      modalBusy,
-      btnBusy,
-
-      to,
-      from,
-      quantity,
-      memo,
-
-      delegations,
-      delegationFields,
-
-      pendingUnstakes,
-      pendingUnstakeFields,
-
-      actionName,
-      showTo,
-      showFrom,
-      popularChoices,
-
-      requestAction,
-      beforeOpen,
-      modalClose,
-
-      requestCancelUnstake: walletStore.requestCancelUnstake,
-    };
+      return /^([a-z])[a-z0-9-.]*$/.test(value);
+    },
   },
+
+  quantity: {
+    required,
+    greaterThanZero: (v) => {
+      if (v === "") {
+        return true;
+      }
+
+      return v > 0;
+    },
+  },
+};
+
+const computedRules = computed(() => {
+  const obj = {
+    transfer: { to, quantity },
+    delegate: { to, quantity },
+    undelegate: { from, quantity },
+    stake: { to, quantity },
+    unstake: { quantity },
+    pendingUnstakes: {},
+  };
+
+  return Object.keys(obj[modalAction.value]).reduce((a, c) => {
+    a[c] = rules[c];
+    return a;
+  }, {});
+});
+
+const v$ = useVuelidate(computedRules, { to, from, quantity });
+
+const actionName = computed(() => {
+  const obj = {
+    transfer: "Transfer",
+    delegate: "Delegate",
+    undelegate: "Undelegate",
+    stake: "Stake",
+    unstake: "Unstake",
+    pendingUnstakes: "Pending Unstakes",
+  };
+
+  return obj[modalAction.value] || "";
+});
+
+const requestAction = async (params) => {
+  v$.value.$touch();
+
+  if (!v$.value.$invalid) {
+    const actions = {
+      transfer: walletStore.requestTransfer,
+      delegate: walletStore.requestDelegate,
+      undelegate: walletStore.requestUndelegate,
+      stake: walletStore.requestStake,
+      unstake: walletStore.requestUnstake,
+    };
+
+    await actions[modalAction.value]({
+      symbol: params.symbol,
+      to: to.value.trim(),
+      from: from.value.trim(),
+      quantity: quantity.value.toString(),
+      memo: memo.value.trim(),
+    });
+  }
+};
+
+const popularChoices = computed(() => {
+  if (
+    [
+      "ORB",
+      "ALPHA",
+      "BETA",
+      "UNTAMED",
+      "DEC",
+      "SLDICE",
+      "PLOT",
+      "ZONE",
+      "SECTOR",
+      "TRACT",
+      "REGION",
+      "RAFFLE",
+      "TOTEMC",
+      "TOTEMR",
+      "TOTEME",
+      "TOTEML",
+      "SPS",
+      "CHAOS",
+      "VOUCHER",
+    ].includes(tokenSymbol.value)
+  ) {
+    return [{ text: "Splinterlands", value: "steemmonsters" }];
+  }
+
+  return [];
+});
+
+const showTo = computed(() => ["transfer", "stake", "delegate"].includes(modalAction.value));
+const showFrom = computed(() => ["undelegate"].includes(modalAction.value));
+
+const beforeOpen = async (e) => {
+  modalBusy.value = true;
+
+  const { action, symbol } = e.ref.params.value;
+  modalAction.value = action;
+  tokenSymbol.value = symbol;
+
+  if (modalAction.value === "stake") {
+    to.value = username.value;
+  } else if (modalAction.value === "undelegate") {
+    const result = await sidechain.contract({
+      method: "find",
+      params: {
+        contract: "tokens",
+        table: "delegations",
+        query: { symbol, from: username.value },
+      },
+    });
+
+    delegations.value = result.map((d) => ({
+      ...d,
+      quantity: Number(d.quantity),
+    }));
+  } else if (modalAction.value === "pendingUnstakes") {
+    const result = await sidechain.getPendingUnstakes(username.value, symbol);
+
+    pendingUnstakes.value = result.map((p) => ({
+      ...p,
+      quantity: Number(p.quantity),
+      quantityLeft: Number(p.quantityLeft),
+    }));
+  }
+
+  modalBusy.value = false;
+};
+
+const modalClose = () => {
+  v$.value.$reset();
+
+  modalAction.value = "transfer";
+
+  to.value = "";
+  from.value = "";
+  quantity.value = "";
+  memo.value = "";
+
+  delegations.value = [];
+  pendingUnstakes.value = [];
+};
+
+onMounted(() => {
+  eventBus.on("broadcast-awaiting", () => {
+    btnBusy.value = true;
+  });
+
+  eventBus.on("broadcast-done", () => {
+    btnBusy.value = false;
+  });
+
+  eventBus.on("broadcast-success", () => {
+    show.value = false;
+  });
+});
+
+onBeforeUnmount(() => {
+  eventBus.off("broadcast-awaiting");
+  eventBus.off("broadcast-done");
+  eventBus.off("broadcast-success");
 });
 </script>

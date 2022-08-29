@@ -11,7 +11,7 @@
 
             <div class="p-1 text-red-500 text-right">
               <a href="https://discord.gg/xWRYB9s" target="_blank">
-                <chat-alt-icon class="h-12 w-h-12" />
+                <ChatBubbleLeftRightIcon class="h-12 w-h-12" />
               </a>
             </div>
           </div>
@@ -26,7 +26,7 @@
 
             <div class="p-1 text-red-500 text-right">
               <a href="https://eng-support.privex.io/open.php" target="_blank">
-                <user-group-icon class="h-12 w-h-12" />
+                <UserGroupIcon class="h-12 w-h-12" />
               </a>
             </div>
           </div>
@@ -44,16 +44,6 @@
   </footer>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import { ChatAltIcon, UserGroupIcon } from "@heroicons/vue/outline";
-
-export default defineComponent({
-  name: "PageFooter",
-
-  components: {
-    ChatAltIcon,
-    UserGroupIcon,
-  },
-});
+<script setup>
+import { ChatBubbleLeftRightIcon, UserGroupIcon } from "@heroicons/vue/24/outline";
 </script>

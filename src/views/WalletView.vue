@@ -102,7 +102,7 @@
           title="Transfer"
           @click="vfm$.show('tokenInfoModal', item.token)"
         >
-          <information-circle-icon class="h-5 w-5" />
+          <InformationCircleIcon class="h-5 w-5" />
         </button>
 
         <button
@@ -116,7 +116,7 @@
             })
           "
         >
-          <arrow-right-icon class="h-5 w-5" />
+          <ArrowRightIcon class="h-5 w-5" />
         </button>
 
         <button
@@ -131,7 +131,7 @@
             })
           "
         >
-          <lock-closed-icon class="h-5 w-5" />
+          <LockClosedIcon class="h-5 w-5" />
         </button>
 
         <button
@@ -146,7 +146,7 @@
             })
           "
         >
-          <lock-open-icon class="h-5 w-5" />
+          <LockOpenIcon class="h-5 w-5" />
         </button>
 
         <button
@@ -161,7 +161,7 @@
             })
           "
         >
-          <trending-up-icon class="h-5 w-5" />
+          <ArrowTrendingUpIcon class="h-5 w-5" />
         </button>
 
         <button
@@ -176,7 +176,7 @@
             })
           "
         >
-          <trending-down-icon class="h-5 w-5" />
+          <ArrowTrendingDownIcon class="h-5 w-5" />
         </button>
 
         <router-link
@@ -185,7 +185,7 @@
           class="btn-sm mr-1 mt-1 mb-1"
           title="Trade"
         >
-          <switch-horizontal-icon class="h-5 w-5" />
+          <ArrowsRightLeftIcon class="h-5 w-5" />
         </router-link>
 
         <button
@@ -200,7 +200,7 @@
             })
           "
         >
-          <lightning-bolt-icon class="h-5 w-5" />
+          <BoltIcon class="h-5 w-5" />
         </button>
 
         <router-link
@@ -208,7 +208,7 @@
           class="btn-sm mr-1 mt-1 mb-1"
           title="History"
         >
-          <menu-alt1-icon class="h-5 w-5" />
+          <Bars3CenterLeftIcon class="h-5 w-5" />
         </router-link>
       </template>
     </CustomTable>
@@ -222,29 +222,21 @@
   <TokenInfo />
 </template>
 
-<script>
+<script setup>
 import Big from "big.js";
-import {
-  computed,
-  defineComponent,
-  inject,
-  onBeforeMount,
-  ref,
-  onMounted,
-  onBeforeUnmount,
-} from "vue";
+import { computed, inject, onBeforeMount, ref, onMounted, onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
 import {
   InformationCircleIcon,
-  LightningBoltIcon,
+  BoltIcon,
   LockClosedIcon,
   LockOpenIcon,
   ArrowRightIcon,
-  MenuAlt1Icon,
-  TrendingUpIcon,
-  TrendingDownIcon,
-  SwitchHorizontalIcon,
-} from "@heroicons/vue/outline";
+  Bars3CenterLeftIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  ArrowsRightLeftIcon,
+} from "@heroicons/vue/24/outline";
 import { useStorage } from "@vueuse/core";
 import { useStore } from "../stores";
 import { useTokenStore } from "../stores/token";
@@ -258,217 +250,176 @@ import Withdraw from "../components/modals/Withdraw.vue";
 import TokenInfo from "../components/modals/TokenInfo.vue";
 import PageFooter from "../components/PageFooter.vue";
 
-export default defineComponent({
-  name: "Wallet",
+const loading = ref(true);
+const vfm$ = inject("$vfm");
+const event = inject("eventBus");
 
-  components: {
-    CustomTable,
-    InformationCircleIcon,
-    LightningBoltIcon,
-    LockOpenIcon,
-    LockClosedIcon,
-    ArrowRightIcon,
-    MenuAlt1Icon,
-    TrendingUpIcon,
-    TrendingDownIcon,
-    SwitchHorizontalIcon,
-    WalletAction,
-    Deposit,
-    Withdraw,
-    PageFooter,
-    TokenInfo,
-  },
+const route = useRoute();
 
-  setup() {
-    const loading = ref(true);
-    const vfm$ = inject("$vfm");
-    const event = inject("eventBus");
+const { account } = route.params;
 
-    const route = useRoute();
+const filter = ref("");
+const hiveZeroBalance = useStorage("hide-small-balances", false);
+const includeAll = useStorage("value-includes-all", false);
 
-    const { account } = route.params;
+let refreshTimeout = null;
 
-    const filter = ref("");
-    const hiveZeroBalance = useStorage("hide-small-balances", false);
-    const includeAll = useStorage("value-includes-all", false);
+const store = useStore();
+const tokenStore = useTokenStore();
+const userStore = useUserStore();
+const walletStore = useWalletStore();
 
-    let refreshTimeout = null;
+const disableActions = computed(() => !userStore.isLoggedIn || userStore.username !== account);
 
-    const store = useStore();
-    const tokenStore = useTokenStore();
-    const userStore = useUserStore();
-    const walletStore = useWalletStore();
+const mappedTokens = computed(() => new Map(tokenStore.tokens.map((t) => [t.symbol, t])));
+const mappedMetrics = computed(() => new Map(tokenStore.metrics.map((t) => [t.symbol, t])));
+const lockedStakes = computed(() => {
+  return walletStore.pendingUnstakes
+    .filter((p) => p.numberTransactionsLeft > 1)
+    .reduce((acc, cur) => {
+      const token = mappedTokens.value.get(cur.symbol);
 
-    const disableActions = computed(() => !userStore.isLoggedIn || userStore.username !== account);
+      if (token) {
+        if (!acc[cur.symbol]) {
+          acc[cur.symbol] = Big(0);
+        }
 
-    const mappedTokens = computed(() => new Map(tokenStore.tokens.map((t) => [t.symbol, t])));
-    const mappedMetrics = computed(() => new Map(tokenStore.metrics.map((t) => [t.symbol, t])));
-    const lockedStakes = computed(() => {
-      return walletStore.pendingUnstakes
-        .filter((p) => p.numberTransactionsLeft > 1)
-        .reduce((acc, cur) => {
-          const token = mappedTokens.value.get(cur.symbol);
-
-          if (token) {
-            if (!acc[cur.symbol]) {
-              acc[cur.symbol] = Big(0);
-            }
-
-            acc[cur.symbol] = acc[cur.symbol].plus(
-              cur.quantityLeft.minus(
-                toFixedNoRounding(
-                  cur.quantity.div(token.numberTransactions).toString(),
-                  token.precision
-                )
-              )
-            );
-          }
-
-          return acc;
-        }, {});
-    });
-
-    const hivePrice = computed(() => store.hivePrice);
-
-    const wallet = computed(() => {
-      const regExp = new RegExp(filter.value, "i");
-
-      return walletStore.wallet
-        .filter((t) => {
-          if (filter.value !== "") {
-            return regExp.test(t.symbol);
-          }
-
-          return true;
-        })
-        .map((b) => {
-          const token = mappedTokens.value.get(b.symbol);
-          const metrics = mappedMetrics.value.get(b.symbol);
-
-          const lockedStake = lockedStakes.value[b.symbol]
-            ? lockedStakes.value[b.symbol].toFixed(token.precision, Big.roundHalfUp)
-            : 0;
-          const availableStake = b.stake.minus(lockedStake).toFixed(token.precision);
-          const changePct = metrics ? parseFloat(metrics.priceChangePercent) : 0;
-
-          const balance = b.balance;
-
-          const stakesAndDelegated = b.delegationsOut
-            .plus(b.stake)
-            .plus(b.pendingUnstake.minus(lockedStake));
-
-          const valueHive = metrics
-            ? balance.plus(includeAll.value ? stakesAndDelegated : 0).times(metrics.lastPrice)
-            : balance.plus(includeAll.value ? stakesAndDelegated : 0);
-
-          const valueUSD = toFixedWithoutRounding(valueHive * hivePrice.value);
-
-          return {
-            ...b,
-            token,
-            icon: token.icon,
-            symbol: b.symbol,
-            name: token.name,
-            balance,
-            pendingUndelegations: Number(b.pendingUndelegations),
-            lockedStake,
-            availableStake,
-            stakingEnabled: token.stakingEnabled,
-            delegationEnabled: token.delegationEnabled,
-            usdValue: valueUSD,
-            changePct,
-          };
-        })
-        .filter((b) => {
-          if (hiveZeroBalance.value) {
-            return b.usdValue > 0;
-          }
-
-          return true;
-        })
-        .sort((a, b) => b.usdValue - a.usdValue);
-    });
-
-    const estimatedValue = computed(() => {
-      return toFixedWithoutRounding(wallet.value.reduce((acc, cur) => acc + cur.usdValue, 0));
-    });
-
-    const walletTableFields = [
-      { key: "icon", label: "" },
-      { key: "symbol", label: "Symbol", sortable: true },
-      { key: "balance", label: "Balance", sortable: true },
-      { key: "usdValue", label: "USD Value", sortable: true },
-      { key: "changePct", label: "% Change", sortable: true },
-      { key: "stake", label: "Stake" },
-      { key: "delegation", label: "Delegation" },
-      { key: "actions", label: "" },
-    ];
-
-    const fetchWallet = async () => {
-      try {
-        await Promise.all([
-          walletStore.fetchWallet(account),
-          walletStore.fetchPendingUnstakes(),
-          tokenStore.fetchTokens(),
-          tokenStore.fetchMetrics(),
-        ]);
-      } catch {
-        //
+        acc[cur.symbol] = acc[cur.symbol].plus(
+          cur.quantityLeft.minus(
+            toFixedNoRounding(
+              cur.quantity.div(token.numberTransactions).toString(),
+              token.precision
+            )
+          )
+        );
       }
-    };
 
-    const onBoardcastSuccess = async ({ id, ntrx }) => {
-      loading.value = true;
+      return acc;
+    }, {});
+});
 
-      await vfm$.hideAll();
+const hivePrice = computed(() => store.hivePrice);
 
-      await store.validateTransaction(ntrx > 1 ? `${id}-0` : id);
-    };
+const wallet = computed(() => {
+  const regExp = new RegExp(filter.value, "i");
 
-    const onTransactionValidated = async () => {
-      await fetchWallet();
+  return walletStore.wallet
+    .filter((t) => {
+      if (filter.value !== "") {
+        return regExp.test(t.symbol);
+      }
 
-      loading.value = false;
-    };
+      return true;
+    })
+    .map((b) => {
+      const token = mappedTokens.value.get(b.symbol);
+      const metrics = mappedMetrics.value.get(b.symbol);
 
-    onBeforeMount(async () => {
-      loading.value = true;
+      const lockedStake = lockedStakes.value[b.symbol]
+        ? lockedStakes.value[b.symbol].toFixed(token.precision, Big.roundHalfUp)
+        : 0;
+      const availableStake = b.stake.minus(lockedStake).toFixed(token.precision);
+      const changePct = metrics ? parseFloat(metrics.priceChangePercent) : 0;
 
-      await fetchWallet();
+      const balance = b.balance;
 
-      loading.value = false;
-    });
+      const stakesAndDelegated = b.delegationsOut
+        .plus(b.stake)
+        .plus(b.pendingUnstake.minus(lockedStake));
 
-    onMounted(async () => {
-      refreshTimeout = setInterval(fetchWallet, 60 * 1000);
+      const valueHive = metrics
+        ? balance.plus(includeAll.value ? stakesAndDelegated : 0).times(metrics.lastPrice)
+        : balance.plus(includeAll.value ? stakesAndDelegated : 0);
 
-      event.on("broadcast-success", onBoardcastSuccess);
-      event.on("transaction-validated", onTransactionValidated);
-    });
+      const valueUSD = toFixedWithoutRounding(valueHive * hivePrice.value);
 
-    onBeforeUnmount(() => {
-      clearInterval(refreshTimeout);
+      return {
+        ...b,
+        token,
+        icon: token.icon,
+        symbol: b.symbol,
+        name: token.name,
+        balance,
+        pendingUndelegations: Number(b.pendingUndelegations),
+        lockedStake,
+        availableStake,
+        stakingEnabled: token.stakingEnabled,
+        delegationEnabled: token.delegationEnabled,
+        usdValue: valueUSD,
+        changePct,
+      };
+    })
+    .filter((b) => {
+      if (hiveZeroBalance.value) {
+        return b.usdValue > 0;
+      }
 
-      event.off("broadcast-success", onBoardcastSuccess);
-      event.off("transaction-validated", onTransactionValidated);
-    });
+      return true;
+    })
+    .sort((a, b) => b.usdValue - a.usdValue);
+});
 
-    return {
-      loading,
-      vfm$,
-      account,
-      disableActions,
+const estimatedValue = computed(() => {
+  return toFixedWithoutRounding(wallet.value.reduce((acc, cur) => acc + cur.usdValue, 0));
+});
 
-      filter,
-      hiveZeroBalance,
-      includeAll,
+const walletTableFields = [
+  { key: "icon", label: "" },
+  { key: "symbol", label: "Symbol", sortable: true },
+  { key: "balance", label: "Balance", sortable: true },
+  { key: "usdValue", label: "USD Value", sortable: true },
+  { key: "changePct", label: "% Change", sortable: true },
+  { key: "stake", label: "Stake" },
+  { key: "delegation", label: "Delegation" },
+  { key: "actions", label: "" },
+];
 
-      walletTableFields,
-      wallet,
-      estimatedValue,
+const fetchWallet = async () => {
+  try {
+    await Promise.all([
+      walletStore.fetchWallet(account),
+      walletStore.fetchPendingUnstakes(),
+      tokenStore.fetchTokens(),
+      tokenStore.fetchMetrics(),
+    ]);
+  } catch {
+    //
+  }
+};
 
-      addCommas,
-    };
-  },
+const onBoardcastSuccess = async ({ id, ntrx }) => {
+  loading.value = true;
+
+  await vfm$.hideAll();
+
+  await store.validateTransaction(ntrx > 1 ? `${id}-0` : id);
+};
+
+const onTransactionValidated = async () => {
+  await fetchWallet();
+
+  loading.value = false;
+};
+
+onBeforeMount(async () => {
+  loading.value = true;
+
+  await fetchWallet();
+
+  loading.value = false;
+});
+
+onMounted(async () => {
+  refreshTimeout = setInterval(fetchWallet, 60 * 1000);
+
+  event.on("broadcast-success", onBoardcastSuccess);
+  event.on("transaction-validated", onTransactionValidated);
+});
+
+onBeforeUnmount(() => {
+  clearInterval(refreshTimeout);
+
+  event.off("broadcast-success", onBoardcastSuccess);
+  event.off("transaction-validated", onTransactionValidated);
 });
 </script>

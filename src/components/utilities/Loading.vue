@@ -9,15 +9,11 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "Loading",
-
-  props: {
-    small: { type: Boolean, default: false },
-    showText: { type: Boolean, default: true },
-  },
-};
+<script setup>
+defineProps({
+  small: { type: Boolean, default: false },
+  showText: { type: Boolean, default: true },
+});
 </script>
 
 <style lang="scss">

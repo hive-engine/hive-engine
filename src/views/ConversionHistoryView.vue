@@ -34,83 +34,63 @@
   <PageFooter />
 </template>
 
-<script>
-import { defineComponent, onBeforeMount, ref } from "vue";
+<script setup>
+import { onBeforeMount, ref } from "vue";
 import { useWalletStore } from "../stores/wallet";
 import CustomTable from "../components/utilities/CustomTable.vue";
 import PageFooter from "../components/PageFooter.vue";
 
-export default defineComponent({
-  name: "ConversionHistory",
+const loading = ref(true);
 
-  components: {
-    PageFooter,
-    CustomTable,
-  },
+const walletStore = useWalletStore();
 
-  setup() {
-    const loading = ref(true);
+const history = ref([]);
 
-    const walletStore = useWalletStore();
+const historyTableFields = [
+  { key: "date", label: "Date" },
+  { key: "type", label: "TYPE" },
+  { key: "address", label: "ADDRESS" },
+  { key: "amount", label: "AMOUNT" },
+  { key: "symbol", label: "TOKEN" },
+  { key: "fee", label: "FEE" },
+  { key: "trx_id", label: "TX ID" },
+];
 
-    const history = ref([]);
+const explorers = {
+  HBD: "https://hiveblocks.com/tx/{trxId}",
+  HIVE: "https://hiveblocks.com/tx/{trxId}",
+  STEEM: "https://steemd.com/tx/{trxId}",
+  SBD: "https://steemd.com/tx/{trxId}",
+  BTC: "https://blockchair.com/bitcoin/transaction/{trxId}",
+  LTC: "https://blockchair.com/litecoin/transaction/{trxId}",
+  DOGE: "https://blockchair.com/dogecoin/transaction/{trxId}",
+  BCH: "https://blockchair.com/bitcoin-cash/transaction/{trxId}",
+  EOS: "https://bloks.io/transaction/{trxId}",
+  BLURT: "https://blocks.blurtwallet.com/#/tx/{trxId}",
+  WAX: "https://wax.bloks.io/transaction/{trxId}",
+  GOLOS: "https://explorer.golos.id/#tx/{trxId}",
+  BTS: "https://cryptofresh.com/tx/{trxId}",
+  SAVVA: "https://explorer.cyberway.io/trx/{trxId}",
+  TLOS: "https://telos.eosx.io/tx/{trxId}",
+};
 
-    const historyTableFields = [
-      { key: "date", label: "Date" },
-      { key: "type", label: "TYPE" },
-      { key: "address", label: "ADDRESS" },
-      { key: "amount", label: "AMOUNT" },
-      { key: "symbol", label: "TOKEN" },
-      { key: "fee", label: "FEE" },
-      { key: "trx_id", label: "TX ID" },
-    ];
+const getExplorerLink = (symbol, trxId) => {
+  const explorer =
+    (symbol.includes("SWAP.") ? "https://he.dtools.dev/tx/{trxId}" : explorers[symbol]) ||
+    "https://hive-engine.com";
 
-    const explorers = {
-      HBD: "https://hiveblocks.com/tx/{trxId}",
-      HIVE: "https://hiveblocks.com/tx/{trxId}",
-      STEEM: "https://steemd.com/tx/{trxId}",
-      SBD: "https://steemd.com/tx/{trxId}",
-      BTC: "https://blockchair.com/bitcoin/transaction/{trxId}",
-      LTC: "https://blockchair.com/litecoin/transaction/{trxId}",
-      DOGE: "https://blockchair.com/dogecoin/transaction/{trxId}",
-      BCH: "https://blockchair.com/bitcoin-cash/transaction/{trxId}",
-      EOS: "https://bloks.io/transaction/{trxId}",
-      BLURT: "https://blocks.blurtwallet.com/#/tx/{trxId}",
-      WAX: "https://wax.bloks.io/transaction/{trxId}",
-      GOLOS: "https://explorer.golos.id/#tx/{trxId}",
-      BTS: "https://cryptofresh.com/tx/{trxId}",
-      SAVVA: "https://explorer.cyberway.io/trx/{trxId}",
-      TLOS: "https://telos.eosx.io/tx/{trxId}",
-    };
+  return explorer.replace("{trxId}", trxId);
+};
 
-    const getExplorerLink = (symbol, trxId) => {
-      const explorer =
-        (symbol.includes("SWAP.") ? "https://he.dtools.dev/tx/{trxId}" : explorers[symbol]) ||
-        "https://hive-engine.com";
+onBeforeMount(async () => {
+  loading.value = true;
 
-      return explorer.replace("{trxId}", trxId);
-    };
+  try {
+    history.value = await walletStore.fetchConversionHistory();
+  } catch {
+    //
+  }
 
-    onBeforeMount(async () => {
-      loading.value = true;
-
-      try {
-        history.value = await walletStore.fetchConversionHistory();
-      } catch {
-        //
-      }
-
-      loading.value = false;
-    });
-
-    return {
-      loading,
-
-      historyTableFields,
-      history,
-
-      getExplorerLink,
-    };
-  },
+  loading.value = false;
 });
 </script>

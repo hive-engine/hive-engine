@@ -2,8 +2,8 @@
   <Candlestick :chart-data="chartData" :options="options" />
 </template>
 
-<script>
-import { defineComponent, ref } from "vue";
+<script setup>
+import { ref } from "vue";
 import { Chart, LinearScale, TimeSeriesScale, Tooltip } from "chart.js";
 import { defineChartComponent } from "vue-chart-3";
 import { CandlestickController, CandlestickElement } from "chartjs-chart-financial";
@@ -50,53 +50,39 @@ Chart.register(
 
 const Candlestick = defineChartComponent("CandleStick", "CustomCandleChart");
 
-export default defineComponent({
-  name: "CandlestickChart",
+defineProps({
+  chartData: { type: Object, required: true },
+});
 
-  components: {
-    Candlestick,
-  },
-
-  props: {
-    chartData: { type: Object, required: true },
-  },
-
-  setup() {
-    const options = ref({
-      maintainAspectRatio: false,
-      scales: {
-        y: {
-          ticks: {
-            color: "#647882",
-          },
-          grid: {
-            color: "rgba(100, 100, 100, .2)",
-            borderWidth: 0,
-          },
-        },
-        x: {
-          ticks: {
-            color: "#647882",
-          },
-          grid: {
-            color: "rgba(100, 100, 100, .2)",
-            borderWidth: 0,
-          },
-        },
+const options = ref({
+  maintainAspectRatio: false,
+  scales: {
+    y: {
+      ticks: {
+        color: "#647882",
       },
-      plugins: {
-        legend: {
-          display: false,
-        },
-        chartAreaBorder: {
-          borderColor: "white",
-        },
+      grid: {
+        color: "rgba(100, 100, 100, .2)",
+        borderWidth: 0,
       },
-    });
-
-    return {
-      options,
-    };
+    },
+    x: {
+      ticks: {
+        color: "#647882",
+      },
+      grid: {
+        color: "rgba(100, 100, 100, .2)",
+        borderWidth: 0,
+      },
+    },
+  },
+  plugins: {
+    legend: {
+      display: false,
+    },
+    chartAreaBorder: {
+      borderColor: "white",
+    },
   },
 });
 </script>

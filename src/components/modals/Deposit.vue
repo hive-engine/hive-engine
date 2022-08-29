@@ -15,7 +15,7 @@
         </div>
 
         <button class="dark:text-gray-300" @click="close">
-          <x-icon class="h-5 w-5" aria-hidden="true" />
+          <XMarkIcon class="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
 
@@ -101,7 +101,7 @@
                   title="Refresh address"
                   @click="fetchEvmAddress(networks[selectedToken])"
                 >
-                  <refresh-icon class="h-5 w-5" />
+                  <ArrowPathIcon class="h-5 w-5" />
                 </button>
 
                 <button
@@ -259,9 +259,9 @@
   </vue-final-modal>
 </template>
 
-<script>
-import { computed, defineComponent, inject, ref, watch } from "vue";
-import { XIcon, RefreshIcon } from "@heroicons/vue/outline";
+<script setup>
+import { computed, inject, ref, watch } from "vue";
+import { XMarkIcon, ArrowPathIcon } from "@heroicons/vue/24/outline";
 import { providers, utils, Contract } from "ethers";
 import { notify } from "@kyvg/vue3-notification";
 import { useClipboard } from "@vueuse/core";
@@ -272,461 +272,417 @@ import { useWalletStore } from "../../stores/wallet";
 import { toFixedWithoutRounding } from "../../utils";
 import SearchSelect from "../utilities/SearchSelect.vue";
 
-export default defineComponent({
-  name: "DepositModal",
+const hiveClient = inject("hiveClient");
+let web3Provider = null;
 
-  components: {
-    XIcon,
-    RefreshIcon,
-    SearchSelect,
+const networks = {
+  ETH: "eth",
+  ERC20: "eth",
+  BNB: "bsc",
+  BEP20: "bsc",
+  MATIC: "polygon",
+  "POLY-ERC20": "polygon",
+};
+
+const chainIds = {
+  1: "Ethereum Mainnet",
+  3: "Ropsten Testnet",
+  4: "Rinkeby Testnet",
+  56: "Binance Smart Chain",
+  97: "Binance Smart Chain Testnet",
+  137: "Polygon Mainnet",
+  80001: "Polygon Mumbai Testnet",
+};
+
+const ABI = [
+  {
+    constant: true,
+    inputs: [{ name: "_owner", type: "address" }],
+    name: "balanceOf",
+    outputs: [{ name: "balance", type: "uint256" }],
+    type: "function",
   },
+  {
+    constant: true,
+    inputs: [],
+    name: "decimals",
+    outputs: [{ name: "", type: "uint8" }],
+    type: "function",
+  },
+  {
+    constant: false,
+    inputs: [
+      { name: "_to", type: "address" },
+      { name: "_value", type: "uint256" },
+    ],
+    name: "transfer",
+    outputs: [{ name: "", type: "bool" }],
+    type: "function",
+  },
+];
 
-  setup() {
-    const hiveClient = inject("hiveClient");
-    let web3Provider = null;
+const show = ref(false);
+const modalBusy = ref(true);
+const btnBusy = ref(false);
 
-    const networks = {
-      ETH: "eth",
-      ERC20: "eth",
-      BNB: "bsc",
-      BEP20: "bsc",
-      MATIC: "polygon",
-      "POLY-ERC20": "polygon",
-    };
+const store = useStore();
+const userStore = useUserStore();
+const tokenStore = useTokenStore();
+const walletStore = useWalletStore();
 
-    const chainIds = {
-      1: "Ethereum Mainnet",
-      3: "Ropsten Testnet",
-      4: "Rinkeby Testnet",
-      56: "Binance Smart Chain",
-      97: "Binance Smart Chain Testnet",
-      137: "Polygon Mainnet",
-      80001: "Polygon Mumbai Testnet",
-    };
+const selectedToken = ref(null);
+const depositAmount = ref("");
+const evmAddress = ref("");
+const evmToken = ref(null);
 
-    const ABI = [
-      {
-        constant: true,
-        inputs: [{ name: "_owner", type: "address" }],
-        name: "balanceOf",
-        outputs: [{ name: "balance", type: "uint256" }],
-        type: "function",
-      },
-      {
-        constant: true,
-        inputs: [],
-        name: "decimals",
-        outputs: [{ name: "", type: "uint8" }],
-        type: "function",
-      },
-      {
-        constant: false,
-        inputs: [
-          { name: "_to", type: "address" },
-          { name: "_value", type: "uint256" },
-        ],
-        name: "transfer",
-        outputs: [{ name: "", type: "bool" }],
-        type: "function",
-      },
-    ];
+const settings = computed(() => store.settings);
+const peggedTokens = computed(() => tokenStore.peggedTokens);
+const evmTokens = computed(() => tokenStore.evmTokens);
+const depositInfo = computed(() => walletStore.depositInfo);
 
-    const show = ref(false);
-    const modalBusy = ref(true);
-    const btnBusy = ref(false);
+const { copy: copyAddress, copied: addressCopied } = useClipboard();
 
-    const store = useStore();
-    const userStore = useUserStore();
-    const tokenStore = useTokenStore();
-    const walletStore = useWalletStore();
+const { copy: copyMemo, copied: memoCopied } = useClipboard();
 
-    const selectedToken = ref(null);
-    const depositAmount = ref("");
-    const evmAddress = ref("");
-    const evmToken = ref(null);
+const tokens = computed(() => {
+  let tokens = [
+    ...peggedTokens.value,
+    settings.value.eth_bridge.ethereum,
+    settings.value.bsc_bridge.bnb,
+    settings.value.polygon_bridge.matic,
+  ];
 
-    const settings = computed(() => store.settings);
-    const peggedTokens = computed(() => tokenStore.peggedTokens);
-    const evmTokens = computed(() => tokenStore.evmTokens);
-    const depositInfo = computed(() => walletStore.depositInfo);
+  if (settings.value.eth_bridge.erc_20.enabled) {
+    tokens.push({ name: "Ethereum Tokens", symbol: "ERC20" });
+  }
 
-    const { copy: copyAddress, copied: addressCopied } = useClipboard();
+  if (settings.value.bsc_bridge.bep_20.enabled) {
+    tokens.push({ name: "Binance Smart Chain Tokens", symbol: "BEP20" });
+  }
 
-    const { copy: copyMemo, copied: memoCopied } = useClipboard();
+  if (settings.value.polygon_bridge.erc_20.enabled) {
+    tokens.push({ name: "Polygon Tokens", symbol: "POLY-ERC20" });
+  }
 
-    const tokens = computed(() => {
-      let tokens = [
-        ...peggedTokens.value,
-        settings.value.eth_bridge.ethereum,
-        settings.value.bsc_bridge.bnb,
-        settings.value.polygon_bridge.matic,
-      ];
+  tokens = tokens
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((t) => ({ value: t.symbol, text: `${t.name} (${t.symbol})` }));
 
-      if (settings.value.eth_bridge.erc_20.enabled) {
-        tokens.push({ name: "Ethereum Tokens", symbol: "ERC20" });
-      }
+  return [{ value: null, text: "Please select a token" }, ...tokens];
+});
 
-      if (settings.value.bsc_bridge.bep_20.enabled) {
-        tokens.push({ name: "Binance Smart Chain Tokens", symbol: "BEP20" });
-      }
+const isEvmToken = computed(() =>
+  ["ETH", "ERC20", "BNB", "BEP20", "MATIC", "POLY-ERC20"].includes(selectedToken.value)
+);
 
-      if (settings.value.polygon_bridge.erc_20.enabled) {
-        tokens.push({ name: "Polygon Tokens", symbol: "POLY-ERC20" });
-      }
+const evmTokenOptions = computed(() => {
+  const allEvmTokens = evmTokens.value.map((t) => ({
+    value: t.symbol,
+    text: `${t.name} (${t.symbol})`,
+  }));
 
-      tokens = tokens
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map((t) => ({ value: t.symbol, text: `${t.name} (${t.symbol})` }));
+  return [{ value: null, text: "Please select a token" }, ...allEvmTokens];
+});
 
-      return [{ value: null, text: "Please select a token" }, ...tokens];
+const hiveReceiveAmount = computed(() => (depositAmount.value * 0.9925).toFixed(3));
+
+const isDepositDisabled = computed(() => {
+  const token = store.settings.disabled_deposits.find((t) => t.symbol === selectedToken.value);
+
+  return {
+    disabled: !!token,
+    ...token,
+  };
+});
+
+const beforeOpen = async () => {
+  modalBusy.value = true;
+
+  if (!settings.value) {
+    await store.fetchSettings();
+  }
+
+  await tokenStore.fetchPeggedTokens();
+
+  modalBusy.value = false;
+};
+
+const modalClose = () => {
+  selectedToken.value = null;
+
+  depositAmount.value = "";
+  evmAddress.value = "";
+  evmToken.value = null;
+  walletStore.depositInfo = null;
+};
+
+const updateEvmAddress = async (network = "eth") => {
+  if (!window.ethereum) {
+    return;
+  }
+
+  const currentAddress = await web3Provider.send("eth_accounts");
+
+  if (!currentAddress.map((a) => a.toLowerCase()).includes(evmAddress.value.toLowerCase())) {
+    return notify({
+      title: "Error",
+      text: "Your entered address does not match with the connected Metamask address.",
+      type: "error",
     });
+  }
 
-    const isEvmToken = computed(() =>
-      ["ETH", "ERC20", "BNB", "BEP20", "MATIC", "POLY-ERC20"].includes(selectedToken.value)
-    );
+  if (utils.isAddress(evmAddress.value)) {
+    try {
+      const signature = await web3Provider
+        .getSigner(evmAddress.value)
+        .signMessage(utils.toUtf8Bytes(userStore.username));
 
-    const evmTokenOptions = computed(() => {
-      const allEvmTokens = evmTokens.value.map((t) => ({
-        value: t.symbol,
-        text: `${t.name} (${t.symbol})`,
-      }));
+      const bridgeConfig = `${network}_bridge`;
 
-      return [{ value: null, text: "Please select a token" }, ...allEvmTokens];
-    });
-
-    const hiveReceiveAmount = computed(() => (depositAmount.value * 0.9925).toFixed(3));
-
-    const isDepositDisabled = computed(() => {
-      const token = store.settings.disabled_deposits.find((t) => t.symbol === selectedToken.value);
-
-      return {
-        disabled: !!token,
-        ...token,
+      const addressKeys = {
+        eth: "ethereumAddress",
+        bsc: "bscAddress",
+        polygon: "polygonAddress",
       };
-    });
-
-    const beforeOpen = async () => {
-      modalBusy.value = true;
-
-      if (!settings.value) {
-        await store.fetchSettings();
-      }
-
-      await tokenStore.fetchPeggedTokens();
-
-      modalBusy.value = false;
-    };
-
-    const modalClose = () => {
-      selectedToken.value = null;
-
-      depositAmount.value = "";
-      evmAddress.value = "";
-      evmToken.value = null;
-      walletStore.depositInfo = null;
-    };
-
-    const updateEvmAddress = async (network = "eth") => {
-      if (!window.ethereum) {
-        return;
-      }
-
-      const currentAddress = await web3Provider.send("eth_accounts");
-
-      if (!currentAddress.map((a) => a.toLowerCase()).includes(evmAddress.value.toLowerCase())) {
-        return notify({
-          title: "Error",
-          text: "Your entered address does not match with the connected Metamask address.",
-          type: "error",
-        });
-      }
-
-      if (utils.isAddress(evmAddress.value)) {
-        try {
-          const signature = await web3Provider
-            .getSigner(evmAddress.value)
-            .signMessage(utils.toUtf8Bytes(userStore.username));
-
-          const bridgeConfig = `${network}_bridge`;
-
-          const addressKeys = {
-            eth: "ethereumAddress",
-            bsc: "bscAddress",
-            polygon: "polygonAddress",
-          };
-
-          const memo = JSON.stringify({
-            id: settings.value[bridgeConfig].id,
-            json: {
-              [addressKeys[network]]: evmAddress.value,
-              signature,
-            },
-          });
-
-          await store.requestBrodcastTransfer({
-            to: settings.value[bridgeConfig].account,
-            amount: "0.001",
-            memo,
-            currency: "HIVE",
-          });
-        } catch (e) {
-          console.log(e.message);
-        }
-      }
-    };
-
-    const checkEvmAddress = async (network) => {
-      let success = true;
-
-      try {
-        evmAddress.value = await walletStore.fetchEvmAddress(network);
-
-        const currentAddress = await web3Provider.send("eth_accounts");
-
-        if (!currentAddress.map((a) => a.toLowerCase()).includes(evmAddress.value.toLowerCase())) {
-          success = false;
-
-          notify({
-            title: "Error",
-            text: "Your address does not match with the connected Metamask address.",
-            type: "error",
-          });
-
-          await web3Provider.send("wallet_requestPermissions", [{ eth_accounts: {} }]);
-        } else if (!utils.isAddress(evmAddress.value)) {
-          success = false;
-
-          notify({
-            title: "Error",
-            text: "Please make sure you have added/updated your address before proceeding.",
-            type: "error",
-          });
-        }
-      } catch (e) {
-        success = false;
-
-        console.log(e.message);
-      }
-
-      return success;
-    };
-
-    const getEvmTokenBalance = async (contractAddress, walletAddress) => {
-      if (!walletAddress || !contractAddress) {
-        return 0;
-      }
-
-      const contract = new Contract(contractAddress, ABI, web3Provider);
-
-      const [balance, decimals] = await Promise.all([
-        contract.balanceOf(walletAddress),
-        contract.decimals(),
-      ]);
-
-      return utils.formatUnits(balance, decimals);
-    };
-
-    const depositHive = async () => {
-      btnBusy.value = true;
 
       const memo = JSON.stringify({
-        id: settings.value.sidechain_id,
+        id: settings.value[bridgeConfig].id,
         json: {
-          contractName: "hivepegged",
-          contractAction: "buy",
-          contractPayload: {},
+          [addressKeys[network]]: evmAddress.value,
+          signature,
         },
       });
 
       await store.requestBrodcastTransfer({
-        to: settings.value.hive_pegged_account,
-        amount: toFixedWithoutRounding(depositAmount.value, 3).toFixed(3),
+        to: settings.value[bridgeConfig].account,
+        amount: "0.001",
         memo,
         currency: "HIVE",
       });
+    } catch (e) {
+      console.log(e.message);
+    }
+  }
+};
 
-      btnBusy.value = false;
-    };
+const checkEvmAddress = async (network) => {
+  let success = true;
 
-    const depositEvmAsset = async (network) => {
-      btnBusy.value = true;
+  try {
+    evmAddress.value = await walletStore.fetchEvmAddress(network);
 
-      try {
-        if (await checkEvmAddress(network)) {
-          await web3Provider.send("eth_sendTransaction", [
-            {
-              to: depositInfo.value.deposit_address,
-              from: evmAddress.value,
-              value: utils.parseEther(depositAmount.value.toString()).toHexString(),
-            },
-          ]);
-        }
-      } catch (e) {
-        console.log(e.message);
-      }
+    const currentAddress = await web3Provider.send("eth_accounts");
 
-      btnBusy.value = false;
-    };
+    if (!currentAddress.map((a) => a.toLowerCase()).includes(evmAddress.value.toLowerCase())) {
+      success = false;
 
-    const depositEvmToken = async (network) => {
-      btnBusy.value = true;
+      notify({
+        title: "Error",
+        text: "Your address does not match with the connected Metamask address.",
+        type: "error",
+      });
 
-      try {
-        if (await checkEvmAddress(network)) {
-          const { contract_address: contractAddress, evm_precision: precision } =
-            evmTokens.value.find((t) => t.symbol === evmToken.value);
+      await web3Provider.send("wallet_requestPermissions", [{ eth_accounts: {} }]);
+    } else if (!utils.isAddress(evmAddress.value)) {
+      success = false;
 
-          const contract = new Contract(contractAddress, ABI, web3Provider.getSigner());
+      notify({
+        title: "Error",
+        text: "Please make sure you have added/updated your address before proceeding.",
+        type: "error",
+      });
+    }
+  } catch (e) {
+    success = false;
 
-          const amount = utils.parseUnits(depositAmount.value.toString(), precision);
+    console.log(e.message);
+  }
 
-          await contract.transfer(depositInfo.value.deposit_address, amount);
-        }
-      } catch (e) {
-        console.log(e.message);
-      }
+  return success;
+};
 
-      btnBusy.value = false;
-    };
+const getEvmTokenBalance = async (contractAddress, walletAddress) => {
+  if (!walletAddress || !contractAddress) {
+    return 0;
+  }
 
-    watch(selectedToken, async (value) => {
-      modalBusy.value = true;
+  const contract = new Contract(contractAddress, ABI, web3Provider);
 
-      if (value === "HIVE") {
-        const [account] = await hiveClient.database.getAccounts([userStore.username]);
+  const [balance, decimals] = await Promise.all([
+    contract.balanceOf(walletAddress),
+    contract.decimals(),
+  ]);
 
-        walletStore.depositInfo = { balance: parseFloat(account.balance) };
-      } else if (
-        value === "ETH" ||
-        value === "ERC20" ||
-        value === "BNB" ||
-        value === "BEP20" ||
-        value === "MATIC" ||
-        value === "POLY-ERC20"
-      ) {
-        if (window.ethereum) {
-          web3Provider = new providers.Web3Provider(window.ethereum);
+  return utils.formatUnits(balance, decimals);
+};
 
-          const network = networks[value];
-          const bridgeConfig = `${network}_bridge`;
+const depositHive = async () => {
+  btnBusy.value = true;
 
-          const chainId = await web3Provider.send("net_version");
-          const requiredChainId = settings.value[bridgeConfig].chain_id;
+  const memo = JSON.stringify({
+    id: settings.value.sidechain_id,
+    json: {
+      contractName: "hivepegged",
+      contractAction: "buy",
+      contractPayload: {},
+    },
+  });
 
-          if (Number(chainId) !== requiredChainId) {
-            selectedToken.value = null;
+  await store.requestBrodcastTransfer({
+    to: settings.value.hive_pegged_account,
+    amount: toFixedWithoutRounding(depositAmount.value, 3).toFixed(3),
+    memo,
+    currency: "HIVE",
+  });
 
-            const text = `Please make sure Metamask network is set to ${chainIds[requiredChainId]}.`;
+  btnBusy.value = false;
+};
 
-            notify({
-              title: "Error",
-              text,
-              type: "error",
-            });
-          } else {
-            try {
-              await web3Provider.send("eth_requestAccounts", []);
+const depositEvmAsset = async (network) => {
+  btnBusy.value = true;
 
-              evmAddress.value = await walletStore.fetchEvmAddress(network);
+  try {
+    if (await checkEvmAddress(network)) {
+      await web3Provider.send("eth_sendTransaction", [
+        {
+          to: depositInfo.value.deposit_address,
+          from: evmAddress.value,
+          value: utils.parseEther(depositAmount.value.toString()).toHexString(),
+        },
+      ]);
+    }
+  } catch (e) {
+    console.log(e.message);
+  }
 
-              let balance = 0;
+  btnBusy.value = false;
+};
 
-              const depositAddress = settings.value[bridgeConfig].gateway_address;
+const depositEvmToken = async (network) => {
+  btnBusy.value = true;
 
-              if (value === "ETH" || value === "BNB" || value === "MATIC") {
-                if (utils.isAddress(evmAddress.value)) {
-                  balance = toFixedWithoutRounding(
-                    utils.formatEther(await web3Provider.getBalance(evmAddress.value)),
-                    8
-                  );
-                }
-              } else {
-                await tokenStore.fetchSupportedEvmTokens({ network, deposit: true });
-              }
+  try {
+    if (await checkEvmAddress(network)) {
+      const { contract_address: contractAddress, evm_precision: precision } = evmTokens.value.find(
+        (t) => t.symbol === evmToken.value
+      );
 
-              walletStore.depositInfo = { balance, deposit_address: depositAddress };
-            } catch (e) {
-              console.log(e.message);
+      const contract = new Contract(contractAddress, ABI, web3Provider.getSigner());
 
-              selectedToken.value = null;
+      const amount = utils.parseUnits(depositAmount.value.toString(), precision);
 
-              notify({
-                title: "Error",
-                text: "Please allow us to connect to Metamask.",
-                type: "error",
-              });
+      await contract.transfer(depositInfo.value.deposit_address, amount);
+    }
+  } catch (e) {
+    console.log(e.message);
+  }
+
+  btnBusy.value = false;
+};
+
+watch(selectedToken, async (value) => {
+  modalBusy.value = true;
+
+  if (value === "HIVE") {
+    const [account] = await hiveClient.database.getAccounts([userStore.username]);
+
+    walletStore.depositInfo = { balance: parseFloat(account.balance) };
+  } else if (
+    value === "ETH" ||
+    value === "ERC20" ||
+    value === "BNB" ||
+    value === "BEP20" ||
+    value === "MATIC" ||
+    value === "POLY-ERC20"
+  ) {
+    if (window.ethereum) {
+      web3Provider = new providers.Web3Provider(window.ethereum);
+
+      const network = networks[value];
+      const bridgeConfig = `${network}_bridge`;
+
+      const chainId = await web3Provider.send("net_version");
+      const requiredChainId = settings.value[bridgeConfig].chain_id;
+
+      if (Number(chainId) !== requiredChainId) {
+        selectedToken.value = null;
+
+        const text = `Please make sure Metamask network is set to ${chainIds[requiredChainId]}.`;
+
+        notify({
+          title: "Error",
+          text,
+          type: "error",
+        });
+      } else {
+        try {
+          await web3Provider.send("eth_requestAccounts", []);
+
+          evmAddress.value = await walletStore.fetchEvmAddress(network);
+
+          let balance = 0;
+
+          const depositAddress = settings.value[bridgeConfig].gateway_address;
+
+          if (value === "ETH" || value === "BNB" || value === "MATIC") {
+            if (utils.isAddress(evmAddress.value)) {
+              balance = toFixedWithoutRounding(
+                utils.formatEther(await web3Provider.getBalance(evmAddress.value)),
+                8
+              );
             }
+          } else {
+            await tokenStore.fetchSupportedEvmTokens({ network, deposit: true });
           }
-        } else {
+
+          walletStore.depositInfo = { balance, deposit_address: depositAddress };
+        } catch (e) {
+          console.log(e.message);
+
           selectedToken.value = null;
 
           notify({
             title: "Error",
-            text: "Metamask or other Web3 wallet was not found.",
+            text: "Please allow us to connect to Metamask.",
             type: "error",
           });
         }
-      } else {
-        await walletStore.getDepositAddress(value);
       }
+    } else {
+      selectedToken.value = null;
 
-      modalBusy.value = false;
-    });
+      notify({
+        title: "Error",
+        text: "Metamask or other Web3 wallet was not found.",
+        type: "error",
+      });
+    }
+  } else {
+    await walletStore.getDepositAddress(value);
+  }
 
-    watch(evmToken, async (value) => {
-      if (!value) {
-        return;
-      }
+  modalBusy.value = false;
+});
 
-      const { contract_address: contractAddress, network } = evmTokens.value.find(
-        (t) => t.symbol === value
-      );
+watch(evmToken, async (value) => {
+  if (!value) {
+    return;
+  }
 
-      const bridgeConfig = `${network}_bridge`;
+  const { contract_address: contractAddress, network } = evmTokens.value.find(
+    (t) => t.symbol === value
+  );
 
-      const balance = toFixedWithoutRounding(
-        await getEvmTokenBalance(contractAddress, evmAddress.value),
-        8
-      );
+  const bridgeConfig = `${network}_bridge`;
 
-      walletStore.depositInfo = {
-        balance,
-        deposit_address: settings.value[bridgeConfig].gateway_address,
-      };
-    });
+  const balance = toFixedWithoutRounding(
+    await getEvmTokenBalance(contractAddress, evmAddress.value),
+    8
+  );
 
-    return {
-      show,
-      modalBusy,
-      btnBusy,
-
-      copyAddress,
-      addressCopied,
-      copyMemo,
-      memoCopied,
-
-      networks,
-      tokens,
-      selectedToken,
-      depositInfo,
-
-      isEvmToken,
-      depositAmount,
-      hiveReceiveAmount,
-      isDepositDisabled,
-
-      evmAddress,
-      evmTokenOptions,
-      evmToken,
-
-      beforeOpen,
-      modalClose,
-      fetchEvmAddress: walletStore.fetchEvmAddress,
-      updateEvmAddress,
-      depositHive,
-      depositEvmAsset,
-      depositEvmToken,
-    };
-  },
+  walletStore.depositInfo = {
+    balance,
+    deposit_address: settings.value[bridgeConfig].gateway_address,
+  };
 });
 </script>

@@ -142,9 +142,9 @@
   </Modal>
 </template>
 
-<script>
+<script setup>
 import axios from "axios";
-import { computed, defineComponent, inject, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { debouncedWatch } from "@vueuse/core";
 import { DSWAP_API, DSWAP_ACCOUNT, DSWAP_SOURCE_ID, DSWAP_API_VERSION } from "../../config";
@@ -158,304 +158,258 @@ import SearchSelect from "../utilities/SearchSelect.vue";
 import LoadingOverlay from "../utilities/LoadingOverlay.vue";
 import { uuid } from "vue-uuid";
 
-export default defineComponent({
-  name: "SwapModal",
+const event = inject("eventBus");
+const vfm$ = inject("$vfm");
+const show = ref(false);
+const modalBusy = ref(true);
+const btnBusy = ref(false);
+const showOverlay = ref(false);
+const swapInProgress = ref(false);
+const swapSendTokens = ref(false);
 
-  components: {
-    Modal,
-    SearchSelect,
-    LoadingOverlay,
-  },
+const dswapAPI = axios.create({
+  baseURL: DSWAP_API,
+});
 
-  setup() {
-    const event = inject("eventBus");
-    const vfm$ = inject("$vfm");
-    const show = ref(false);
-    const modalBusy = ref(true);
-    const btnBusy = ref(false);
-    const showOverlay = ref(false);
-    const swapInProgress = ref(false);
-    const swapSendTokens = ref(false);
+const router = useRouter();
 
-    const dswapAPI = axios.create({
-      baseURL: DSWAP_API,
-    });
+const store = useStore();
+const tokenStore = useTokenStore();
+const walletStore = useWalletStore();
+const userStore = useUserStore();
 
-    const router = useRouter();
+const fromSymbol = ref(null);
+const toSymbol = ref(null);
 
-    const store = useStore();
-    const tokenStore = useTokenStore();
-    const walletStore = useWalletStore();
-    const userStore = useUserStore();
+const fromQuantity = ref("");
+const toQuantity = ref("");
 
-    const fromSymbol = ref(null);
-    const toSymbol = ref(null);
+const slippageOne = ref(5);
+const slippageTwo = ref(5);
 
-    const fromQuantity = ref("");
-    const toQuantity = ref("");
+const baseTokenAmount = ref(0);
 
-    const slippageOne = ref(5);
-    const slippageTwo = ref(5);
+const tokens = computed(() => tokenStore.tokens);
+const wallet = computed(() => walletStore.wallet);
+const username = computed(() => userStore.username);
 
-    const baseTokenAmount = ref(0);
+const fromSymbolOptions = computed(() => {
+  const options = tokens.value.map((t) => ({
+    text: `${t.name} (${t.symbol})`,
+    value: t.symbol,
+  }));
 
-    const tokens = computed(() => tokenStore.tokens);
-    const wallet = computed(() => walletStore.wallet);
-    const username = computed(() => userStore.username);
+  return [{ value: null, text: "Please select a token" }, ...options];
+});
 
-    const fromSymbolOptions = computed(() => {
-      const options = tokens.value.map((t) => ({
-        text: `${t.name} (${t.symbol})`,
-        value: t.symbol,
-      }));
-
-      return [{ value: null, text: "Please select a token" }, ...options];
-    });
-
-    const toSymbolOptions = computed(() => {
-      const options = tokens.value
-        .filter((t) => {
-          if (fromSymbol.value) {
-            return !(t.symbol === fromSymbol.value);
-          }
-
-          return true;
-        })
-        .map((t) => ({ text: `${t.name} (${t.symbol})`, value: t.symbol }));
-
-      return [{ value: null, text: "Please select a token" }, ...options];
-    });
-
-    const fromSymbolBalance = computed(() => {
+const toSymbolOptions = computed(() => {
+  const options = tokens.value
+    .filter((t) => {
       if (fromSymbol.value) {
-        const bal = wallet.value.find((t) => t.symbol === fromSymbol.value);
-
-        if (bal) {
-          return bal.balance;
-        }
+        return !(t.symbol === fromSymbol.value);
       }
 
-      return 0;
+      return true;
+    })
+    .map((t) => ({ text: `${t.name} (${t.symbol})`, value: t.symbol }));
+
+  return [{ value: null, text: "Please select a token" }, ...options];
+});
+
+const fromSymbolBalance = computed(() => {
+  if (fromSymbol.value) {
+    const bal = wallet.value.find((t) => t.symbol === fromSymbol.value);
+
+    if (bal) {
+      return bal.balance;
+    }
+  }
+
+  return 0;
+});
+
+const toSymbolBalance = computed(() => {
+  if (toSymbol.value) {
+    const bal = wallet.value.find((t) => t.symbol === toSymbol.value);
+
+    if (bal) {
+      return bal.balance;
+    }
+  }
+
+  return 0;
+});
+
+const beforeOpen = async () => {
+  modalBusy.value = true;
+
+  const requests = [await walletStore.fetchWallet()];
+
+  if (tokens.value.length <= 0) {
+    requests.push(tokenStore.fetchTokens());
+  }
+
+  await Promise.all(requests);
+
+  modalBusy.value = false;
+};
+
+const beforeClose = async (e) => {
+  if (swapInProgress.value) {
+    if (
+      confirm(
+        "Swap request is in progress. If you close this modal, your swap will fail. Click cancel to stop closing the modal."
+      )
+    ) {
+      await vfm$.hideAll();
+
+      onClose();
+    } else {
+      e.stop();
+    }
+  }
+};
+
+const onClose = () => {
+  fromSymbol.value = null;
+  toSymbol.value = null;
+
+  fromQuantity.value = "";
+  toQuantity.value = "";
+
+  slippageOne.value = 5;
+  slippageTwo.value = 5;
+
+  showOverlay.value = false;
+  swapInProgress.value = false;
+  swapSendTokens.value = false;
+
+  baseTokenAmount.value = 0;
+};
+
+const requestSwap = async () => {
+  btnBusy.value = true;
+
+  const postData = {
+    Chain: 1,
+    Account: username.value,
+    TokenInput: fromSymbol.value,
+    TokenInputAmount: fromQuantity.value,
+    TokenOutput: toSymbol.value,
+    TokenOutputAmount: toQuantity.value,
+    SwapSourceId: DSWAP_SOURCE_ID,
+    MaxSlippageInputToken: slippageOne.value,
+    MaxSlippageOutputToken: slippageTwo.value,
+    BaseTokenAmount: baseTokenAmount.value,
+    TokenInputMemo: uuid.v4(),
+  };
+
+  let postMethod = "SwapRequest";
+  if (DSWAP_API_VERSION && DSWAP_API_VERSION != "1.0") {
+    postMethod += `?api-version=${DSWAP_API_VERSION}`;
+  }
+
+  let postVal = await dswapAPI.post(postMethod, postData);
+
+  if (postVal && postVal.data && postVal.data.Id) {
+    swapSendTokens.value = true;
+
+    await walletStore.requestTransfer({
+      to: DSWAP_ACCOUNT,
+      symbol: fromSymbol.value,
+      quantity: fromQuantity.value.toString(),
+      memo: `SwapRequest ${postData.TokenInputMemo}`,
+      eventName: "dswap-transfer-successful",
     });
+  }
 
-    const toSymbolBalance = computed(() => {
-      if (toSymbol.value) {
-        const bal = wallet.value.find((t) => t.symbol === toSymbol.value);
+  btnBusy.value = false;
+};
 
-        if (bal) {
-          return bal.balance;
-        }
-      }
+const onTransferSuccessful = async ({ id }) => {
+  showOverlay.value = true;
+  swapInProgress.value = true;
+  swapSendTokens.value = false;
 
-      return 0;
-    });
+  await store.validateTransaction(id, 10);
+};
 
-    const beforeOpen = async () => {
-      modalBusy.value = true;
-
-      const requests = [await walletStore.fetchWallet()];
-
-      if (tokens.value.length <= 0) {
-        requests.push(tokenStore.fetchTokens());
-      }
-
-      await Promise.all(requests);
-
-      modalBusy.value = false;
-    };
-
-    const beforeClose = async (e) => {
-      if (swapInProgress.value) {
-        if (
-          confirm(
-            "Swap request is in progress. If you close this modal, your swap will fail. Click cancel to stop closing the modal."
-          )
-        ) {
-          await vfm$.hideAll();
-
-          onClose();
-        } else {
-          e.stop();
-        }
-      }
-    };
-
-    const onClose = () => {
-      fromSymbol.value = null;
-      toSymbol.value = null;
-
-      fromQuantity.value = "";
-      toQuantity.value = "";
-
-      slippageOne.value = 5;
-      slippageTwo.value = 5;
-
-      showOverlay.value = false;
+const onTransactionValidated = async ({ error, contract, action, payload }) => {
+  if (!error && contract === "tokens" && action === "transfer" && payload.to === DSWAP_ACCOUNT) {
+    try {
       swapInProgress.value = false;
+      showOverlay.value = false;
       swapSendTokens.value = false;
 
-      baseTokenAmount.value = 0;
-    };
+      await vfm$.hideAll();
 
-    const requestSwap = async () => {
-      btnBusy.value = true;
+      onClose();
 
-      const postData = {
-        Chain: 1,
-        Account: username.value,
-        TokenInput: fromSymbol.value,
-        TokenInputAmount: fromQuantity.value,
-        TokenOutput: toSymbol.value,
-        TokenOutputAmount: toQuantity.value,
-        SwapSourceId: DSWAP_SOURCE_ID,
-        MaxSlippageInputToken: slippageOne.value,
-        MaxSlippageOutputToken: slippageTwo.value,
-        BaseTokenAmount: baseTokenAmount.value,
-        TokenInputMemo: uuid.v4(),
-      };
+      router.push({ name: "swaps" });
+    } catch (e) {
+      console.log(e.message);
+    }
+  }
 
-      let postMethod = "SwapRequest";
-      if (DSWAP_API_VERSION && DSWAP_API_VERSION != "1.0") {
-        postMethod += `?api-version=${DSWAP_API_VERSION}`;
-      }
+  swapInProgress.value = false;
+  showOverlay.value = false;
+  swapSendTokens.value = false;
+};
 
-      let postVal = await dswapAPI.post(postMethod, postData);
+watch(fromSymbol, (value) => {
+  if (toSymbol.value && value === toSymbol.value) {
+    toSymbol.value = null;
+  }
+});
 
-      if (postVal && postVal.data && postVal.data.Id) {
-        swapSendTokens.value = true;
+watch(toSymbol, (value) => {
+  if (fromSymbol.value && value === fromSymbol.value) {
+    toSymbol.value = null;
+  }
+});
 
-        await walletStore.requestTransfer({
-          to: DSWAP_ACCOUNT,
-          symbol: fromSymbol.value,
-          quantity: fromQuantity.value.toString(),
-          memo: `SwapRequest ${postData.TokenInputMemo}`,
-          eventName: "dswap-transfer-successful",
-        });
-      }
-
-      btnBusy.value = false;
-    };
-
-    const onTransferSuccessful = async ({ id }) => {
+debouncedWatch(
+  fromQuantity,
+  async () => {
+    if (toSymbol.value) {
       showOverlay.value = true;
-      swapInProgress.value = true;
-      swapSendTokens.value = false;
 
-      await store.validateTransaction(id, 10);
-    };
+      try {
+        const postData = {
+          Chain: 1,
+          TokenInput: fromSymbol.value,
+          TokenInputAmount: fromQuantity.value,
+          TokenOutput: toSymbol.value,
+        };
 
-    const onTransactionValidated = async ({ error, contract, action, payload }) => {
-      if (
-        !error &&
-        contract === "tokens" &&
-        action === "transfer" &&
-        payload.to === DSWAP_ACCOUNT
-      ) {
-        try {
-          swapInProgress.value = false;
-          showOverlay.value = false;
-          swapSendTokens.value = false;
-
-          await vfm$.hideAll();
-
-          onClose();
-
-          router.push({ name: "swaps" });
-        } catch (e) {
-          console.log(e.message);
+        let postMethod = "SwapRequest/CalculateSwapOutput";
+        if (DSWAP_API_VERSION && DSWAP_API_VERSION != "1.0") {
+          postMethod += `?api-version=${DSWAP_API_VERSION}`;
         }
+
+        const {
+          data: { TokenOutputAmount, BaseTokenAmount },
+        } = await dswapAPI.post(postMethod, postData);
+
+        toQuantity.value = toFixedWithoutRounding(TokenOutputAmount, 8);
+        baseTokenAmount.value = BaseTokenAmount;
+      } catch (e) {
+        console.log(e.message);
       }
 
-      swapInProgress.value = false;
       showOverlay.value = false;
-      swapSendTokens.value = false;
-    };
-
-    watch(fromSymbol, (value) => {
-      if (toSymbol.value && value === toSymbol.value) {
-        toSymbol.value = null;
-      }
-    });
-
-    watch(toSymbol, (value) => {
-      if (fromSymbol.value && value === fromSymbol.value) {
-        toSymbol.value = null;
-      }
-    });
-
-    debouncedWatch(
-      fromQuantity,
-      async () => {
-        if (toSymbol.value) {
-          showOverlay.value = true;
-
-          try {
-            const postData = {
-              Chain: 1,
-              TokenInput: fromSymbol.value,
-              TokenInputAmount: fromQuantity.value,
-              TokenOutput: toSymbol.value,
-            };
-
-            let postMethod = "SwapRequest/CalculateSwapOutput";
-            if (DSWAP_API_VERSION && DSWAP_API_VERSION != "1.0") {
-              postMethod += `?api-version=${DSWAP_API_VERSION}`;
-            }
-
-            const {
-              data: { TokenOutputAmount, BaseTokenAmount },
-            } = await dswapAPI.post(postMethod, postData);
-
-            toQuantity.value = toFixedWithoutRounding(TokenOutputAmount, 8);
-            baseTokenAmount.value = BaseTokenAmount;
-          } catch (e) {
-            console.log(e.message);
-          }
-
-          showOverlay.value = false;
-        }
-      },
-      { debounce: 500 }
-    );
-
-    onMounted(() => {
-      event.on("dswap-transfer-successful", onTransferSuccessful);
-      event.on("transaction-validated", onTransactionValidated);
-    });
-
-    onBeforeUnmount(() => {
-      event.off("dswap-transfer-successful", onTransferSuccessful);
-      event.off("transaction-validated", onTransactionValidated);
-    });
-
-    return {
-      show,
-      modalBusy,
-      btnBusy,
-      showOverlay,
-      swapInProgress,
-      swapSendTokens,
-
-      fromSymbol,
-      toSymbol,
-
-      fromQuantity,
-      toQuantity,
-
-      fromSymbolOptions,
-      toSymbolOptions,
-
-      fromSymbolBalance,
-      toSymbolBalance,
-
-      slippageOne,
-      slippageTwo,
-
-      beforeOpen,
-      beforeClose,
-      onClose,
-      requestSwap,
-    };
+    }
   },
+  { debounce: 500 }
+);
+
+onMounted(() => {
+  event.on("dswap-transfer-successful", onTransferSuccessful);
+  event.on("transaction-validated", onTransactionValidated);
+});
+
+onBeforeUnmount(() => {
+  event.off("dswap-transfer-successful", onTransferSuccessful);
+  event.off("transaction-validated", onTransactionValidated);
 });
 </script>

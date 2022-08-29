@@ -18,7 +18,9 @@
 
     <CustomTable :fields="rewardsTableFields" :items="rewards">
       <template #cell(actions)="{ item }">
-        <button class="btn-sm" @click.prevent="claimReward(item.symbol)">Claim</button>
+        <button class="btn-sm" @click.prevent="walletStore.requestClaimScotRewards(item.symbol)">
+          Claim
+        </button>
       </template>
     </CustomTable>
 
@@ -30,84 +32,64 @@
   <PageFooter />
 </template>
 
-<script>
-import { defineComponent, inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from "vue";
+<script setup>
+import { inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from "vue";
 import { useWalletStore } from "../stores/wallet";
 import { sleep } from "../utils";
 import CustomTable from "../components/utilities/CustomTable.vue";
 import PageFooter from "../components/PageFooter.vue";
 
-export default defineComponent({
-  name: "Rewards",
+const loading = ref(true);
+const event = inject("eventBus");
 
-  components: {
-    CustomTable,
-    PageFooter,
-  },
+const walletStore = useWalletStore();
 
-  setup() {
-    const loading = ref(true);
-    const event = inject("eventBus");
+const rewards = ref([]);
 
-    const walletStore = useWalletStore();
+const rewardsTableFields = [
+  { key: "symbol", label: "SYMBOL" },
+  { key: "stake", label: "STAKE" },
+  { key: "reward", label: "REWARD" },
+  { key: "actions", label: "" },
+];
 
-    const rewards = ref([]);
+const fetchRewards = async () => {
+  try {
+    rewards.value = await walletStore.fetchScotRewards();
+  } catch {
+    //
+  }
+};
 
-    const rewardsTableFields = [
-      { key: "symbol", label: "SYMBOL" },
-      { key: "stake", label: "STAKE" },
-      { key: "reward", label: "REWARD" },
-      { key: "actions", label: "" },
-    ];
+const claimAll = async () => {
+  const symbols = rewards.value.map((r) => r.symbol);
 
-    const fetchRewards = async () => {
-      try {
-        rewards.value = await walletStore.fetchScotRewards();
-      } catch {
-        //
-      }
-    };
+  await walletStore.requestClaimScotRewards(symbols);
+};
 
-    const claimAll = async () => {
-      const symbols = rewards.value.map((r) => r.symbol);
+const onScotClaim = async () => {
+  loading.value = true;
 
-      await walletStore.requestClaimScotRewards(symbols);
-    };
+  await sleep(30 * 1000);
 
-    const onScotClaim = async () => {
-      loading.value = true;
+  await fetchRewards();
 
-      await sleep(30 * 1000);
+  loading.value = false;
+};
 
-      await fetchRewards();
+onBeforeMount(async () => {
+  loading.value = true;
 
-      loading.value = false;
-    };
+  await fetchRewards();
 
-    onBeforeMount(async () => {
-      loading.value = true;
+  loading.value = false;
+});
 
-      await fetchRewards();
+onMounted(() => {
+  event.on("scot-claim-successful", onScotClaim);
+});
 
-      loading.value = false;
-    });
-
-    onMounted(() => {
-      event.on("scot-claim-successful", onScotClaim);
-    });
-
-    onBeforeUnmount(() => {
-      event.off("scot-claim-successful", onScotClaim);
-    });
-
-    return {
-      loading,
-      rewardsTableFields,
-      rewards,
-
-      claimReward: walletStore.requestClaimScotRewards,
-      claimAll,
-    };
-  },
+onBeforeUnmount(() => {
+  event.off("scot-claim-successful", onScotClaim);
 });
 </script>

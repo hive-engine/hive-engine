@@ -2,7 +2,7 @@
   <DepthLineChart :chart-data="chartData" :options="options" />
 </template>
 
-<script>
+<script setup>
 import {
   Chart,
   LineController,
@@ -12,7 +12,7 @@ import {
   CategoryScale,
   Filler,
 } from "chart.js";
-import { defineComponent, ref } from "vue";
+import { ref } from "vue";
 import { defineChartComponent } from "vue-chart-3";
 
 class CustomLineChart extends LineController {
@@ -57,49 +57,35 @@ Chart.register(
 
 const DepthLineChart = defineChartComponent("DepthLineChart", "CustomLineChart");
 
-export default defineComponent({
-  name: "DepthChart",
+defineProps({
+  chartData: { type: Object, required: true },
+});
 
-  components: {
-    DepthLineChart,
+const options = ref({
+  maintainAspectRatio: false,
+  interaction: {
+    mode: "index",
+    intersect: false,
   },
-
-  props: {
-    chartData: { type: Object, required: true },
-  },
-
-  setup() {
-    const options = ref({
-      maintainAspectRatio: false,
-      interaction: {
-        mode: "index",
-        intersect: false,
+  scales: {
+    y: {
+      ticks: {
+        color: "#647882",
       },
-      scales: {
-        y: {
-          ticks: {
-            color: "#647882",
-          },
-          grid: {
-            color: "rgba(100, 100, 100, .2)",
-            borderWidth: 0,
-          },
-        },
-        x: {
-          ticks: {
-            color: "#647882",
-          },
-          grid: {
-            color: "rgba(100, 100, 100, .2)",
-            borderWidth: 0,
-          },
-        },
+      grid: {
+        color: "rgba(100, 100, 100, .2)",
+        borderWidth: 0,
       },
-    });
-
-    return {
-      options,
-    };
+    },
+    x: {
+      ticks: {
+        color: "#647882",
+      },
+      grid: {
+        color: "rgba(100, 100, 100, .2)",
+        borderWidth: 0,
+      },
+    },
   },
 });
 </script>
