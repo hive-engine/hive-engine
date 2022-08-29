@@ -30,11 +30,11 @@
 
           <div class="hidden lg:block lg:ml-auto">
             <div class="flex lg:space-x-4">
-              <a
+              <!-- <a
                 class="text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold cursor-pointer"
                 @click="vfm$.show('buyCrypto')"
                 >Buy Crypto</a
-              >
+              > -->
 
               <router-link
                 :to="{ name: 'tokens' }"
@@ -238,7 +238,7 @@
 
   <LoginModal />
 
-  <BuyCrypto />
+  <!-- <BuyCrypto /> -->
 
   <Swap />
 
@@ -264,7 +264,7 @@ import { MenuIcon, XIcon, MoonIcon, SunIcon } from "@heroicons/vue/outline";
 import { useUserStore } from "./stores/user";
 import { useStore } from "./stores";
 import LoginModal from "./components/modals/Login.vue";
-import BuyCrypto from "./components/modals/BuyCrypto.vue";
+// import BuyCrypto from "./components/modals/BuyCrypto.vue";
 import Swap from "./components/modals/Swap.vue";
 import Keychain from "./components/modals/Keychain.vue";
 
