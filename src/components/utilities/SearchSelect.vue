@@ -1,6 +1,6 @@
 <template>
   <div
-    class="relative bg-white text-gray-700 border border-gray-400 dark:bg-slate-600 dark:text-gray-300 dark:border-gray-500"
+    class="relative bg-white text-gray-700 border border-gray-500 dark:bg-slate-600 dark:text-gray-300 dark:border-gray-500"
     :class="classes"
   >
     <input
@@ -9,6 +9,7 @@
       autocomplete="off"
       class="input bg-transparent w-full px-3 py-2 top-0 border-0 focus:ring-0 z-10"
       :value="searchText"
+      :disabled="disabled"
       @input="searchText = $event.target.value"
       @focus.prevent="openMenu"
       @blur="blurInput"
@@ -62,6 +63,7 @@ export default defineComponent({
     classes: { type: String, default: "" },
     menuClass: { type: String, default: "" },
     optionClass: { type: String, default: "" },
+    disabled: { type: Boolean, default: false },
   },
 
   emits: ["update:modelValue"],
@@ -108,6 +110,10 @@ export default defineComponent({
     });
 
     const openMenu = () => {
+      if (props.disabled) {
+        return;
+      }
+
       input.value.focus();
 
       showMenu.value = true;

@@ -16,3 +16,4 @@ export const SCOT_API = "https://scot-api.hive-engine.com";
 export const DSWAP_API = "https://dswap-api.dswap.trade/api";
 export const DSWAP_ACCOUNT = "dswap";
 export const DSWAP_SOURCE_ID = "60f0880d47262b9a30fef8bf";
+export const BANXA_API = "https://banxa.tribaldex.com";
