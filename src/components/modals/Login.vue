@@ -40,113 +40,94 @@
   </Modal>
 </template>
 
-<script>
-import { defineComponent, inject, onMounted, onBeforeUnmount, ref } from "vue";
+<script setup>
+import { inject, onMounted, onBeforeUnmount, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useVuelidate } from "@vuelidate/core";
 import { minLength, maxLength, required } from "@vuelidate/validators";
 import { useUserStore } from "../../stores/user";
 import Modal from "./Modal.vue";
 
-export default defineComponent({
-  name: "LoginModal",
+const userStore = useUserStore();
+const event = inject("eventBus");
+const vfm$ = inject("$vfm");
 
-  components: {
-    Modal,
-  },
+const username = ref("");
+const show = ref(false);
+const btnBusy = ref(false);
 
-  setup() {
-    const userStore = useUserStore();
-    const event = inject("eventBus");
-    const vfm$ = inject("$vfm");
+const route = useRoute();
+const router = useRouter();
 
-    const username = ref("");
-    const show = ref(false);
-    const btnBusy = ref(false);
-
-    const route = useRoute();
-    const router = useRouter();
-
-    const rules = {
-      username: {
-        required,
-        minLength: minLength(3),
-        maxLength: maxLength(16),
-        validUsername: (value) => {
-          if (value === "") {
-            return true;
-          }
-
-          return /^([a-z])[a-z0-9-.]*$/.test(value);
-        },
-      },
-    };
-
-    const v$ = useVuelidate(rules, { username });
-
-    let loggedInUser = localStorage.getItem("username");
-
-    if (loggedInUser && loggedInUser !== "") {
-      loggedInUser = loggedInUser.toLowerCase();
-
-      username.value = loggedInUser;
-
-      v$.value.$touch();
-    }
-
-    if (!v$.value.$invalid) {
-      userStore.username = loggedInUser;
-
-      let { redirect } = route.query;
-
-      if (redirect) {
-        redirect = atob(redirect);
-
-        const resolved = router.resolve(redirect);
-
-        if (resolved.name) {
-          router.push(redirect);
-        }
+const rules = {
+  username: {
+    required,
+    minLength: minLength(3),
+    maxLength: maxLength(16),
+    validUsername: (value) => {
+      if (value === "") {
+        return true;
       }
-    }
 
-    const beforeOpen = () => {
-      username.value = "";
-    };
-
-    const onClose = () => {
-      username.value = "";
-
-      v$.value.$reset();
-    };
-
-    onMounted(() => {
-      event.on("login-awaiting", () => {
-        btnBusy.value = true;
-      });
-
-      event.on("login-done", () => {
-        btnBusy.value = false;
-
-        vfm$.hide("loginModal");
-      });
-    });
-
-    onBeforeUnmount(() => {
-      event.off("login-awaiting");
-      event.off("login-done");
-    });
-
-    return {
-      username,
-      show,
-      btnBusy,
-      v$,
-
-      requestLogin: () => userStore.requestLogin(username.value),
-      beforeOpen,
-      onClose,
-    };
+      return /^([a-z])[a-z0-9-.]*$/.test(value);
+    },
   },
+};
+
+const v$ = useVuelidate(rules, { username });
+
+let loggedInUser = localStorage.getItem("username");
+
+if (loggedInUser && loggedInUser !== "") {
+  loggedInUser = loggedInUser.toLowerCase();
+
+  username.value = loggedInUser;
+
+  v$.value.$touch();
+}
+
+if (!v$.value.$invalid) {
+  userStore.username = loggedInUser;
+
+  let { redirect } = route.query;
+
+  if (redirect) {
+    redirect = atob(redirect);
+
+    const resolved = router.resolve(redirect);
+
+    if (resolved.name) {
+      router.push(redirect);
+    }
+  }
+}
+
+const requestLogin = () => userStore.requestLogin(username.value);
+
+const beforeOpen = () => {
+  username.value = "";
+};
+
+const onClose = () => {
+  username.value = "";
+
+  v$.value.$reset();
+};
+
+onMounted(() => {
+  event.on("login-awaiting", () => {
+    btnBusy.value = true;
+  });
+
+  event.on("login-done", () => {
+    btnBusy.value = false;
+
+    vfm$.hide("loginModal");
+  });
+});
+
+onBeforeUnmount(() => {
+  event.off("login-awaiting");
+  event.off("login-done");
 });
 </script>

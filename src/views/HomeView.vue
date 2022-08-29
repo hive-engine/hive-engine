@@ -85,27 +85,16 @@
   <PageFooter />
 </template>
 
-<script>
-import { defineComponent } from "vue";
+<script setup>
 import { useRoute, useRouter } from "vue-router";
 import PageFooter from "../components/PageFooter.vue";
 
-export default defineComponent({
-  name: "Home",
+const router = useRouter();
+const route = useRoute();
 
-  components: {
-    PageFooter,
-  },
+const { p, t } = route.query;
 
-  setup() {
-    const router = useRouter();
-    const route = useRoute();
-
-    const { p, t } = route.query;
-
-    if (p === "market" && t !== "") {
-      router.push({ name: "trade", params: { symbol: t } });
-    }
-  },
-});
+if (p === "market" && t !== "") {
+  router.push({ name: "trade", params: { symbol: t } });
+}
 </script>

@@ -46,23 +46,9 @@
   </Modal>
 </template>
 
-<script>
-import { defineComponent, ref } from "vue";
+<script setup>
+import { ref } from "vue";
 import Modal from "./Modal.vue";
 
-export default defineComponent({
-  name: "TransactionInfo",
-
-  components: {
-    Modal,
-  },
-
-  setup() {
-    const show = ref(false);
-
-    return {
-      show,
-    };
-  },
-});
+const show = ref(false);
 </script>

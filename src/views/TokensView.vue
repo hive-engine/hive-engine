@@ -49,11 +49,11 @@
       <template #cell(actions)="{ item }">
         <div class="flex">
           <button class="btn-sm mr-1" @click="vfm$.show('tokenInfoModal', item)">
-            <information-circle-icon class="h-5 w-5" />
+            <InformationCircleIcon class="h-5 w-5" />
           </button>
 
           <router-link :to="{ name: 'trade', params: { symbol: item.symbol } }" class="btn-sm">
-            <switch-horizontal-icon class="h-5 w-5" />
+            <ArrowsRightLeftIcon class="h-5 w-5" />
           </router-link>
         </div>
       </template>
@@ -65,135 +65,111 @@
   <TokenInfo />
 </template>
 
-<script>
-import { computed, defineComponent, inject, onBeforeMount, ref } from "vue";
+<script setup>
+import { computed, inject, onBeforeMount, ref } from "vue";
 import { useTokenStore } from "../stores/token";
-import { SwitchHorizontalIcon, InformationCircleIcon } from "@heroicons/vue/outline";
+import { ArrowsRightLeftIcon, InformationCircleIcon } from "@heroicons/vue/24/outline";
 import { useStore } from "../stores";
 import { addCommas } from "../utils";
 import CustomTable from "../components/utilities/CustomTable.vue";
 import TokenInfo from "../components/modals/TokenInfo.vue";
 import PageFooter from "../components/PageFooter.vue";
 
-export default defineComponent({
-  name: "Tokens",
+const loading = ref(true);
+const filter = ref("");
+const toFixedWithoutRounding = inject("toFixedWithoutRounding");
+const vfm$ = inject("$vfm");
 
-  components: {
-    CustomTable,
-    SwitchHorizontalIcon,
-    InformationCircleIcon,
-    TokenInfo,
-    PageFooter,
-  },
+const store = useStore();
+const tokenStore = useTokenStore();
 
-  setup() {
-    const loading = ref(true);
-    const filter = ref("");
-    const toFixedWithoutRounding = inject("toFixedWithoutRounding");
-    const vfm$ = inject("$vfm");
+const metrics = computed(() =>
+  tokenStore.metrics.reduce((acc, cur) => {
+    const { volume, volumeExpiration, lastPrice, priceChangePercent: change } = cur;
 
-    const store = useStore();
-    const tokenStore = useTokenStore();
-
-    const metrics = computed(() =>
-      tokenStore.metrics.reduce((acc, cur) => {
-        const { volume, volumeExpiration, lastPrice, priceChangePercent: change } = cur;
-
-        acc.set(cur.symbol, {
-          volume: Number(volume),
-          volumeExpiration,
-          price: Number(lastPrice),
-          change,
-        });
-
-        return acc;
-      }, new Map())
-    );
-
-    const tokens = computed(() => {
-      const regExp = new RegExp(filter.value, "i");
-
-      return tokenStore.tokens
-        .filter((t) => {
-          if (filter.value !== "") {
-            return regExp.test(t.symbol);
-          }
-
-          return true;
-        })
-        .reduce((acc, cur) => {
-          let { maxSupply, supply, circulatingSupply } = cur;
-
-          let volume = 0;
-          let price = 0;
-          let change = 0;
-          let volumeExpiration = 0;
-
-          if (metrics.value.has(cur.symbol)) {
-            ({ volume, price, change, volumeExpiration } = metrics.value.get(cur.symbol));
-
-            if (volumeExpiration * 1000 < Date.now()) {
-              volume = 0;
-            }
-          }
-
-          price = toFixedWithoutRounding(price * store.hivePrice, 5);
-          volume = toFixedWithoutRounding(volume * store.hivePrice, 0);
-          maxSupply = Number(maxSupply);
-          supply = Number(supply);
-          circulatingSupply = Number(circulatingSupply);
-
-          const marketCap = toFixedWithoutRounding(circulatingSupply * price, 0);
-
-          acc.push({
-            ...cur,
-            maxSupply,
-            supply,
-            circulatingSupply,
-            marketCap,
-            volume,
-            price,
-            change,
-          });
-
-          return acc;
-        }, [])
-        .sort((a, b) => b.volume - a.volume);
+    acc.set(cur.symbol, {
+      volume: Number(volume),
+      volumeExpiration,
+      price: Number(lastPrice),
+      change,
     });
 
-    onBeforeMount(async () => {
-      loading.value = true;
+    return acc;
+  }, new Map())
+);
 
-      try {
-        await Promise.all([tokenStore.fetchTokens(), tokenStore.fetchMetrics()]);
-      } catch {
-        //
+const tokens = computed(() => {
+  const regExp = new RegExp(filter.value, "i");
+
+  return tokenStore.tokens
+    .filter((t) => {
+      if (filter.value !== "") {
+        return regExp.test(t.symbol);
       }
 
-      loading.value = false;
-    });
+      return true;
+    })
+    .reduce((acc, cur) => {
+      let { maxSupply, supply, circulatingSupply } = cur;
 
-    const fields = [
-      { key: "icon", label: "" },
-      { key: "symbol", label: "Token", sortable: true },
-      { key: "name", label: "Name" },
-      { key: "marketCap", label: "Market Cap", sortable: true },
-      { key: "price", label: "Price", sortable: true },
-      { key: "change", label: "% Change", sortable: true },
-      { key: "volume", label: "24h Volume", sortable: true },
-      { key: "circulatingSupply", label: "Supply", sortable: true },
-      { key: "actions", label: "" },
-    ];
+      let volume = 0;
+      let price = 0;
+      let change = 0;
+      let volumeExpiration = 0;
 
-    return {
-      vfm$,
-      loading,
-      filter,
-      fields,
-      tokens,
+      if (metrics.value.has(cur.symbol)) {
+        ({ volume, price, change, volumeExpiration } = metrics.value.get(cur.symbol));
 
-      addCommas,
-    };
-  },
+        if (volumeExpiration * 1000 < Date.now()) {
+          volume = 0;
+        }
+      }
+
+      price = toFixedWithoutRounding(price * store.hivePrice, 5);
+      volume = toFixedWithoutRounding(volume * store.hivePrice, 0);
+      maxSupply = Number(maxSupply);
+      supply = Number(supply);
+      circulatingSupply = Number(circulatingSupply);
+
+      const marketCap = toFixedWithoutRounding(circulatingSupply * price, 0);
+
+      acc.push({
+        ...cur,
+        maxSupply,
+        supply,
+        circulatingSupply,
+        marketCap,
+        volume,
+        price,
+        change,
+      });
+
+      return acc;
+    }, [])
+    .sort((a, b) => b.volume - a.volume);
 });
+
+onBeforeMount(async () => {
+  loading.value = true;
+
+  try {
+    await Promise.all([tokenStore.fetchTokens(), tokenStore.fetchMetrics()]);
+  } catch {
+    //
+  }
+
+  loading.value = false;
+});
+
+const fields = [
+  { key: "icon", label: "" },
+  { key: "symbol", label: "Token", sortable: true },
+  { key: "name", label: "Name" },
+  { key: "marketCap", label: "Market Cap", sortable: true },
+  { key: "price", label: "Price", sortable: true },
+  { key: "change", label: "% Change", sortable: true },
+  { key: "volume", label: "24h Volume", sortable: true },
+  { key: "circulatingSupply", label: "Supply", sortable: true },
+  { key: "actions", label: "" },
+];
 </script>

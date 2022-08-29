@@ -10,15 +10,6 @@
   <PageFooter />
 </template>
 
-<script>
-import { defineComponent } from "vue";
+<script setup>
 import PageFooter from "../components/PageFooter.vue";
-
-export default defineComponent({
-  name: "NotFound",
-
-  components: {
-    PageFooter,
-  },
-});
 </script>

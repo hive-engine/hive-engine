@@ -32,7 +32,7 @@
 
       <template #cell(txId)="{ item }">
         <button class="btn-sm" @click="marketStore.requestCancelOrders([item])">
-          <XIcon class="h-5 w-5" />
+          <XMarkIcon class="h-5 w-5" />
         </button>
       </template>
     </custom-table>
@@ -57,7 +57,7 @@ import {
   onMounted,
   ref,
 } from "vue";
-import { XIcon } from "@heroicons/vue/outline";
+import { XMarkIcon } from "@heroicons/vue/24/outline";
 import { useStore } from "../stores";
 import { useMarketStore } from "../stores/market";
 import { useUserStore } from "../stores/user";
@@ -67,7 +67,7 @@ export default defineComponent({
   name: "OpenOrders",
 
   components: {
-    XIcon,
+    XMarkIcon,
     CustomTable,
     PageFooter,
   },

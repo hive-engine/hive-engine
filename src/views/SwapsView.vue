@@ -37,91 +37,72 @@
   <PageFooter />
 </template>
 
-<script>
+<script setup>
 import axios from "axios";
 import { format } from "date-fns";
-import { computed, defineComponent, onBeforeMount, ref } from "vue";
+import { computed, onBeforeMount, ref } from "vue";
 import { DSWAP_API, DSWAP_SOURCE_ID } from "../config";
 import { useUserStore } from "../stores/user";
 import PageFooter from "../components/PageFooter.vue";
 import CustomTable from "../components/utilities/CustomTable.vue";
 
-export default defineComponent({
-  name: "Swaps",
+const loading = ref(true);
 
-  components: {
-    PageFooter,
-    CustomTable,
-  },
+const userStore = useUserStore();
 
-  setup() {
-    const loading = ref(true);
+const username = computed(() => userStore.username);
 
-    const userStore = useUserStore();
+const statusObj = {
+  1: "Init",
+  2: "In progress",
+  3: "Success",
+  4: "Failed",
+};
 
-    const username = computed(() => userStore.username);
+const statusClass = {
+  Init: "bg-yellow-400 text-yellow-900",
+  "In progress": "bg-yellow-400 text-yellow-900",
+  Success: "bg-green-400 text-green-900",
+  Failed: "bg-red-400 text-red-900",
+};
 
-    const statusObj = {
-      1: "Init",
-      2: "In progress",
-      3: "Success",
-      4: "Failed",
-    };
+const swaps = ref([]);
 
-    const statusClass = {
-      Init: "bg-yellow-400 text-yellow-900",
-      "In progress": "bg-yellow-400 text-yellow-900",
-      Success: "bg-green-400 text-green-900",
-      Failed: "bg-red-400 text-red-900",
-    };
+const swapFields = [
+  { key: "date", label: "DATE" },
+  { key: "from", label: "FROM" },
+  { key: "requested", label: "AMOUNT REQUESTED" },
+  { key: "realized", label: "AMOUNT REALIZED" },
+  { key: "status", label: "STATUS" },
+];
 
-    const swaps = ref([]);
+const getStatusClass = (status) => {
+  return statusClass[status];
+};
 
-    const swapFields = [
-      { key: "date", label: "DATE" },
-      { key: "from", label: "FROM" },
-      { key: "requested", label: "AMOUNT REQUESTED" },
-      { key: "realized", label: "AMOUNT REALIZED" },
-      { key: "status", label: "STATUS" },
-    ];
+onBeforeMount(async () => {
+  loading.value = true;
 
-    const getStatusClass = (status) => {
-      return statusClass[status];
-    };
-
-    onBeforeMount(async () => {
-      loading.value = true;
-
-      try {
-        let { data } = await axios.get(`${DSWAP_API}/SwapRequest`, {
-          params: { account: username.value, sourceId: DSWAP_SOURCE_ID, limit: 50 },
-        });
-
-        data = data.map((s) => ({
-          date: format(new Date(s.CreatedAt), "Pp"),
-          fromSymbol: s.TokenInput,
-          fromAmount: s.TokenInputAmount,
-          toSymbol: s.TokenOutput,
-          amountRequested: s.TokenOutputAmount,
-          actualAmount: s.TokenOutputAmountActual,
-          status: statusObj[s.SwapStatusId],
-        }));
-
-        swaps.value = data;
-      } catch {
-        //
-      }
-
-      loading.value = false;
+  try {
+    let { data } = await axios.get(`${DSWAP_API}/SwapRequest`, {
+      params: { account: username.value, sourceId: DSWAP_SOURCE_ID, limit: 50 },
     });
 
-    return {
-      loading,
+    data = data.map((s) => ({
+      date: format(new Date(s.CreatedAt), "Pp"),
+      fromSymbol: s.TokenInput,
+      fromAmount: s.TokenInputAmount,
+      toSymbol: s.TokenOutput,
+      amountRequested: s.TokenOutputAmount,
+      actualAmount: s.TokenOutputAmountActual,
+      status: statusObj[s.SwapStatusId],
+    }));
 
-      swaps,
-      swapFields,
-      getStatusClass,
-    };
-  },
+    swaps.value = data;
+  } catch {
+    //
+  }
+
+  loading.value = false;
 });
 </script>

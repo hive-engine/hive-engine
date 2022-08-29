@@ -14,14 +14,8 @@
   </svg>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "Spninner",
-
-  props: {
-    large: { type: Boolean, default: false },
-  },
+<script setup>
+defineProps({
+  large: { type: Boolean, default: false },
 });
 </script>

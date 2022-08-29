@@ -44,119 +44,100 @@
   </nav>
 </template>
 
-<script>
-import { defineComponent, computed } from "vue";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/vue/solid";
+<script setup>
+import { computed } from "vue";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/vue/24/outline";
 
-export default defineComponent({
-  name: "Pagination",
-
-  components: {
-    ChevronLeftIcon,
-    ChevronRightIcon,
+const props = defineProps({
+  pages: {
+    type: Number,
+    default: 0,
   },
-
-  props: {
-    pages: {
-      type: Number,
-      default: 0,
-    },
-    rangeSize: {
-      type: Number,
-      default: 1,
-    },
-    modelValue: {
-      type: Number,
-      default: 1,
-    },
+  rangeSize: {
+    type: Number,
+    default: 1,
   },
-
-  emits: ["update:modelValue"],
-
-  setup(props, { emit }) {
-    const pagination = computed(() => {
-      const res = [];
-
-      const minPaginationElems = 3 + props.rangeSize * 2;
-
-      let rangeStart = props.pages <= minPaginationElems ? 1 : props.modelValue - props.rangeSize;
-      let rangeEnd =
-        props.pages <= minPaginationElems ? props.pages : props.modelValue + props.rangeSize;
-
-      rangeEnd = rangeEnd > props.pages ? props.pages : rangeEnd;
-
-      rangeStart = rangeStart < 1 ? 1 : rangeStart;
-
-      if (props.pages > minPaginationElems) {
-        const isStartBoundaryReached = rangeStart - 1 < 3;
-        const isEndBoundaryReached = props.pages - rangeEnd < 3;
-        if (isStartBoundaryReached) {
-          rangeEnd = minPaginationElems - 2;
-          for (let i = 1; i < rangeStart; i += 1) {
-            res.push(i);
-          }
-        } else {
-          res.push(1);
-          res.push(null);
-        }
-        if (isEndBoundaryReached) {
-          rangeStart = props.pages - (minPaginationElems - 3);
-          for (let i = rangeStart; i <= props.pages; i += 1) {
-            res.push(i);
-          }
-        } else {
-          for (let i = rangeStart; i <= rangeEnd; i += 1) {
-            res.push(i);
-          }
-          res.push(null);
-          res.push(props.pages);
-        }
-      } else {
-        for (let i = rangeStart; i <= rangeEnd; i += 1) {
-          res.push(i);
-        }
-      }
-      return res;
-    });
-
-    const isPrevControlsActive = computed(() => props.modelValue > 1);
-    const isNextControlsActive = computed(() => props.modelValue < props.pages);
-
-    const updatePageHandler = (params) => {
-      emit("update:modelValue", params);
-    };
-
-    const goToFirst = () => {
-      if (isPrevControlsActive.value) {
-        emit("update:modelValue", 1);
-      }
-    };
-    const goToPrev = () => {
-      if (isPrevControlsActive.value) {
-        emit("update:modelValue", props.modelValue - 1);
-      }
-    };
-    const goToLast = () => {
-      if (isNextControlsActive.value) {
-        emit("update:modelValue", props.pages);
-      }
-    };
-    const goToNext = () => {
-      if (isNextControlsActive.value) {
-        emit("update:modelValue", props.modelValue + 1);
-      }
-    };
-
-    return {
-      pagination,
-      updatePageHandler,
-      isPrevControlsActive,
-      isNextControlsActive,
-      goToFirst,
-      goToLast,
-      goToPrev,
-      goToNext,
-    };
+  modelValue: {
+    type: Number,
+    default: 1,
   },
 });
+
+const emit = defineEmits(["update:modelValue"]);
+
+const pagination = computed(() => {
+  const res = [];
+
+  const minPaginationElems = 3 + props.rangeSize * 2;
+
+  let rangeStart = props.pages <= minPaginationElems ? 1 : props.modelValue - props.rangeSize;
+  let rangeEnd =
+    props.pages <= minPaginationElems ? props.pages : props.modelValue + props.rangeSize;
+
+  rangeEnd = rangeEnd > props.pages ? props.pages : rangeEnd;
+
+  rangeStart = rangeStart < 1 ? 1 : rangeStart;
+
+  if (props.pages > minPaginationElems) {
+    const isStartBoundaryReached = rangeStart - 1 < 3;
+    const isEndBoundaryReached = props.pages - rangeEnd < 3;
+    if (isStartBoundaryReached) {
+      rangeEnd = minPaginationElems - 2;
+      for (let i = 1; i < rangeStart; i += 1) {
+        res.push(i);
+      }
+    } else {
+      res.push(1);
+      res.push(null);
+    }
+    if (isEndBoundaryReached) {
+      rangeStart = props.pages - (minPaginationElems - 3);
+      for (let i = rangeStart; i <= props.pages; i += 1) {
+        res.push(i);
+      }
+    } else {
+      for (let i = rangeStart; i <= rangeEnd; i += 1) {
+        res.push(i);
+      }
+      res.push(null);
+      res.push(props.pages);
+    }
+  } else {
+    for (let i = rangeStart; i <= rangeEnd; i += 1) {
+      res.push(i);
+    }
+  }
+  return res;
+});
+
+const isPrevControlsActive = computed(() => props.modelValue > 1);
+const isNextControlsActive = computed(() => props.modelValue < props.pages);
+
+const updatePageHandler = (params) => {
+  emit("update:modelValue", params);
+};
+
+// const goToFirst = () => {
+//   if (isPrevControlsActive.value) {
+//     emit("update:modelValue", 1);
+//   }
+// };
+
+const goToPrev = () => {
+  if (isPrevControlsActive.value) {
+    emit("update:modelValue", props.modelValue - 1);
+  }
+};
+
+// const goToLast = () => {
+//   if (isNextControlsActive.value) {
+//     emit("update:modelValue", props.pages);
+//   }
+// };
+
+const goToNext = () => {
+  if (isNextControlsActive.value) {
+    emit("update:modelValue", props.modelValue + 1);
+  }
+};
 </script>

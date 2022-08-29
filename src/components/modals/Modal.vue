@@ -12,7 +12,7 @@
         </div>
 
         <button class="dark:text-gray-300" @click="close">
-          <x-icon class="h-5 w-5" aria-hidden="true" />
+          <XMarkIcon class="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
 
@@ -23,17 +23,6 @@
   </vue-final-modal>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import { XIcon } from "@heroicons/vue/outline";
-
-export default defineComponent({
-  name: "Modal",
-
-  components: {
-    XIcon,
-  },
-
-  inheritAttrs: false,
-});
+<script setup>
+import { XMarkIcon } from "@heroicons/vue/24/outline";
 </script>

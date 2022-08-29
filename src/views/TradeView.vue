@@ -437,7 +437,7 @@
 
         <template #cell(txId)="{ item }">
           <button class="btn-sm" @click="marketStore.requestCancelOrders([item])">
-            <XIcon class="h-5 w-5" />
+            <XMarkIcon class="h-5 w-5" />
           </button>
         </template>
       </custom-table>
@@ -459,20 +459,11 @@
   <TokenInfo />
 </template>
 
-<script>
-import {
-  computed,
-  defineComponent,
-  inject,
-  onBeforeMount,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-  watch,
-} from "vue";
+<script setup>
+import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { RadioGroup, RadioGroupOption } from "@headlessui/vue";
-import { InformationCircleIcon, XIcon } from "@heroicons/vue/outline";
+import { InformationCircleIcon, XMarkIcon } from "@heroicons/vue/24/outline";
 import { format } from "date-fns";
 import { useStore } from "../stores";
 import { useUserStore } from "../stores/user";
@@ -488,467 +479,393 @@ import CandleChart from "../components/charts/CandleChart.vue";
 import DepthChart from "../components/charts/DepthChart.vue";
 import VolumeChart from "../components/charts/VolumeChart.vue";
 
-export default defineComponent({
-  name: "Trade",
+const loading = ref(true);
+const route = useRoute();
+const router = useRouter();
+const vfm$ = inject("$vfm");
+const event = inject("eventBus");
 
-  components: {
-    RadioGroup,
-    RadioGroupOption,
-    InformationCircleIcon,
-    XIcon,
-    CustomTable,
-    SearchSelect,
-    PageFooter,
-    CandleChart,
-    DepthChart,
-    VolumeChart,
-    TokenInfo,
-  },
+const store = useStore();
+const userStore = useUserStore();
+const marketStore = useMarketStore();
+const walletStore = useWalletStore();
+const tokenStore = useTokenStore();
 
-  setup() {
-    const loading = ref(true);
-    const route = useRoute();
-    const router = useRouter();
-    const vfm$ = inject("$vfm");
-    const event = inject("eventBus");
+const toFixedWithoutRounding = inject("toFixedWithoutRounding");
 
-    const store = useStore();
-    const userStore = useUserStore();
-    const marketStore = useMarketStore();
-    const walletStore = useWalletStore();
-    const tokenStore = useTokenStore();
+const symbol = ref(route.params.symbol);
 
-    const toFixedWithoutRounding = inject("toFixedWithoutRounding");
+const buyOrderType = ref("limit");
+const buyPrice = ref("");
+const buyQuantity = ref("");
+const buyTotal = ref("");
 
-    const symbol = ref(route.params.symbol);
+const sellOrderType = ref("limit");
+const sellPrice = ref("");
+const sellQuantity = ref("");
+const sellTotal = ref("");
 
-    const buyOrderType = ref("limit");
-    const buyPrice = ref("");
-    const buyQuantity = ref("");
-    const buyTotal = ref("");
+const interval = ref("daily");
+const chartType = ref("candle");
+const selectedOrders = ref([]);
 
-    const sellOrderType = ref("limit");
-    const sellPrice = ref("");
-    const sellQuantity = ref("");
-    const sellTotal = ref("");
+const candleChartData = ref({});
+const depthChartData = ref({});
+const volumeChartData = ref({});
 
-    const interval = ref("daily");
-    const chartType = ref("candle");
-    const selectedOrders = ref([]);
+const isLoggedIn = computed(() => userStore.isLoggedIn);
+const username = computed(() => userStore.username);
+const hiveBalance = computed(() => {
+  const balance = walletStore.wallet.find((w) => w.symbol === "SWAP.HIVE");
 
-    const candleChartData = ref({});
-    const depthChartData = ref({});
-    const volumeChartData = ref({});
+  return balance ? balance.balance : 0;
+});
+const symbolBalance = computed(() => {
+  const balance = walletStore.wallet.find((w) => w.symbol === symbol.value);
 
-    const isLoggedIn = computed(() => userStore.isLoggedIn);
-    const username = computed(() => userStore.username);
-    const hiveBalance = computed(() => {
-      const balance = walletStore.wallet.find((w) => w.symbol === "SWAP.HIVE");
+  return balance ? balance.balance : 0;
+});
 
-      return balance ? balance.balance : 0;
-    });
-    const symbolBalance = computed(() => {
-      const balance = walletStore.wallet.find((w) => w.symbol === symbol.value);
+const hivePrice = computed(() => store.hivePrice);
 
-      return balance ? balance.balance : 0;
-    });
+const tokens = computed(() => tokenStore.tokens.map((t) => ({ text: t.symbol, value: t.symbol })));
 
-    const hivePrice = computed(() => store.hivePrice);
+const token = computed(() => marketStore.token);
+const buyBook = computed(() =>
+  marketStore.buyBookFormatted.map((b) => ({
+    ...b,
+    quantity: b.quantity.toFixed(token.value.precision),
+  }))
+);
+const sellBook = computed(() =>
+  marketStore.sellBookFormatted.map((b) => ({
+    ...b,
+    quantity: b.quantity.toFixed(token.value.precision),
+  }))
+);
+const openOrders = computed(() => marketStore.openOrdersFormatted);
+const tradesHistory = computed(() => marketStore.tradesHistoryFormatted);
+const metrics = computed(() => marketStore.metrics);
+const marketHistory = computed(() => marketStore.marketHistory);
 
-    const tokens = computed(() =>
-      tokenStore.tokens.map((t) => ({ text: t.symbol, value: t.symbol }))
-    );
+const buyBookFields = [
+  { key: "hive_volume", label: "Total HIVE", class: "md:hidden lg:table-cell" },
+  { key: "total", label: "HIVE" },
+  { key: "quantity", label: symbol.value },
+  { key: "price", label: "BID" },
+];
 
-    const token = computed(() => marketStore.token);
-    const buyBook = computed(() =>
-      marketStore.buyBookFormatted.map((b) => ({
-        ...b,
-        quantity: b.quantity.toFixed(token.value.precision),
-      }))
-    );
-    const sellBook = computed(() =>
-      marketStore.sellBookFormatted.map((b) => ({
-        ...b,
-        quantity: b.quantity.toFixed(token.value.precision),
-      }))
-    );
-    const openOrders = computed(() => marketStore.openOrdersFormatted);
-    const tradesHistory = computed(() => marketStore.tradesHistoryFormatted);
-    const metrics = computed(() => marketStore.metrics);
-    const marketHistory = computed(() => marketStore.marketHistory);
+const sellBookFields = [
+  { key: "price", label: "ASK" },
+  { key: "quantity", label: symbol.value },
+  { key: "total", label: "HIVE" },
+  { key: "hive_volume", label: "Total HIVE", class: "md:hidden lg:table-cell" },
+];
 
-    const buyBookFields = [
-      { key: "hive_volume", label: "Total HIVE", class: "md:hidden lg:table-cell" },
-      { key: "total", label: "HIVE" },
-      { key: "quantity", label: symbol.value },
-      { key: "price", label: "BID" },
-    ];
+const openOrdersFields = [
+  { key: "checkbox", label: "" },
+  { key: "timestamp", label: "DATE" },
+  { key: "type", label: "TYPE" },
+  { key: "quantity", label: symbol.value },
+  { key: "price", label: "PRICE" },
+  { key: "total", label: "TOTAL HIVE" },
+  { key: "txId", label: "Action" },
+];
 
-    const sellBookFields = [
-      { key: "price", label: "ASK" },
-      { key: "quantity", label: symbol.value },
-      { key: "total", label: "HIVE" },
-      { key: "hive_volume", label: "Total HIVE", class: "md:hidden lg:table-cell" },
-    ];
+const tradesHistoryFields = [
+  { key: "timestamp", label: "DATE" },
+  { key: "type", label: "TYPE" },
+  { key: "buyer", label: "BUYER", class: "hidden sm:table-cell" },
+  { key: "seller", label: "SELLER", class: "hidden sm:table-cell" },
+  { key: "quantity", label: symbol.value },
+  { key: "price", label: "PRICE" },
+  { key: "total", label: "TOTAL HIVE" },
+];
 
-    const openOrdersFields = [
-      { key: "checkbox", label: "" },
-      { key: "timestamp", label: "DATE" },
-      { key: "type", label: "TYPE" },
-      { key: "quantity", label: symbol.value },
-      { key: "price", label: "PRICE" },
-      { key: "total", label: "TOTAL HIVE" },
-      { key: "txId", label: "Action" },
-    ];
+const disabledBuyButton = computed(() => {
+  return (
+    buyQuantity.value <= 0 ||
+    Number(buyTotal.value) <= 0 ||
+    Number(buyTotal.value) > hiveBalance.value
+  );
+});
 
-    const tradesHistoryFields = [
-      { key: "timestamp", label: "DATE" },
-      { key: "type", label: "TYPE" },
-      { key: "buyer", label: "BUYER", class: "hidden sm:table-cell" },
-      { key: "seller", label: "SELLER", class: "hidden sm:table-cell" },
-      { key: "quantity", label: symbol.value },
-      { key: "price", label: "PRICE" },
-      { key: "total", label: "TOTAL HIVE" },
-    ];
+const disabledSellButton = computed(() => {
+  return (
+    sellQuantity.value <= 0 ||
+    Number(sellTotal.value) <= 0 ||
+    sellQuantity.value > symbolBalance.value
+  );
+});
 
-    const disabledBuyButton = computed(() => {
-      return (
-        buyQuantity.value <= 0 ||
-        Number(buyTotal.value) <= 0 ||
-        Number(buyTotal.value) > hiveBalance.value
-      );
-    });
+watch(isLoggedIn, async (loggedIn) => {
+  if (loggedIn) {
+    await Promise.all([
+      marketStore.fetchUserOrders(symbol.value, username.value),
+      walletStore.fetchWallet(username.value, ["SWAP.HIVE", symbol.value]),
+    ]);
+  }
+});
 
-    const disabledSellButton = computed(() => {
-      return (
-        sellQuantity.value <= 0 ||
-        Number(sellTotal.value) <= 0 ||
-        sellQuantity.value > symbolBalance.value
-      );
-    });
+watch(symbol, () => {
+  router.push({ name: "trade", params: { symbol: symbol.value } });
+});
 
-    watch(isLoggedIn, async (loggedIn) => {
-      if (loggedIn) {
-        await Promise.all([
-          marketStore.fetchUserOrders(symbol.value, username.value),
-          walletStore.fetchWallet(username.value, ["SWAP.HIVE", symbol.value]),
-        ]);
-      }
-    });
+watch(buyPrice, () => {
+  if (buyPrice.value > 0 && buyQuantity.value > 0 && buyOrderType.value !== "market") {
+    buyTotal.value = (buyQuantity.value * buyPrice.value).toFixed(8);
+  }
+});
 
-    watch(symbol, () => {
-      router.push({ name: "trade", params: { symbol: symbol.value } });
-    });
+watch(buyQuantity, () => {
+  if (buyPrice.value > 0 && buyQuantity.value > 0 && buyOrderType.value !== "market") {
+    buyTotal.value = (buyQuantity.value * buyPrice.value).toFixed(8);
+  }
+});
 
-    watch(buyPrice, () => {
-      if (buyPrice.value > 0 && buyQuantity.value > 0 && buyOrderType.value !== "market") {
-        buyTotal.value = (buyQuantity.value * buyPrice.value).toFixed(8);
-      }
-    });
+watch(buyTotal, (value) => {
+  let balance = value;
+  let totalQuantity = 0;
 
-    watch(buyQuantity, () => {
-      if (buyPrice.value > 0 && buyQuantity.value > 0 && buyOrderType.value !== "market") {
-        buyTotal.value = (buyQuantity.value * buyPrice.value).toFixed(8);
-      }
-    });
+  if (buyOrderType.value === "market") {
+    for (let i = 0; i < sellBook.value.length; i += 1) {
+      let { quantity, price } = sellBook.value[i];
 
-    watch(buyTotal, (value) => {
-      let balance = value;
-      let totalQuantity = 0;
+      quantity = Number(quantity);
+      price = price.toNumber();
 
-      if (buyOrderType.value === "market") {
-        for (let i = 0; i < sellBook.value.length; i += 1) {
-          let { quantity, price } = sellBook.value[i];
+      const totalPrice = quantity * price;
 
-          quantity = Number(quantity);
-          price = price.toNumber();
-
-          const totalPrice = quantity * price;
-
-          if (totalPrice > balance) {
-            totalQuantity += balance / price;
-            balance = 0;
-          } else {
-            totalQuantity += quantity;
-            balance -= totalPrice;
-          }
-        }
-
-        buyQuantity.value = totalQuantity.toFixed(8);
-        buyPrice.value = toFixedWithoutRounding(buyTotal.value / buyQuantity.value, 8);
-      }
-    });
-
-    watch(sellPrice, () => {
-      if (sellPrice.value > 0 && sellQuantity.value > 0 && sellOrderType.value !== "market") {
-        sellTotal.value = (sellQuantity.value * sellPrice.value).toFixed(8);
-      }
-    });
-
-    watch(sellQuantity, (value) => {
-      if (sellPrice.value > 0 && sellQuantity.value > 0 && sellOrderType.value !== "market") {
-        sellTotal.value = (sellQuantity.value * sellPrice.value).toFixed(8);
+      if (totalPrice > balance) {
+        totalQuantity += balance / price;
+        balance = 0;
       } else {
-        let totalQuantity = value;
-        let total = 0;
-
-        for (let i = 0; i < buyBook.value.length; i += 1) {
-          let { quantity, price } = buyBook.value[i];
-
-          quantity = Number(quantity);
-          price = price.toNumber();
-
-          if (quantity < totalQuantity) {
-            total += quantity * price;
-            totalQuantity -= quantity;
-          } else {
-            total += totalQuantity * price;
-            totalQuantity = 0;
-          }
-        }
-
-        sellTotal.value = total.toFixed(8);
-        sellPrice.value = toFixedWithoutRounding(sellTotal.value / sellQuantity.value, 8);
+        totalQuantity += quantity;
+        balance -= totalPrice;
       }
-    });
+    }
 
-    watch(interval, async () => {
-      await marketStore.fetchMarketHistory(symbol.value, interval.value);
+    buyQuantity.value = totalQuantity.toFixed(8);
+    buyPrice.value = toFixedWithoutRounding(buyTotal.value / buyQuantity.value, 8);
+  }
+});
 
-      produceCandleChart();
-      producevDepthChart();
-      produceVolumeChart();
-    });
+watch(sellPrice, () => {
+  if (sellPrice.value > 0 && sellQuantity.value > 0 && sellOrderType.value !== "market") {
+    sellTotal.value = (sellQuantity.value * sellPrice.value).toFixed(8);
+  }
+});
 
-    const produceCandleChart = () => {
-      const history = marketHistory.value.map((h) => ({
-        x: new Date(h.timestamp * 1000).getTime(),
-        o: Number(h.open),
-        h: Number(h.high),
-        l: Number(h.low),
-        c: Number(h.close),
-      }));
+watch(sellQuantity, (value) => {
+  if (sellPrice.value > 0 && sellQuantity.value > 0 && sellOrderType.value !== "market") {
+    sellTotal.value = (sellQuantity.value * sellPrice.value).toFixed(8);
+  } else {
+    let totalQuantity = value;
+    let total = 0;
 
-      candleChartData.value = {
-        datasets: [
-          {
-            label: symbol,
-            data: history,
-            color: {
-              up: "#01c075",
-              down: "#d92f4d",
-              unchanged: "#999",
-            },
-          },
-        ],
-      };
-    };
+    for (let i = 0; i < buyBook.value.length; i += 1) {
+      let { quantity, price } = buyBook.value[i];
 
-    const producevDepthChart = () => {
-      const buyOrderDataset = filterOutliers(buyBook.value.map((o) => o.volume));
-      const sellOrderDataset = filterOutliers(sellBook.value.map((o) => o.volume));
+      quantity = Number(quantity);
+      price = price.toNumber();
 
-      buyOrderDataset.reverse();
-
-      const buyOrderLabels = [
-        ...new Set(
-          buyBook.value
-            .filter((o) => buyOrderDataset.includes(o.volume))
-            .map((o) => parseFloat(o.price))
-        ),
-      ];
-
-      const sellOrderLabels = [
-        ...new Set(
-          sellBook.value
-            .filter((o) => sellOrderDataset.includes(o.volume))
-            .map((o) => parseFloat(o.price))
-        ),
-      ];
-
-      buyOrderLabels.reverse();
-
-      depthChartData.value = {
-        labels: buyOrderLabels.concat(sellOrderLabels),
-        datasets: [
-          {
-            label: "Buy",
-            borderColor: "#02c076",
-            backgroundColor: "#02c076",
-            fill: "origin",
-            pointRadius: 0,
-            data: buyOrderDataset,
-          },
-          {
-            label: "Sell",
-            borderColor: "#d9304e",
-            backgroundColor: "#d9304e",
-            fill: "origin",
-            pointRadius: 0,
-            data: new Array(buyOrderDataset.length).fill(null).concat(sellOrderDataset),
-          },
-        ],
-      };
-    };
-
-    const produceVolumeChart = () => {
-      const history = marketHistory.value
-        .slice()
-        .sort((a, b) => b.timestamp - a.timestamp)
-        .slice(0, 60);
-
-      history.reverse();
-
-      volumeChartData.value = {
-        labels: history.map((h) => format(new Date(h.timestamp * 1000), "Pp")),
-        datasets: [
-          {
-            label: "SWAP.HIVE",
-            backgroundColor: "#01c075",
-            data: history.map((h) => Number(h.quoteVolume)),
-          },
-          {
-            label: symbol,
-            backgroundColor: "#d92f4d",
-            data: history.map((h) => Number(h.baseVolume)),
-          },
-        ],
-      };
-    };
-
-    const fetchTokenMarket = async () => {
-      try {
-        const requests = [
-          marketStore.fetchOrders(symbol.value),
-          marketStore.fetchMarketHistory(symbol.value, interval.value),
-          marketStore.fetchToken(symbol.value),
-          marketStore.fetchTokenMetrics(symbol.value),
-          marketStore.fetchTradeHistory(symbol.value),
-        ];
-
-        if (tokens.value.length <= 0) {
-          requests.push(tokenStore.fetchTokens());
-        }
-
-        if (isLoggedIn.value) {
-          requests.push(marketStore.fetchUserOrders(symbol.value, username.value));
-          requests.push(walletStore.fetchWallet(username.value, ["SWAP.HIVE", symbol.value]));
-        }
-
-        await Promise.all(requests);
-
-        produceCandleChart();
-        producevDepthChart();
-        produceVolumeChart();
-      } catch {
-        //
+      if (quantity < totalQuantity) {
+        total += quantity * price;
+        totalQuantity -= quantity;
+      } else {
+        total += totalQuantity * price;
+        totalQuantity = 0;
       }
-    };
+    }
 
-    const resetForm = () => {
-      buyOrderType.value = "limit";
-      buyPrice.value = "";
-      buyQuantity.value = "";
-      buyTotal.value = "";
+    sellTotal.value = total.toFixed(8);
+    sellPrice.value = toFixedWithoutRounding(sellTotal.value / sellQuantity.value, 8);
+  }
+});
 
-      sellOrderType.value = "limit";
-      sellPrice.value = "";
-      sellQuantity.value = "";
-      sellTotal.value = "";
+watch(interval, async () => {
+  await marketStore.fetchMarketHistory(symbol.value, interval.value);
 
-      selectedOrders.value = [];
-    };
+  produceCandleChart();
+  producevDepthChart();
+  produceVolumeChart();
+});
 
-    const onBroadcastSuccess = async ({ id, ntrx }) => {
-      loading.value = true;
+const produceCandleChart = () => {
+  const history = marketHistory.value.map((h) => ({
+    x: new Date(h.timestamp * 1000).getTime(),
+    o: Number(h.open),
+    h: Number(h.high),
+    l: Number(h.low),
+    c: Number(h.close),
+  }));
 
-      await store.validateTransaction(ntrx > 1 ? `${id}-0` : id);
-    };
+  candleChartData.value = {
+    datasets: [
+      {
+        label: symbol,
+        data: history,
+        color: {
+          up: "#01c075",
+          down: "#d92f4d",
+          unchanged: "#999",
+        },
+      },
+    ],
+  };
+};
 
-    const onTransactionValidated = async () => {
-      resetForm();
+const producevDepthChart = () => {
+  const buyOrderDataset = filterOutliers(buyBook.value.map((o) => o.volume));
+  const sellOrderDataset = filterOutliers(sellBook.value.map((o) => o.volume));
 
-      await fetchTokenMarket();
+  buyOrderDataset.reverse();
 
-      loading.value = false;
-    };
+  const buyOrderLabels = [
+    ...new Set(
+      buyBook.value
+        .filter((o) => buyOrderDataset.includes(o.volume))
+        .map((o) => parseFloat(o.price))
+    ),
+  ];
 
-    let refreshTimeout = null;
+  const sellOrderLabels = [
+    ...new Set(
+      sellBook.value
+        .filter((o) => sellOrderDataset.includes(o.volume))
+        .map((o) => parseFloat(o.price))
+    ),
+  ];
 
-    onBeforeMount(async () => {
-      loading.value = true;
+  buyOrderLabels.reverse();
 
-      await fetchTokenMarket();
+  depthChartData.value = {
+    labels: buyOrderLabels.concat(sellOrderLabels),
+    datasets: [
+      {
+        label: "Buy",
+        borderColor: "#02c076",
+        backgroundColor: "#02c076",
+        fill: "origin",
+        pointRadius: 0,
+        data: buyOrderDataset,
+      },
+      {
+        label: "Sell",
+        borderColor: "#d9304e",
+        backgroundColor: "#d9304e",
+        fill: "origin",
+        pointRadius: 0,
+        data: new Array(buyOrderDataset.length).fill(null).concat(sellOrderDataset),
+      },
+    ],
+  };
+};
 
-      loading.value = false;
-    });
+const produceVolumeChart = () => {
+  const history = marketHistory.value
+    .slice()
+    .sort((a, b) => b.timestamp - a.timestamp)
+    .slice(0, 60);
 
-    onMounted(() => {
-      refreshTimeout = setInterval(fetchTokenMarket, 30 * 1000);
+  history.reverse();
 
-      event.on("broadcast-success", onBroadcastSuccess);
+  volumeChartData.value = {
+    labels: history.map((h) => format(new Date(h.timestamp * 1000), "Pp")),
+    datasets: [
+      {
+        label: "SWAP.HIVE",
+        backgroundColor: "#01c075",
+        data: history.map((h) => Number(h.quoteVolume)),
+      },
+      {
+        label: symbol,
+        backgroundColor: "#d92f4d",
+        data: history.map((h) => Number(h.baseVolume)),
+      },
+    ],
+  };
+};
 
-      event.on("transaction-validated", onTransactionValidated);
-    });
+const fetchTokenMarket = async () => {
+  try {
+    const requests = [
+      marketStore.fetchOrders(symbol.value),
+      marketStore.fetchMarketHistory(symbol.value, interval.value),
+      marketStore.fetchToken(symbol.value),
+      marketStore.fetchTokenMetrics(symbol.value),
+      marketStore.fetchTradeHistory(symbol.value),
+    ];
 
-    onBeforeUnmount(() => {
-      clearInterval(refreshTimeout);
+    if (tokens.value.length <= 0) {
+      requests.push(tokenStore.fetchTokens());
+    }
 
-      event.off("broadcast-success", onBroadcastSuccess);
-      event.off("transaction-validated", onTransactionValidated);
-    });
+    if (isLoggedIn.value) {
+      requests.push(marketStore.fetchUserOrders(symbol.value, username.value));
+      requests.push(walletStore.fetchWallet(username.value, ["SWAP.HIVE", symbol.value]));
+    }
 
-    return {
-      loading,
-      symbol,
-      tokens,
-      vfm$,
-      isLoggedIn,
-      interval,
+    await Promise.all(requests);
 
-      marketStore,
+    produceCandleChart();
+    producevDepthChart();
+    produceVolumeChart();
+  } catch {
+    //
+  }
+};
 
-      hiveBalance,
-      symbolBalance,
+const resetForm = () => {
+  buyOrderType.value = "limit";
+  buyPrice.value = "";
+  buyQuantity.value = "";
+  buyTotal.value = "";
 
-      buyOrderType,
-      sellOrderType,
+  sellOrderType.value = "limit";
+  sellPrice.value = "";
+  sellQuantity.value = "";
+  sellTotal.value = "";
 
-      buyPrice,
-      buyQuantity,
-      buyTotal,
+  selectedOrders.value = [];
+};
 
-      sellPrice,
-      sellQuantity,
-      sellTotal,
+const onBroadcastSuccess = async ({ id, ntrx }) => {
+  loading.value = true;
 
-      buyBookFields,
-      buyBook,
-      sellBookFields,
-      sellBook,
+  await store.validateTransaction(ntrx > 1 ? `${id}-0` : id);
+};
 
-      openOrders,
-      openOrdersFields,
+const onTransactionValidated = async () => {
+  resetForm();
 
-      tradesHistory,
-      tradesHistoryFields,
+  await fetchTokenMarket();
 
-      hivePrice,
-      token,
-      metrics,
+  loading.value = false;
+};
 
-      selectedOrders,
+let refreshTimeout = null;
 
-      disabledBuyButton,
-      disabledSellButton,
+onBeforeMount(async () => {
+  loading.value = true;
 
-      chartType,
-      candleChartData,
-      depthChartData,
-      volumeChartData,
+  await fetchTokenMarket();
 
-      toFixedWithoutRounding,
-    };
-  },
+  loading.value = false;
+});
+
+onMounted(() => {
+  refreshTimeout = setInterval(fetchTokenMarket, 60 * 1000);
+
+  event.on("broadcast-success", onBroadcastSuccess);
+
+  event.on("transaction-validated", onTransactionValidated);
+});
+
+onBeforeUnmount(() => {
+  clearInterval(refreshTimeout);
+
+  event.off("broadcast-success", onBroadcastSuccess);
+  event.off("transaction-validated", onTransactionValidated);
 });
 </script>

@@ -15,7 +15,7 @@
         </div>
 
         <button class="dark:text-gray-300" @click="close">
-          <x-icon class="h-5 w-5" aria-hidden="true" />
+          <XMarkIcon class="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
 
@@ -197,7 +197,7 @@
       </div>
 
       <button class="dark:text-gray-300" @click="close">
-        <x-icon class="h-5 w-5" aria-hidden="true" />
+        <XMarkIcon class="h-5 w-5" aria-hidden="true" />
       </button>
     </div>
 
@@ -249,7 +249,7 @@
 
 <script>
 import { computed, defineComponent, inject, onBeforeUnmount, onMounted, ref, watch } from "vue";
-import { XIcon } from "@heroicons/vue/outline";
+import { XMarkIcon } from "@heroicons/vue/24/outline";
 import { useVuelidate } from "@vuelidate/core";
 import { required, requiredIf } from "@vuelidate/validators";
 import { useStore } from "../../stores";
@@ -265,7 +265,7 @@ export default defineComponent({
   name: "WithdrawModal",
 
   components: {
-    XIcon,
+    XMarkIcon,
     SearchSelect,
   },
 

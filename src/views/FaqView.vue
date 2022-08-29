@@ -44,7 +44,7 @@
 <script>
 import { defineComponent } from "vue";
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
-import { ChevronUpIcon } from "@heroicons/vue/outline";
+import { ChevronUpIcon } from "@heroicons/vue/24/outline";
 import FAQ from "../assets/jsons/faq.json";
 import PageFooter from "../components/PageFooter.vue";
 

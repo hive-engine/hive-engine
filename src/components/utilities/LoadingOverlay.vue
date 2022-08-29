@@ -13,19 +13,10 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
+<script setup>
 import Loading from "./Loading.vue";
 
-export default defineComponent({
-  name: "LoadingOverlay",
-
-  components: {
-    Loading,
-  },
-
-  props: {
-    show: { type: Boolean, default: false },
-  },
+defineProps({
+  show: { type: Boolean, default: false },
 });
 </script>

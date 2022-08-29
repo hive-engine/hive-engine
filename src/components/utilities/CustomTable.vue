@@ -97,91 +97,67 @@
   </div>
 </template>
 
-<script>
-import { defineComponent, computed, ref } from "vue";
+<script setup>
+import { computed, ref } from "vue";
 import Pagination from "../utilities/Pagination.vue";
 
-export default defineComponent({
-  name: "CustomTable",
-
-  components: {
-    Pagination,
-  },
-
-  props: {
-    fields: { type: Array, required: true },
-    items: { type: Array, required: true },
-    perPage: { type: Number, default: 0 },
-    thClass: { type: String, default: "text-left" },
-    tdClass: { type: String, default: "text-left" },
-  },
-
-  setup(props) {
-    const sortKey = ref(null);
-    const sortDirection = ref("none");
-
-    const tableItems = computed(() => {
-      const items = props.items;
-
-      if (sortDirection.value !== "none") {
-        items.sort((a, b) => {
-          if (sortDirection.value === "descending") {
-            return new Intl.Collator("en", { numeric: true }).compare(
-              b[sortKey.value],
-              a[sortKey.value]
-            );
-          }
-
-          return new Intl.Collator("en", { numeric: true }).compare(
-            a[sortKey.value],
-            b[sortKey.value]
-          );
-        });
-      }
-
-      return items;
-    });
-
-    let currentPage = ref(1);
-
-    const totalPages = computed(() => Math.ceil(tableItems.value.length / props.perPage));
-
-    let start = null;
-    let end = null;
-
-    if (props.perPage > 0) {
-      start = computed(() => (currentPage.value - 1) * props.perPage);
-      end = computed(() =>
-        start.value + props.perPage < tableItems.value.length
-          ? start.value + props.perPage
-          : tableItems.value.length
-      );
-    }
-
-    const computedItems = computed(() => {
-      if (start && end) {
-        return tableItems.value.slice(start.value, end.value);
-      }
-
-      return tableItems.value;
-    });
-
-    const sortItems = (key) => {
-      sortKey.value = key;
-
-      sortDirection.value = sortDirection.value === "descending" ? "ascending" : "descending";
-    };
-
-    return {
-      tableItems,
-      computedItems,
-      sortKey,
-      sortDirection,
-      currentPage,
-      totalPages,
-
-      sortItems,
-    };
-  },
+const props = defineProps({
+  fields: { type: Array, required: true },
+  items: { type: Array, required: true },
+  perPage: { type: Number, default: 0 },
+  thClass: { type: String, default: "text-left" },
+  tdClass: { type: String, default: "text-left" },
 });
+
+const sortKey = ref(null);
+const sortDirection = ref("none");
+
+const tableItems = computed(() => {
+  const items = props.items;
+
+  if (sortDirection.value !== "none") {
+    items.sort((a, b) => {
+      if (sortDirection.value === "descending") {
+        return new Intl.Collator("en", { numeric: true }).compare(
+          b[sortKey.value],
+          a[sortKey.value]
+        );
+      }
+
+      return new Intl.Collator("en", { numeric: true }).compare(a[sortKey.value], b[sortKey.value]);
+    });
+  }
+
+  return items;
+});
+
+let currentPage = ref(1);
+
+const totalPages = computed(() => Math.ceil(tableItems.value.length / props.perPage));
+
+let start = null;
+let end = null;
+
+if (props.perPage > 0) {
+  start = computed(() => (currentPage.value - 1) * props.perPage);
+  end = computed(() =>
+    start.value + props.perPage < tableItems.value.length
+      ? start.value + props.perPage
+      : tableItems.value.length
+  );
+}
+
+const computedItems = computed(() => {
+  if (start && end) {
+    return tableItems.value.slice(start.value, end.value);
+  }
+
+  return tableItems.value;
+});
+
+const sortItems = (key) => {
+  sortKey.value = key;
+
+  sortDirection.value = sortDirection.value === "descending" ? "ascending" : "descending";
+};
 </script>
