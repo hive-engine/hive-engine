@@ -22,7 +22,7 @@
               />
             </router-link>
 
-            <button class="ml-5 p-1" @click="toggleDark">
+            <button class="ml-5 p-1" @click.prevent="toggleDark()">
               <sun-icon v-if="isDark" class="h-6 w-6" />
               <moon-icon v-else class="h-6 w-6" />
             </button>
@@ -32,7 +32,7 @@
             <div class="flex lg:space-x-4">
               <!-- <a
                 class="text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold cursor-pointer"
-                @click="vfm$.show('buyCrypto')"
+                @click="$vfm.show('buyCrypto')"
                 >Buy Crypto</a
               > -->
 
@@ -51,7 +51,7 @@
               <a
                 v-if="isLoggedIn"
                 class="text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold cursor-pointer"
-                @click="vfm$.show('swapModal')"
+                @click="$vfm.show('swapModal')"
                 >Swap</a
               >
               <router-link
@@ -147,7 +147,7 @@
                   <a
                     href="#"
                     :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-gray-700']"
-                    @click.prevent="requestLogout"
+                    @click.prevent="userStore.requestLogout"
                     >Logout</a
                   >
                 </MenuItem>
@@ -158,7 +158,7 @@
           <a
             v-else
             class="text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold cursor-pointer"
-            @click="vfm$.show('loginModal')"
+            @click="$vfm.show('loginModal')"
             >Login</a
           >
         </div>
@@ -167,15 +167,15 @@
 
     <DisclosurePanel class="lg:hidden">
       <div class="px-2 pt-2 pb-3 space-y-1">
-        <DisclosureButton as="template">
+        <!-- <DisclosureButton class="w-full text-left">
           <a
             class="block text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold cursor-pointer"
-            @click="vfm$.show('buyCrypto')"
+            @click="$vfm.show('buyCrypto')"
             >Buy Crypto</a
           >
-        </DisclosureButton>
+        </DisclosureButton> -->
 
-        <DisclosureButton as="template">
+        <DisclosureButton class="w-full text-left">
           <router-link
             :to="{ name: 'tokens' }"
             class="block text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
@@ -184,7 +184,7 @@
           >
         </DisclosureButton>
 
-        <DisclosureButton as="template">
+        <DisclosureButton class="w-full text-left">
           <router-link
             :to="{ name: 'trade', params: { symbol: 'BEE' } }"
             class="block text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
@@ -193,16 +193,15 @@
           >
         </DisclosureButton>
 
-        <DisclosureButton as="template">
+        <DisclosureButton v-if="isLoggedIn" class="w-full text-left">
           <a
-            v-if="isLoggedIn"
             class="block text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold cursor-pointer"
-            @click="vfm$.show('swapModal')"
+            @click="$vfm.show('swapModal')"
             >Swap</a
           >
         </DisclosureButton>
 
-        <DisclosureButton as="template">
+        <DisclosureButton class="w-full text-left">
           <router-link
             :to="{ name: 'faq' }"
             class="block text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
@@ -211,7 +210,7 @@
           >
         </DisclosureButton>
 
-        <DisclosureButton as="template">
+        <DisclosureButton class="w-full text-left">
           <a
             href="https://he.dtools.dev"
             target="_blank"
@@ -221,9 +220,8 @@
           >
         </DisclosureButton>
 
-        <DisclosureButton as="template">
+        <DisclosureButton v-if="isLoggedIn" class="w-full text-left">
           <router-link
-            v-if="isLoggedIn"
             :to="{ name: 'wallet', params: { account: username } }"
             class="block text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
             active-class="bg-gray-700 text-white"
@@ -248,7 +246,7 @@
 </template>
 
 <script setup>
-import { computed, inject, onBeforeMount, onMounted } from "vue";
+import { computed, onMounted } from "vue";
 import { RouterLink, RouterView, useRoute } from "vue-router";
 import {
   Disclosure,
@@ -269,7 +267,6 @@ import Swap from "./components/modals/Swap.vue";
 import Keychain from "./components/modals/Keychain.vue";
 
 const route = useRoute();
-const vfm$ = inject("$vfm");
 
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
@@ -285,10 +282,6 @@ const fetchHivePrice = async () => {
 
   setTimeout(fetchHivePrice, 10 * 60 * 1000);
 };
-
-onBeforeMount(async () => {
-  await store.fetchSettings();
-});
 
 onMounted(async () => {
   await fetchHivePrice();

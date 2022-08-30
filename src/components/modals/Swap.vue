@@ -5,7 +5,7 @@
     :click-to-close="false"
     @before-open="beforeOpen"
     @before-close="beforeClose"
-    @close="onClose"
+    @closed="onClosed"
   >
     <template #title>Swap Tokens</template>
 
@@ -43,6 +43,7 @@
                 {{ fromSymbol }}
               </div>
             </div>
+            <div class="text-sm mt-1">Estimated value (USD): ${{ fromPriceUSD }}</div>
           </template>
         </div>
 
@@ -68,6 +69,7 @@
                 {{ toSymbol }}
               </div>
             </div>
+            <div class="text-sm mt-1">Estimated value (USD): ${{ toPriceUSD }}</div>
           </template>
         </div>
 
@@ -117,6 +119,18 @@
         Swap request is in progress. Please do not close this modal.
       </div>
 
+      <div v-if="valueDiffInPct >= 0.15" class="alert-warning">
+        <div>
+          The price impact of this swap is higher than 15%. You may incur substantial losses by
+          executing this swap. Please check carefully before proceeding.
+        </div>
+
+        <label class="block mt-1 font-bold"
+          ><input v-model="riskAccepted" type="checkbox" /> I have checked, please let me
+          swap.</label
+        >
+      </div>
+
       <div class="text-center mt-10">
         <button
           class="btn w-4/5 text-lg"
@@ -125,6 +139,7 @@
             !toSymbol ||
             fromQuantity <= 0 ||
             toQuantity <= 0 ||
+            (!riskAccepted && valueDiffInPct >= 0.15) ||
             btnBusy ||
             showOverlay
           "
@@ -147,11 +162,12 @@ import { DSWAP_API, DSWAP_ACCOUNT, DSWAP_SOURCE_ID } from "../../config";
 import { useStore } from "../../stores";
 import { useTokenStore } from "../../stores/token";
 import { useWalletStore } from "../../stores/wallet";
-import { toFixedWithoutRounding } from "../../utils";
+import { toFixedNoRounding, toFixedWithoutRounding } from "../../utils";
 import { useUserStore } from "../../stores/user";
 import Modal from "./Modal.vue";
 import SearchSelect from "../utilities/SearchSelect.vue";
 import LoadingOverlay from "../utilities/LoadingOverlay.vue";
+import { sidechain } from "../../plugins/sidechain";
 
 const event = inject("eventBus");
 const vfm$ = inject("$vfm");
@@ -160,6 +176,7 @@ const modalBusy = ref(true);
 const btnBusy = ref(false);
 const showOverlay = ref(false);
 const swapInProgress = ref(false);
+const riskAccepted = ref(false);
 
 const dswapAPI = axios.create({
   baseURL: DSWAP_API,
@@ -178,6 +195,9 @@ const toSymbol = ref(null);
 const fromQuantity = ref("");
 const toQuantity = ref("");
 
+const fromMetrics = ref(null);
+const toMetrics = ref(null);
+
 const slippageOne = ref(5);
 const slippageTwo = ref(5);
 
@@ -186,6 +206,36 @@ const baseTokenAmount = ref(0);
 const tokens = computed(() => tokenStore.tokens);
 const wallet = computed(() => walletStore.wallet);
 const username = computed(() => userStore.username);
+
+const fromPriceUSD = computed(() => {
+  if (fromQuantity.value > 0 && fromMetrics.value) {
+    return toFixedNoRounding(
+      fromQuantity.value * Number(fromMetrics.value?.highestBid) * store.hivePrice,
+      5
+    );
+  }
+
+  return 0;
+});
+
+const toPriceUSD = computed(() => {
+  if (toQuantity.value > 0 && toMetrics.value) {
+    return toFixedNoRounding(
+      toQuantity.value * Number(toMetrics.value?.lastPrice) * store.hivePrice,
+      5
+    );
+  }
+
+  return 0;
+});
+
+const valueDiffInPct = computed(() => {
+  if (showOverlay.value || fromQuantity.value <= 0 || toQuantity.value <= 0) {
+    return 0;
+  }
+
+  return toFixedWithoutRounding((fromPriceUSD.value - toPriceUSD.value) / fromPriceUSD.value, 3);
+});
 
 const fromSymbolOptions = computed(() => {
   const options = tokens.value.map((t) => ({
@@ -257,14 +307,14 @@ const beforeClose = async (e) => {
     ) {
       await vfm$.hideAll();
 
-      onClose();
+      onClosed();
     } else {
       e.stop();
     }
   }
 };
 
-const onClose = () => {
+const onClosed = () => {
   fromSymbol.value = null;
   toSymbol.value = null;
 
@@ -278,6 +328,8 @@ const onClose = () => {
   swapInProgress.value = false;
 
   baseTokenAmount.value = 0;
+
+  riskAccepted.value = false;
 };
 
 const requestSwap = async () => {
@@ -326,7 +378,7 @@ const onTransactionValidated = async ({ error, contract, action, payload, trx_id
 
       await vfm$.hideAll();
 
-      onClose();
+      onClosed();
 
       router.push({ name: "swaps" });
     } catch (e) {
@@ -338,15 +390,33 @@ const onTransactionValidated = async ({ error, contract, action, payload, trx_id
   showOverlay.value = false;
 };
 
-watch(fromSymbol, (value) => {
+watch(fromSymbol, async (value) => {
   if (toSymbol.value && value === toSymbol.value) {
     toSymbol.value = null;
   }
+
+  if (value) {
+    fromMetrics.value =
+      value === "SWAP.HIVE" ? { highestBid: 1, lastPrice: 1 } : await sidechain.getMetrics(value);
+  }
 });
 
-watch(toSymbol, (value) => {
+watch(toSymbol, async (value) => {
+  fromQuantity.value = 1;
+
   if (fromSymbol.value && value === fromSymbol.value) {
     toSymbol.value = null;
+  }
+
+  if (value) {
+    toMetrics.value =
+      value === "SWAP.HIVE" ? { highestBid: 1, lastPrice: 1 } : await sidechain.getMetrics(value);
+  }
+});
+
+watch(fromQuantity, () => {
+  if (toSymbol.value) {
+    showOverlay.value = true;
   }
 });
 

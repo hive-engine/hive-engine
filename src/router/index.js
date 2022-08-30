@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useUserStore } from "../stores/user";
+import { useCardStore } from "../stores/card";
 import HomeView from "../views/HomeView.vue";
+import { useStore } from "../stores";
 
 function loadView(view) {
   return () => import(`../views/${view}View.vue`);
@@ -29,6 +31,20 @@ const router = createRouter({
       name: "wallet",
       component: loadView("Wallet"),
       beforeEnter: (to) => {
+        const { account } = to.params;
+
+        return /^[a-z][a-z0-9-.]{2,15}$/.test(account);
+      },
+    },
+    {
+      path: "/@:account/cards",
+      name: "cards",
+      component: loadView("Cards"),
+      beforeEnter: async (to) => {
+        const cardStore = useCardStore();
+
+        await Promise.all([cardStore.fetchSLSettings(), cardStore.fetchCardDetails()]);
+
         const { account } = to.params;
 
         return /^[a-z][a-z0-9-.]{2,15}$/.test(account);
@@ -86,8 +102,13 @@ const router = createRouter({
   ],
 });
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
+  const store = useStore();
   const userStore = useUserStore();
+
+  if (!store.settings) {
+    await store.fetchSettings();
+  }
 
   if (to.meta.requiresAuth && !userStore.isLoggedIn) {
     return {
