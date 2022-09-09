@@ -79,18 +79,13 @@
           </div>
         </div>
 
-        <div
-          class="absolute inset-y-0 right-0 flex items-center md:static md:inset-auto md:ml-1 lg:ml-4 lg:pr-0"
-        >
+        <div class="absolute inset-y-0 right-0 flex items-center md:static md:inset-auto md:ml-1 lg:ml-4 lg:pr-0">
           <Menu v-if="isLoggedIn" as="div" class="relative">
             <div>
               <MenuButton
                 class="bg-gray-800 flex rounded-full border-2 border-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
               >
-                <img
-                  class="h-8 w-8 rounded-full"
-                  :src="`https://images.hive.blog/u/${username}/avatar`"
-                />
+                <img class="h-8 w-8 rounded-full" :src="`https://images.hive.blog/u/${username}/avatar`" />
               </MenuButton>
             </div>
 
@@ -106,9 +101,7 @@
                 class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
               >
                 <MenuItem>
-                  <div class="block font-bold px-4 py-2 text-gray-700 border-b">
-                    @{{ username }}
-                  </div>
+                  <div class="block font-bold px-4 py-2 text-gray-700 border-b">@{{ username }}</div>
                 </MenuItem>
 
                 <MenuItem v-slot="{ active }">
@@ -147,7 +140,7 @@
                   <a
                     href="#"
                     :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-gray-700']"
-                    @click.prevent="requestLogout"
+                    @click.prevent="userStore.requestLogout"
                     >Logout</a
                   >
                 </MenuItem>
@@ -248,28 +241,20 @@
 </template>
 
 <script setup>
-import { computed, inject, onBeforeMount, onMounted } from "vue";
-import { RouterLink, RouterView, useRoute } from "vue-router";
-import {
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
-  Menu,
-  MenuButton,
-  MenuItems,
-  MenuItem,
-} from "@headlessui/vue";
-import { useDark, useToggle } from "@vueuse/core";
-import { Bars3Icon, XMarkIcon, MoonIcon, SunIcon } from "@heroicons/vue/24/outline";
-import { useUserStore } from "./stores/user";
-import { useStore } from "./stores";
-import LoginModal from "./components/modals/Login.vue";
+import { computed, inject, onBeforeMount, onMounted } from 'vue';
+import { RouterLink, RouterView, useRoute } from 'vue-router';
+import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue';
+import { useDark, useToggle } from '@vueuse/core';
+import { Bars3Icon, XMarkIcon, MoonIcon, SunIcon } from '@heroicons/vue/24/outline';
+import { useUserStore } from './stores/user';
+import { useStore } from './stores';
+import LoginModal from './components/modals/Login.vue';
 // import BuyCrypto from "./components/modals/BuyCrypto.vue";
-import Swap from "./components/modals/Swap.vue";
-import Keychain from "./components/modals/Keychain.vue";
+import Swap from './components/modals/Swap.vue';
+import Keychain from './components/modals/Keychain.vue';
 
 const route = useRoute();
-const vfm$ = inject("$vfm");
+const vfm$ = inject('$vfm');
 
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
