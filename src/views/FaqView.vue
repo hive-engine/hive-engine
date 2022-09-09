@@ -27,7 +27,7 @@
           ]"
         >
           <span>{{ faq.title }}</span>
-          <ChevronUpIcon :class="open ? 'transform rotate-180' : ''" class="w-6 h-6" />
+          <ChevronUpIcon :class="open ? '' : 'transform rotate-180'" class="w-6 h-6" />
         </DisclosureButton>
 
         <DisclosurePanel

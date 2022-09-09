@@ -3,7 +3,7 @@
     v-slot="{ params, close }"
     v-bind="$attrs"
     classes="flex justify-center items-center overflow-y-auto"
-    content-class="w-full max-w-xl relative flex flex-col max-h-full"
+    :content-class="contentClasses"
   >
     <div class="border dark:border-gray-800 rounded bg-white dark:bg-gray-600 dark:text-gray-300">
       <div class="flex items-center justify-between px-6 py-4">
@@ -16,7 +16,7 @@
         </button>
       </div>
 
-      <div class="p-6 flex-grow">
+      <div :class="bodyClass">
         <slot :params="params"></slot>
       </div>
     </div>
@@ -25,4 +25,22 @@
 
 <script setup>
 import { XMarkIcon } from "@heroicons/vue/24/outline";
+import { computed } from "vue";
+
+const props = defineProps({
+  size: { type: String, default: "sm" },
+  bodyClass: { type: String, default: "p-6 flex-grow" },
+});
+
+const contentClasses = computed(() => {
+  const classes = ["w-full relative flex flex-col max-h-full"];
+
+  if (props.size === "xl") {
+    return [...classes, "max-w-6xl"];
+  } else if (props.size === "md") {
+    return [...classes, "max-w-3xl"];
+  }
+
+  return [...classes, "max-w-xl"];
+});
 </script>

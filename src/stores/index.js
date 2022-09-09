@@ -1,10 +1,10 @@
-import axios from "axios";
-import { defineStore } from "pinia";
-import { $vfm } from "vue-final-modal";
-import { TRIBALDEX_API } from "../config";
-import { emitter } from "../plugins/mitt";
-import { sidechain } from "../plugins/sidechain";
-import { useUserStore } from "./user";
+import axios from 'axios';
+import { defineStore } from 'pinia';
+import { $vfm } from 'vue-final-modal';
+import { TRIBALDEX_API } from '../config';
+import { emitter } from '../plugins/mitt';
+import { sidechain } from '../plugins/sidechain';
+import { useUserStore } from './user';
 
 const parseJSON = (json) => {
   let result = {};
@@ -21,7 +21,7 @@ const parseJSON = (json) => {
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const useStore = defineStore({
-  id: "main",
+  id: 'main',
 
   state: () => ({
     settings: null,
@@ -33,7 +33,7 @@ export const useStore = defineStore({
       return new Promise((resolve) => {
         if (window.hive_keychain) {
           window.hive_keychain[fn](...args, (r) => {
-            if (r.error === "user_cancel") {
+            if (r.error === 'user_cancel') {
               return resolve({ success: false, cancel: true, ...r });
             }
 
@@ -44,7 +44,7 @@ export const useStore = defineStore({
             return resolve({ success: false, ...r });
           });
         } else {
-          $vfm.show("installKeychain");
+          $vfm.show('installKeychain');
 
           return resolve({ success: false });
         }
@@ -52,17 +52,17 @@ export const useStore = defineStore({
     },
 
     async requestBrodcastTransfer({ to, amount, currency, memo, eventName }) {
-      emitter.emit("broadcast-awaiting");
+      emitter.emit('broadcast-awaiting');
 
       const useStore = useUserStore();
 
       const { success, result } = await this.requestKeychain(
-        "requestTransfer",
+        'requestTransfer',
         useStore.username,
         to,
         amount,
         memo,
-        currency
+        currency,
       );
 
       if (success) {
@@ -73,25 +73,25 @@ export const useStore = defineStore({
         if (eventName) {
           emitter.emit(eventName, result);
         } else {
-          emitter.emit("broadcast-success", result);
+          emitter.emit('broadcast-success', result);
         }
       }
 
-      emitter.emit("broadcast-done");
+      emitter.emit('broadcast-done');
     },
 
-    async requestBroadcastJson({ key = "Active", id, message, json, eventName = null }) {
-      emitter.emit("broadcast-awaiting");
+    async requestBroadcastJson({ key = 'Active', id, message, json, eventName = null, eventData = null }) {
+      emitter.emit('broadcast-awaiting');
 
       const useStore = useUserStore();
 
       const { success, result } = await this.requestKeychain(
-        "requestCustomJson",
+        'requestCustomJson',
         useStore.username,
         id || this.settings.sidechain_id,
         key,
         JSON.stringify(json),
-        message
+        message,
       );
 
       if (success) {
@@ -101,16 +101,16 @@ export const useStore = defineStore({
 
         const nTrx = json.length;
 
-        const data = { ...result, ntrx: nTrx };
+        const data = { ...result, ntrx: nTrx, eventData };
 
         if (eventName) {
           emitter.emit(eventName, data);
         } else {
-          emitter.emit("broadcast-success", data);
+          emitter.emit('broadcast-success', data);
         }
       }
 
-      emitter.emit("broadcast-done");
+      emitter.emit('broadcast-done');
     },
 
     async fetchSettings() {
@@ -125,7 +125,7 @@ export const useStore = defineStore({
 
     async fetchHivePrice() {
       try {
-        const { data } = await axios.get("https://prices.splinterlands.com/prices");
+        const { data } = await axios.get('https://prices.splinterlands.com/prices');
 
         this.hivePrice = data.hive;
       } catch {
@@ -158,7 +158,7 @@ export const useStore = defineStore({
         }
       }
 
-      emitter.emit("transaction-validated", {
+      emitter.emit('transaction-validated', {
         trx_id: trxId,
         contract: trx ? trx.contract : null,
         action: trx ? trx.action : null,

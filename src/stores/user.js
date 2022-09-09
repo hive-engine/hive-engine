@@ -1,12 +1,13 @@
-import { defineStore } from "pinia";
-import { useStore } from ".";
-import { emitter } from "../plugins/mitt";
+import { defineStore } from 'pinia';
+import { useStore } from '.';
+import { emitter } from '../plugins/mitt';
+import { useCardStore } from './card';
 
 export const useUserStore = defineStore({
-  id: "user",
+  id: 'user',
 
   state: () => ({
-    username: "",
+    username: '',
   }),
 
   getters: {
@@ -18,24 +19,19 @@ export const useUserStore = defineStore({
       const ts = Date.now();
 
       if (window.hive_keychain) {
-        emitter.emit("login-awaiting");
+        emitter.emit('login-awaiting');
 
         const store = useStore();
 
-        const { success } = await store.requestKeychain(
-          "requestSignBuffer",
-          username,
-          `${username}${ts}`,
-          "Posting"
-        );
+        const { success } = await store.requestKeychain('requestSignBuffer', username, `${username}${ts}`, 'Posting');
 
         if (success) {
           this.username = username;
 
-          localStorage.setItem("username", username);
+          localStorage.setItem('username', username);
         }
 
-        emitter.emit("login-done");
+        emitter.emit('login-done');
 
         let { redirect } = this.router.currentRoute.value.query;
 
@@ -50,11 +46,16 @@ export const useUserStore = defineStore({
     },
 
     requestLogout() {
-      this.username = "";
+      const cardStore = useCardStore();
 
-      localStorage.removeItem("username");
+      this.username = '';
+      cardStore.player = null;
 
-      this.router.push("/");
+      localStorage.removeItem('username');
+      localStorage.removeItem('sl_expiration');
+      localStorage.removeItem('sl_token');
+
+      this.router.push('/');
     },
   },
 });

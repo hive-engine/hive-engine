@@ -4,7 +4,7 @@
       class="min-w-full table-auto divide-y divide-gray-200 dark:divide-slate-600 dark:text-gray-300"
       v-bind="$attrs"
     >
-      <thead class="bg-gray-400 dark:bg-slate-600">
+      <thead>
         <tr>
           <template v-for="(th, i) of fields" :key="i">
             <th
@@ -73,7 +73,7 @@
 
   <div
     v-if="perPage > 0"
-    class="bg-white dark:bg-slate-600 px-4 py-3 flex items-center justify-between border-t border-gray-200 dark:border-slate-600 sm:px-6"
+    class="py-3 flex items-center justify-between border-t border-gray-200 dark:border-slate-600"
   >
     <div>
       <p class="text-sm text-gray-700 dark:text-gray-300">
@@ -118,13 +118,10 @@ const tableItems = computed(() => {
   if (sortDirection.value !== "none") {
     items.sort((a, b) => {
       if (sortDirection.value === "descending") {
-        return new Intl.Collator("en", { numeric: true }).compare(
-          b[sortKey.value],
-          a[sortKey.value]
-        );
+        return b[sortKey.value] - a[sortKey.value];
       }
 
-      return new Intl.Collator("en", { numeric: true }).compare(a[sortKey.value], b[sortKey.value]);
+      return a[sortKey.value] - b[sortKey.value];
     });
   }
 

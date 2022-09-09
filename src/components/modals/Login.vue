@@ -15,7 +15,7 @@
           v$.username.$error
             ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
             : '',
-          'block mx-auto w-3/4 text-center text-xl px-3 py-3 dark:bg-slate-600 dark:border-gray-500 rounded-md focus:ring-0 border-gray-400 placeholder-gray-300',
+          'block max-w-sm mx-auto w-3/4 text-center text-xl px-3 py-3 dark:bg-slate-600 dark:border-gray-500 rounded-md focus:ring-0 border-gray-400 placeholder-gray-300',
         ]"
         required
         @blur="v$.username.$touch()"
@@ -34,7 +34,7 @@
       </button>
 
       <div class="text-center mt-3 text-sm">
-        <a href="https://hive-keychain.com/#download" target="_blank">Download Hive Keychain</a>
+        <a href="https://hive-keychain.com" target="_blank">Download Hive Keychain</a>
       </div>
     </div>
   </Modal>
