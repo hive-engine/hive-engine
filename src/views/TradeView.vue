@@ -148,11 +148,16 @@
               >
             </RadioGroupOption>
 
-            <RadioGroupOption v-slot="{ checked }" value="market">
+            <RadioGroupOption
+              v-slot="{ checked, disabled }"
+              value="market"
+              :disabled="token.precision <= 3"
+            >
               <span
                 :class="[
                   checked ? 'bg-red-700 shadow-red-800 shadow-inner' : 'bg-red-600',
                   'cursor-pointer p-2 text-white font-bold rounded-r-md',
+                  disabled ? 'cursor-not-allowed' : '',
                 ]"
                 >Market</span
               >
@@ -265,11 +270,16 @@
               >
             </RadioGroupOption>
 
-            <RadioGroupOption v-slot="{ checked }" value="market">
+            <RadioGroupOption
+              v-slot="{ checked, disabled }"
+              value="market"
+              :disabled="token.precision <= 3"
+            >
               <span
                 :class="[
                   checked ? 'bg-red-700 shadow-red-800 shadow-inner' : 'bg-red-600',
                   'cursor-pointer p-2 text-white font-bold rounded-r-md',
+                  disabled ? 'cursor-not-allowed' : '',
                 ]"
                 >Market</span
               >

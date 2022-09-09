@@ -16,6 +16,7 @@ export const SCOT_API = 'https://scot-api.hive-engine.com';
 export const DSWAP_API = 'https://dswap-api.dswap.trade/api';
 export const DSWAP_ACCOUNT = 'dswap';
 export const DSWAP_SOURCE_ID = '60f0880d47262b9a30fef8bf';
+export const DSWAP_API_VERSION = '2.0';
 export const BANXA_API = 'https://banxa.tribaldex.com';
 export const SL_API = 'https://api2.splinterlands.com';
 export const HESL_API = 'http://localhost:7070';
