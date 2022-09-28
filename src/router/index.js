@@ -1,13 +1,29 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { useUserStore } from '@/stores/user';
-import { useCardStore } from '@/stores/card';
-import HomeView from '@/views/HomeView.vue';
 import { useStore } from '@/stores';
+import { useCardStore } from '@/stores/card';
+import { useUserStore } from '@/stores/user';
+import HomeView from '@/views/HomeView.vue';
 
 function loadView(view) {
-  const path = `../views/${view}View.vue`;
-  return () => import(/* @vite-ignore */ path);
+  return () => import(`../views/${view}View.vue`);
 }
+
+const beforeEnterSL = async () => {
+  const store = useStore();
+  const cardStore = useCardStore();
+
+  store.loading = true;
+
+  await Promise.all([cardStore.fetchSettings(), cardStore.fetchSLSettings(), cardStore.fetchCardDetails()]);
+
+  store.loading = false;
+};
+
+const validateUsername = (to) => {
+  const { account } = to.params;
+
+  return /^[a-z][a-z0-9-.]{2,15}$/.test(account);
+};
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,25 +47,22 @@ const router = createRouter({
       path: '/@:account/wallet',
       name: 'wallet',
       component: loadView('Wallet'),
-      beforeEnter: (to) => {
-        const { account } = to.params;
-
-        return /^[a-z][a-z0-9-.]{2,15}$/.test(account);
-      },
+      beforeEnter: [validateUsername],
     },
     {
       path: '/@:account/cards',
       name: 'sl-cards',
-      component: loadView('splinterlands/Cards'),
-      beforeEnter: async (to) => {
-        const cardStore = useCardStore();
-
-        await Promise.all([cardStore.fetchSettings(), cardStore.fetchSLSettings(), cardStore.fetchCardDetails()]);
-
-        const { account } = to.params;
-
-        return /^[a-z][a-z0-9-.]{2,15}$/.test(account);
+      component: () => import('../views/splinterlands/CardsView.vue'),
+      beforeEnter: [beforeEnterSL, validateUsername],
+      meta: {
+        requiresAuth: true,
       },
+    },
+    {
+      path: '/@:account/active-rentals',
+      name: 'sl-active-rentals',
+      component: () => import('../views/splinterlands/ActiveRentalsView.vue'),
+      beforeEnter: [beforeEnterSL, validateUsername],
       meta: {
         requiresAuth: true,
       },
@@ -57,12 +70,8 @@ const router = createRouter({
     {
       path: '/splinterlands',
       name: 'sl-market',
-      component: loadView('splinterlands/Market'),
-      beforeEnter: async () => {
-        const cardStore = useCardStore();
-
-        await Promise.all([cardStore.fetchSettings(), cardStore.fetchSLSettings(), cardStore.fetchCardDetails()]);
-      },
+      component: () => import('../views/splinterlands/MarketView.vue'),
+      beforeEnter: [beforeEnterSL],
       meta: {
         requiresAuth: true,
       },
@@ -130,7 +139,7 @@ router.beforeEach(async (to) => {
   if (to.meta.requiresAuth && !userStore.isLoggedIn) {
     return {
       path: '/',
-      query: { redirect: btoa(to.fullPath) },
+      query: { redirect: btoa(JSON.stringify({ name: to.name, params: to.params, query: to.query })) },
     };
   }
 });

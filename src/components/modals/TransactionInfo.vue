@@ -11,16 +11,12 @@
 
       <div class="font-bold">Transaction ID</div>
       <div class="mb-3">
-        <a :href="`https://he.dtools.dev/tx/${params.transactionId}`" target="_blank">{{
-          params.transactionId
-        }}</a>
+        <a :href="`https://he.dtools.dev/tx/${params.transactionId}`" target="_blank">{{ params.transactionId }}</a>
       </div>
 
       <div class="font-bold">Sidechain Block</div>
       <div class="mb-3">
-        <a :href="`https://he.dtools.dev/tx/${params.blockNumber}`" target="_blank">{{
-          params.blockNumber
-        }}</a>
+        <a :href="`https://he.dtools.dev/tx/${params.blockNumber}`" target="_blank">{{ params.blockNumber }}</a>
       </div>
 
       <template v-if="params.from && params.from !== 'N/A'">
@@ -47,8 +43,8 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import Modal from "./Modal.vue";
+import { ref } from 'vue';
+import Modal from './Modal.vue';
 
 const show = ref(false);
 </script>

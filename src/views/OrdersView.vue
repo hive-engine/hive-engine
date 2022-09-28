@@ -18,10 +18,9 @@
       </template>
 
       <template #cell(type)="{ item }">
-        <span
-          :class="{ 'text-red-500': item.type === 'SELL', 'text-green-500': item.type === 'BUY' }"
-          >{{ item.type }}</span
-        >
+        <span :class="{ 'text-red-500': item.type === 'SELL', 'text-green-500': item.type === 'BUY' }">{{
+          item.type
+        }}</span>
       </template>
 
       <template #cell(symbol)="{ item }">
@@ -38,9 +37,7 @@
     </custom-table>
 
     <div v-if="selectedOrders.length > 1" class="mt-5 text-right">
-      <button class="btn-sm px-4" @click="marketStore.requestCancelOrders(selectedOrders)">
-        Cancel All
-      </button>
+      <button class="btn-sm px-4" @click="marketStore.requestCancelOrders(selectedOrders)">Cancel All</button>
     </div>
   </div>
 
@@ -48,23 +45,15 @@
 </template>
 
 <script>
-import {
-  computed,
-  defineComponent,
-  inject,
-  onBeforeMount,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-} from "vue";
-import { XMarkIcon } from "@heroicons/vue/24/outline";
-import { useStore } from "../stores";
-import { useMarketStore } from "../stores/market";
-import { useUserStore } from "../stores/user";
-import CustomTable from "../components/utilities/CustomTable.vue";
-import PageFooter from "../components/PageFooter.vue";
+import { XMarkIcon } from '@heroicons/vue/24/outline';
+import { computed, defineComponent, inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
+import PageFooter from '../components/PageFooter.vue';
+import CustomTable from '../components/utilities/CustomTable.vue';
+import { useStore } from '../stores';
+import { useMarketStore } from '../stores/market';
+import { useUserStore } from '../stores/user';
 export default defineComponent({
-  name: "OpenOrders",
+  name: 'OpenOrders',
 
   components: {
     XMarkIcon,
@@ -74,7 +63,7 @@ export default defineComponent({
 
   setup() {
     const loading = ref(true);
-    const event = inject("eventBus");
+    const event = inject('eventBus');
 
     const store = useStore();
     const marketStore = useMarketStore();
@@ -86,14 +75,14 @@ export default defineComponent({
     const openOrders = computed(() => marketStore.openOrdersFormatted);
 
     const openOrdersFields = [
-      { key: "checkbox", label: "" },
-      { key: "timestamp", label: "DATE", sortable: true },
-      { key: "type", label: "TYPE", sortable: true },
-      { key: "quantity", label: "QUANTITY" },
-      { key: "symbol", label: "SYMBOL" },
-      { key: "price", label: "PRICE" },
-      { key: "total", label: "TOTAL HIVE" },
-      { key: "txId", label: "Action" },
+      { key: 'checkbox', label: '' },
+      { key: 'timestamp', label: 'DATE', sortable: true },
+      { key: 'type', label: 'TYPE', sortable: true },
+      { key: 'quantity', label: 'QUANTITY' },
+      { key: 'symbol', label: 'SYMBOL' },
+      { key: 'price', label: 'PRICE' },
+      { key: 'total', label: 'TOTAL HIVE' },
+      { key: 'txId', label: 'Action' },
     ];
 
     const onBoardcastSuccess = async ({ id, ntrx }) => {
@@ -121,14 +110,14 @@ export default defineComponent({
     });
 
     onMounted(() => {
-      event.on("broadcast-success", onBoardcastSuccess);
+      event.on('broadcast-success', onBoardcastSuccess);
 
-      event.on("transaction-validated", onTransactionValidated);
+      event.on('transaction-validated', onTransactionValidated);
     });
 
     onBeforeUnmount(() => {
-      event.off("broadcast-success", onBoardcastSuccess);
-      event.off("transaction-validated", onTransactionValidated);
+      event.off('broadcast-success', onBoardcastSuccess);
+      event.off('transaction-validated', onTransactionValidated);
     });
 
     return {

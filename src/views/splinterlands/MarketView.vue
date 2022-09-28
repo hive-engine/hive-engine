@@ -8,7 +8,7 @@
 
         <div class="col-span-full md:col-span-3 mt-3">
           <div class="flex flex-wrap items-center justify-end gap-4">
-            <select v-model="currency" name="currency" class="max-w-[200px]">
+            <select v-model="currency" name="currency" class="bg-slate-600 border-gray-500 max-w-[180px]">
               <option v-for="symbol of cardStore.settings?.currencies" :key="symbol" :value="symbol">
                 {{ symbol }}
               </option>
@@ -22,7 +22,11 @@
               Log Into Splinterlands
             </button>
 
-            <button class="btn-sm relative" @click="$vfm.show('cartModal')">
+            <button v-if="cardStore.isLoggedIn" class="btn self-stretch" @click="$vfm.show('heslWalletModal')">
+              Wallet
+            </button>
+
+            <button class="btn-sm self-stretch relative" @click="$vfm.show('cartModal')">
               <div
                 class="absolute text-lg text-center leading-4 -top-2 -right-1 bg-white text-red-600 rounded-full p-1"
               >
@@ -40,7 +44,7 @@
 
           <div class="flex items-center gap-1 xl:gap-2">
             <label
-              v-for="edition of [0, 1, 2, 3, 4, 5, 7]"
+              v-for="edition of [0, 1, 2, 3, 4, 5, 7, 8]"
               :key="edition"
               v-tooltip="getEdition(edition)"
               class="cursor-pointer"
@@ -158,7 +162,7 @@
   <Loading v-if="loading" />
 
   <div v-else class="page-content pt-3">
-    <div class="grid sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 mt-5">
+    <div v-if="groupedCollection.length > 0" class="grid sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 mt-5">
       <div
         v-for="(card, idx) of groupedCollection"
         :key="idx"
@@ -171,28 +175,34 @@
             {{ card.cards }}
           </div>
         </div>
-        <img :src="getThumbByLevel(card)" :alt="card.name" class="w-full" height="300px" width="250px" />
+        <img v-lazy="getThumbByLevel(card)" :alt="card.name" class="w-full" height="300px" width="250px" />
       </div>
+    </div>
+
+    <div v-else class="text-center py-10 px-6 mt-10 bg-black bg-opacity-10 text-xl">
+      No cards available or matched your selected filters!
     </div>
   </div>
 
   <Rent />
   <Cart />
+  <Wallet />
 </template>
 
 <script setup>
-import { computed, onBeforeMount, ref, watch } from 'vue';
 import { ShoppingBagIcon } from '@heroicons/vue/24/outline';
-import { useCardStore } from '@/stores/card';
-import { useUserStore } from '@/stores/user';
-import { getEdition, getElement, getThumbByLevel } from '@/utils';
+import { computed, onBeforeMount, ref, watch } from 'vue';
 import Edition from '@/components/sl/Edition.vue';
 import Element from '@/components/sl/Element.vue';
 import Foil from '@/components/sl/Foil.vue';
+import Cart from '@/components/sl/modals/Cart.vue';
+import Rent from '@/components/sl/modals/Rent.vue';
+import Wallet from '@/components/sl/modals/Wallet.vue';
 import Rarity from '@/components/sl/Rarity.vue';
 import Role from '@/components/sl/Role.vue';
-import Rent from '@/components/sl/modals/Rent.vue';
-import Cart from '@/components/sl/modals/Cart.vue';
+import { useCardStore } from '@/stores/card';
+import { useUserStore } from '@/stores/user';
+import { getEdition, getElement, getThumbByLevel } from '@/utils';
 
 const loading = ref(false);
 

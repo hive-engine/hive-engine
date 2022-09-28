@@ -1,11 +1,11 @@
-import axios from "axios";
-import { defineStore } from "pinia";
-import { useStore } from ".";
-import { BSC_BRIDGE_API, CTC_API, ETH_BRIDGE_API, POLYGON_BRIDGE_API } from "../config";
-import { sidechain } from "../plugins/sidechain";
+import axios from 'axios';
+import { defineStore } from 'pinia';
+import { BSC_BRIDGE_API, CTC_API, ETH_BRIDGE_API, POLYGON_BRIDGE_API } from '../config';
+import { sidechain } from '../plugins/sidechain';
+import { useStore } from '.';
 
 export const useTokenStore = defineStore({
-  id: "token",
+  id: 'token',
 
   state: () => ({
     tokens: [],
@@ -45,15 +45,13 @@ export const useTokenStore = defineStore({
         .filter((r) => !store.settings.disabled_tokens.includes(r.symbol))
         .map((t) => {
           let metadata = {};
-          let icon = "https://cdn.tribaldex.com/tribaldex/token-icons/UNKNOWN.png";
+          let icon = 'https://cdn.tribaldex.com/tribaldex/token-icons/UNKNOWN.png';
 
           try {
             metadata = JSON.parse(t.metadata);
 
-            if (metadata.icon && metadata.icon.startsWith("http")) {
-              icon = metadata.icon.endsWith(".svg")
-                ? metadata.icon
-                : `https://images.hive.blog/0x0/${metadata.icon}`;
+            if (metadata.icon && metadata.icon.startsWith('http')) {
+              icon = metadata.icon.endsWith('.svg') ? metadata.icon : `https://images.hive.blog/0x0/${metadata.icon}`;
             }
           } catch {
             //
@@ -100,9 +98,9 @@ export const useTokenStore = defineStore({
         ]);
 
         let tokenPairs = [];
-        const nonPeggedCoins = coins.filter((x) => x.coin_type !== "hiveengine");
+        const nonPeggedCoins = coins.filter((x) => x.coin_type !== 'hiveengine');
 
-        const hive = { name: "HIVE", symbol: "HIVE", pegged_token_symbol: "SWAP.HIVE" };
+        const hive = { name: 'HIVE', symbol: 'HIVE', pegged_token_symbol: 'SWAP.HIVE' };
         tokenPairs.push(hive);
 
         nonPeggedCoins.forEach((x) => {
@@ -144,7 +142,7 @@ export const useTokenStore = defineStore({
 
         const tokens = data
           .filter((t) => {
-            if (typeof deposit === "boolean") {
+            if (typeof deposit === 'boolean') {
               return t.depositEnabled === deposit;
             }
 

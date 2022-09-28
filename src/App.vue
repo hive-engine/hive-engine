@@ -88,13 +88,11 @@
 
         <div class="absolute inset-y-0 right-0 flex items-center md:static md:inset-auto md:ml-1 lg:ml-4 lg:pr-0">
           <Menu v-if="isLoggedIn" as="div" class="relative">
-            <div>
-              <MenuButton
-                class="bg-gray-800 flex rounded-full border-2 border-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
-              >
-                <img class="h-8 w-8 rounded-full" :src="`https://images.hive.blog/u/${username}/avatar`" />
-              </MenuButton>
-            </div>
+            <MenuButton
+              class="bg-gray-800 flex rounded-full border-2 border-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
+            >
+              <img class="h-8 w-8 rounded-full" :src="`https://images.hive.blog/u/${username}/avatar`" />
+            </MenuButton>
 
             <transition
               enter-active-class="transition ease-out duration-100"
@@ -105,7 +103,7 @@
               leave-to-class="transform opacity-0 scale-95"
             >
               <MenuItems
-                class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+                class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
               >
                 <MenuItem>
                   <div class="block font-bold px-4 py-2 text-gray-700 border-b">@{{ username }}</div>
@@ -148,6 +146,14 @@
                     :to="{ name: 'sl-cards', params: { account: userStore.username } }"
                     :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-gray-700']"
                     >Splinterlands Cards</router-link
+                  >
+                </MenuItem>
+
+                <MenuItem v-slot="{ active }">
+                  <router-link
+                    :to="{ name: 'sl-active-rentals', params: { account: userStore.username } }"
+                    :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-gray-700']"
+                    >Active Rentals</router-link
                   >
                 </MenuItem>
 
@@ -211,6 +217,15 @@
 
         <DisclosureButton class="w-full text-left">
           <router-link
+            :to="{ name: 'sl-market' }"
+            class="block text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
+            active-class="bg-gray-700 text-white"
+            >Rentals</router-link
+          >
+        </DisclosureButton>
+
+        <DisclosureButton class="w-full text-left">
+          <router-link
             :to="{ name: 'faq' }"
             class="block text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
             active-class="bg-gray-700 text-white"
@@ -240,31 +255,34 @@
     </DisclosurePanel>
   </Disclosure>
 
-  <RouterView :key="route.fullPath" />
+  <Loading v-if="store.loading" />
 
-  <LoginModal />
+  <template v-else>
+    <RouterView :key="route.fullPath" />
 
-  <!-- <BuyCrypto /> -->
+    <LoginModal />
 
-  <Swap />
+    <Swap />
 
-  <Keychain />
+    <Keychain />
 
-  <notifications :duration="15000" />
+    <notifications :duration="15000" />
+  </template>
 </template>
 
 <script setup>
+import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
+import { Bars3Icon, MoonIcon, SunIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { useDark, useToggle } from '@vueuse/core';
 import { computed, onMounted } from 'vue';
 import { RouterLink, RouterView, useRoute } from 'vue-router';
-import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue';
-import { useDark, useToggle } from '@vueuse/core';
-import { Bars3Icon, XMarkIcon, MoonIcon, SunIcon } from '@heroicons/vue/24/outline';
-import { useUserStore } from './stores/user';
-import { useStore } from './stores';
-import LoginModal from './components/modals/Login.vue';
-// import BuyCrypto from "./components/modals/BuyCrypto.vue";
-import Swap from './components/modals/Swap.vue';
 import Keychain from './components/modals/Keychain.vue';
+import LoginModal from './components/modals/Login.vue';
+import Swap from './components/modals/Swap.vue';
+import Loading from './components/utilities/Loading.vue';
+import { useStore } from './stores';
+import { useUserStore } from './stores/user';
+// import BuyCrypto from "./components/modals/BuyCrypto.vue";
 
 const route = useRoute();
 

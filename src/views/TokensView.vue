@@ -66,19 +66,19 @@
 </template>
 
 <script setup>
-import { computed, inject, onBeforeMount, ref } from "vue";
-import { useTokenStore } from "../stores/token";
-import { ArrowsRightLeftIcon, InformationCircleIcon } from "@heroicons/vue/24/outline";
-import { useStore } from "../stores";
-import { addCommas } from "../utils";
-import CustomTable from "../components/utilities/CustomTable.vue";
-import TokenInfo from "../components/modals/TokenInfo.vue";
-import PageFooter from "../components/PageFooter.vue";
+import { ArrowsRightLeftIcon, InformationCircleIcon } from '@heroicons/vue/24/outline';
+import { computed, inject, onBeforeMount, ref } from 'vue';
+import TokenInfo from '../components/modals/TokenInfo.vue';
+import PageFooter from '../components/PageFooter.vue';
+import CustomTable from '../components/utilities/CustomTable.vue';
+import { useStore } from '../stores';
+import { useTokenStore } from '../stores/token';
+import { addCommas } from '../utils';
 
 const loading = ref(true);
-const filter = ref("");
-const toFixedWithoutRounding = inject("toFixedWithoutRounding");
-const vfm$ = inject("$vfm");
+const filter = ref('');
+const toFixedWithoutRounding = inject('toFixedWithoutRounding');
+const vfm$ = inject('$vfm');
 
 const store = useStore();
 const tokenStore = useTokenStore();
@@ -95,15 +95,15 @@ const metrics = computed(() =>
     });
 
     return acc;
-  }, new Map())
+  }, new Map()),
 );
 
 const tokens = computed(() => {
-  const regExp = new RegExp(filter.value, "i");
+  const regExp = new RegExp(filter.value, 'i');
 
   return tokenStore.tokens
     .filter((t) => {
-      if (filter.value !== "") {
+      if (filter.value !== '') {
         return regExp.test(t.symbol);
       }
 
@@ -162,14 +162,14 @@ onBeforeMount(async () => {
 });
 
 const fields = [
-  { key: "icon", label: "" },
-  { key: "symbol", label: "Token", sortable: true },
-  { key: "name", label: "Name" },
-  { key: "marketCap", label: "Market Cap", sortable: true },
-  { key: "price", label: "Price", sortable: true },
-  { key: "change", label: "% Change", sortable: true },
-  { key: "volume", label: "24h Volume", sortable: true },
-  { key: "circulatingSupply", label: "Supply", sortable: true },
-  { key: "actions", label: "" },
+  { key: 'icon', label: '' },
+  { key: 'symbol', label: 'Token', sortable: true },
+  { key: 'name', label: 'Name' },
+  { key: 'marketCap', label: 'Market Cap', sortable: true },
+  { key: 'price', label: 'Price', sortable: true },
+  { key: 'change', label: '% Change', sortable: true },
+  { key: 'volume', label: '24h Volume', sortable: true },
+  { key: 'circulatingSupply', label: 'Supply', sortable: true },
+  { key: 'actions', label: '' },
 ];
 </script>

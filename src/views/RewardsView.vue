@@ -12,15 +12,11 @@
   <Loading v-if="loading" />
 
   <div v-else class="page-content">
-    <div class="alert-warning">
-      You can only claim a token once a day, including manual and auto.
-    </div>
+    <div class="alert-warning">You can only claim a token once a day, including manual and auto.</div>
 
     <CustomTable :fields="rewardsTableFields" :items="rewards">
       <template #cell(actions)="{ item }">
-        <button class="btn-sm" @click.prevent="walletStore.requestClaimScotRewards(item.symbol)">
-          Claim
-        </button>
+        <button class="btn-sm" @click.prevent="walletStore.requestClaimScotRewards(item.symbol)">Claim</button>
       </template>
     </CustomTable>
 
@@ -33,24 +29,24 @@
 </template>
 
 <script setup>
-import { inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from "vue";
-import { useWalletStore } from "../stores/wallet";
-import { sleep } from "../utils";
-import CustomTable from "../components/utilities/CustomTable.vue";
-import PageFooter from "../components/PageFooter.vue";
+import { inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
+import PageFooter from '../components/PageFooter.vue';
+import CustomTable from '../components/utilities/CustomTable.vue';
+import { useWalletStore } from '../stores/wallet';
+import { sleep } from '../utils';
 
 const loading = ref(true);
-const event = inject("eventBus");
+const event = inject('eventBus');
 
 const walletStore = useWalletStore();
 
 const rewards = ref([]);
 
 const rewardsTableFields = [
-  { key: "symbol", label: "SYMBOL" },
-  { key: "stake", label: "STAKE" },
-  { key: "reward", label: "REWARD" },
-  { key: "actions", label: "" },
+  { key: 'symbol', label: 'SYMBOL' },
+  { key: 'stake', label: 'STAKE' },
+  { key: 'reward', label: 'REWARD' },
+  { key: 'actions', label: '' },
 ];
 
 const fetchRewards = async () => {
@@ -86,10 +82,10 @@ onBeforeMount(async () => {
 });
 
 onMounted(() => {
-  event.on("scot-claim-successful", onScotClaim);
+  event.on('scot-claim-successful', onScotClaim);
 });
 
 onBeforeUnmount(() => {
-  event.off("scot-claim-successful", onScotClaim);
+  event.off('scot-claim-successful', onScotClaim);
 });
 </script>

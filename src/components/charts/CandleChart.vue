@@ -3,17 +3,17 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { Chart, LinearScale, TimeSeriesScale, Tooltip } from "chart.js";
-import { defineChartComponent } from "vue-chart-3";
-import { CandlestickController, CandlestickElement } from "chartjs-chart-financial";
-import "chartjs-adapter-date-fns";
+import { Chart, LinearScale, TimeSeriesScale, Tooltip } from 'chart.js';
+import { CandlestickController, CandlestickElement } from 'chartjs-chart-financial';
+import { ref } from 'vue';
+import { defineChartComponent } from 'vue-chart-3';
+import 'chartjs-adapter-date-fns';
 
 class CustomCandleChart extends CandlestickController {
   draw() {
     super.draw(arguments);
 
-    const borderColor = "#999";
+    const borderColor = '#999';
 
     if (this.chart.tooltip._active && this.chart.tooltip._active.length) {
       const activePoint = this.chart.tooltip._active[0];
@@ -36,19 +36,12 @@ class CustomCandleChart extends CandlestickController {
   }
 }
 
-CustomCandleChart.id = "CustomCandleChart";
+CustomCandleChart.id = 'CustomCandleChart';
 CustomCandleChart.defaults = CandlestickController.defaults;
 
-Chart.register(
-  CandlestickController,
-  CandlestickElement,
-  LinearScale,
-  TimeSeriesScale,
-  Tooltip,
-  CustomCandleChart
-);
+Chart.register(CandlestickController, CandlestickElement, LinearScale, TimeSeriesScale, Tooltip, CustomCandleChart);
 
-const Candlestick = defineChartComponent("CandleStick", "CustomCandleChart");
+const Candlestick = defineChartComponent('CandleStick', 'CustomCandleChart');
 
 defineProps({
   chartData: { type: Object, required: true },
@@ -59,19 +52,19 @@ const options = ref({
   scales: {
     y: {
       ticks: {
-        color: "#647882",
+        color: '#647882',
       },
       grid: {
-        color: "rgba(100, 100, 100, .2)",
+        color: 'rgba(100, 100, 100, .2)',
         borderWidth: 0,
       },
     },
     x: {
       ticks: {
-        color: "#647882",
+        color: '#647882',
       },
       grid: {
-        color: "rgba(100, 100, 100, .2)",
+        color: 'rgba(100, 100, 100, .2)',
         borderWidth: 0,
       },
     },
@@ -81,7 +74,7 @@ const options = ref({
       display: false,
     },
     chartAreaBorder: {
-      borderColor: "white",
+      borderColor: 'white',
     },
   },
 });

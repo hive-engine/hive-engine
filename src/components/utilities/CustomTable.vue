@@ -10,11 +10,7 @@
             <th
               v-if="th.sortable"
               scope="col"
-              :class="[
-                thClass,
-                'px-4 py-2 font-bold first-of-type:text-left last-of-type:text-right',
-                th.class,
-              ]"
+              :class="[thClass, 'px-4 py-2 font-bold first-of-type:text-left last-of-type:text-right', th.class]"
               role="columnheader"
               :aria-sort="sortKey === th.key ? sortDirection : 'none'"
               @click="sortItems(th.key)"
@@ -25,11 +21,7 @@
             <th
               v-else
               scope="col"
-              :class="[
-                thClass,
-                'px-4 py-2 font-bold first-of-type:text-left last-of-type:text-right',
-                th.class,
-              ]"
+              :class="[thClass, 'px-4 py-2 font-bold first-of-type:text-left last-of-type:text-right', th.class]"
               role="columnheader"
             >
               {{ th.label }}
@@ -48,14 +40,10 @@
             <td
               v-for="(td, k) of fields"
               :key="k"
-              :class="[
-                tdClass,
-                'px-4 py-2 first-of-type:text-left last-of-type:text-right',
-                td.class,
-              ]"
+              :class="[tdClass, 'px-4 py-2 first-of-type:text-left last-of-type:text-right', td.class]"
             >
               <slot :name="`cell(${td.key})`" :item="tr">
-                {{ tr[td.key] !== undefined ? tr[td.key] : "" }}
+                {{ tr[td.key] !== undefined ? tr[td.key] : '' }}
               </slot>
             </td>
           </tr>
@@ -71,23 +59,18 @@
     </table>
   </div>
 
-  <div
-    v-if="perPage > 0"
-    class="py-3 flex items-center justify-between border-t border-gray-200 dark:border-slate-600"
-  >
+  <div v-if="perPage > 0" class="py-3 flex items-center justify-between border-t border-gray-200 dark:border-slate-600">
     <div>
       <p class="text-sm text-gray-700 dark:text-gray-300">
-        Showing {{ " " }}
+        Showing {{ ' ' }}
         <span class="font-bold">{{ (currentPage - 1) * perPage + 1 }}</span>
-        {{ " " }} to {{ " " }}
+        {{ ' ' }} to {{ ' ' }}
         <span class="font-bold">
-          {{
-            currentPage * perPage > tableItems.length ? tableItems.length : currentPage * perPage
-          }}
+          {{ currentPage * perPage > tableItems.length ? tableItems.length : currentPage * perPage }}
         </span>
-        {{ " " }} of {{ " " }}
+        {{ ' ' }} of {{ ' ' }}
         <span class="font-bold">{{ tableItems.length }}</span>
-        {{ " " }} results
+        {{ ' ' }} results
       </p>
     </div>
 
@@ -98,26 +81,26 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
-import Pagination from "../utilities/Pagination.vue";
+import { computed, ref } from 'vue';
+import Pagination from '../utilities/Pagination.vue';
 
 const props = defineProps({
   fields: { type: Array, required: true },
   items: { type: Array, required: true },
   perPage: { type: Number, default: 0 },
-  thClass: { type: String, default: "text-left" },
-  tdClass: { type: String, default: "text-left" },
+  thClass: { type: String, default: 'text-left' },
+  tdClass: { type: String, default: 'text-left' },
 });
 
 const sortKey = ref(null);
-const sortDirection = ref("none");
+const sortDirection = ref('none');
 
 const tableItems = computed(() => {
   const items = props.items;
 
-  if (sortDirection.value !== "none") {
+  if (sortDirection.value !== 'none') {
     items.sort((a, b) => {
-      if (sortDirection.value === "descending") {
+      if (sortDirection.value === 'descending') {
         return b[sortKey.value] - a[sortKey.value];
       }
 
@@ -132,20 +115,22 @@ let currentPage = ref(1);
 
 const totalPages = computed(() => Math.ceil(tableItems.value.length / props.perPage));
 
-let start = null;
-let end = null;
+const start = computed(() => {
+  return props.perPage > 0 ? (currentPage.value - 1) * props.perPage : null;
+});
 
-if (props.perPage > 0) {
-  start = computed(() => (currentPage.value - 1) * props.perPage);
-  end = computed(() =>
-    start.value + props.perPage < tableItems.value.length
+const end = computed(() => {
+  if (props.perPage > 0) {
+    return start.value + props.perPage < tableItems.value.length
       ? start.value + props.perPage
-      : tableItems.value.length
-  );
-}
+      : tableItems.value.length;
+  }
+
+  return null;
+});
 
 const computedItems = computed(() => {
-  if (start && end) {
+  if (start.value !== null && end.value !== null) {
     return tableItems.value.slice(start.value, end.value);
   }
 
@@ -155,6 +140,6 @@ const computedItems = computed(() => {
 const sortItems = (key) => {
   sortKey.value = key;
 
-  sortDirection.value = sortDirection.value === "descending" ? "ascending" : "descending";
+  sortDirection.value = sortDirection.value === 'descending' ? 'ascending' : 'descending';
 };
 </script>

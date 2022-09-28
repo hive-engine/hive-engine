@@ -3,23 +3,15 @@
 </template>
 
 <script setup>
-import {
-  Chart,
-  LineController,
-  LineElement,
-  Tooltip,
-  PointElement,
-  CategoryScale,
-  Filler,
-} from "chart.js";
-import { ref } from "vue";
-import { defineChartComponent } from "vue-chart-3";
+import { CategoryScale, Chart, Filler, LineController, LineElement, PointElement, Tooltip } from 'chart.js';
+import { ref } from 'vue';
+import { defineChartComponent } from 'vue-chart-3';
 
 class CustomLineChart extends LineController {
   draw() {
     super.draw(arguments);
 
-    const borderColor = "#999";
+    const borderColor = '#999';
 
     if (this.chart.tooltip._active && this.chart.tooltip._active.length) {
       const activePoint = this.chart.tooltip._active[0];
@@ -42,20 +34,12 @@ class CustomLineChart extends LineController {
   }
 }
 
-CustomLineChart.id = "CustomLineChart";
+CustomLineChart.id = 'CustomLineChart';
 CustomLineChart.defaults = LineController.defaults;
 
-Chart.register(
-  LineController,
-  LineElement,
-  Tooltip,
-  PointElement,
-  CategoryScale,
-  Filler,
-  CustomLineChart
-);
+Chart.register(LineController, LineElement, Tooltip, PointElement, CategoryScale, Filler, CustomLineChart);
 
-const DepthLineChart = defineChartComponent("DepthLineChart", "CustomLineChart");
+const DepthLineChart = defineChartComponent('DepthLineChart', 'CustomLineChart');
 
 defineProps({
   chartData: { type: Object, required: true },
@@ -64,25 +48,25 @@ defineProps({
 const options = ref({
   maintainAspectRatio: false,
   interaction: {
-    mode: "index",
+    mode: 'index',
     intersect: false,
   },
   scales: {
     y: {
       ticks: {
-        color: "#647882",
+        color: '#647882',
       },
       grid: {
-        color: "rgba(100, 100, 100, .2)",
+        color: 'rgba(100, 100, 100, .2)',
         borderWidth: 0,
       },
     },
     x: {
       ticks: {
-        color: "#647882",
+        color: '#647882',
       },
       grid: {
-        color: "rgba(100, 100, 100, .2)",
+        color: 'rgba(100, 100, 100, .2)',
         borderWidth: 0,
       },
     },

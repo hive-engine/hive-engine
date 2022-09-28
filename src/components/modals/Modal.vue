@@ -24,23 +24,25 @@
 </template>
 
 <script setup>
-import { XMarkIcon } from "@heroicons/vue/24/outline";
-import { computed } from "vue";
+import { XMarkIcon } from '@heroicons/vue/24/outline';
+import { computed } from 'vue';
 
 const props = defineProps({
-  size: { type: String, default: "sm" },
-  bodyClass: { type: String, default: "p-6 flex-grow" },
+  size: { type: String, default: 'sm' },
+  bodyClass: { type: String, default: 'p-6 flex-grow' },
 });
 
 const contentClasses = computed(() => {
-  const classes = ["w-full relative flex flex-col max-h-full"];
+  const classes = ['w-full relative flex flex-col max-h-full'];
 
-  if (props.size === "xl") {
-    return [...classes, "max-w-6xl"];
-  } else if (props.size === "md") {
-    return [...classes, "max-w-3xl"];
+  if (props.size === 'xl') {
+    return [...classes, 'max-w-6xl'];
+  } else if (props.size === 'lg') {
+    return [...classes, 'max-w-4xl'];
+  } else if (props.size === 'md') {
+    return [...classes, 'max-w-3xl'];
   }
 
-  return [...classes, "max-w-xl"];
+  return [...classes, 'max-w-xl'];
 });
 </script>

@@ -10,9 +10,7 @@
   >
     <div class="border dark:border-gray-800 rounded bg-white dark:bg-gray-600 dark:text-gray-300">
       <div class="flex items-center justify-between px-6 py-4">
-        <div class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300">
-          Withdraw Tokens
-        </div>
+        <div class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300">Withdraw Tokens</div>
 
         <button class="dark:text-gray-300" @click="close">
           <XMarkIcon class="h-5 w-5" aria-hidden="true" />
@@ -24,22 +22,16 @@
 
         <template v-else>
           <div class="alert-warning mb-5 font-bold">
-            There is a 0.75% fee on withdrawals. For Ethereum, ERC-20, BNB, BEP-20, Polygon (MATIC)
-            and Polygon ERC-20 withdrawals fee is 1% and you will also pay for the Ethereum / BSC /
-            Polygon network gas fee.
+            There is a 0.75% fee on withdrawals. For Ethereum, ERC-20, BNB, BEP-20, Polygon (MATIC) and Polygon ERC-20
+            withdrawals fee is 1% and you will also pay for the Ethereum / BSC / Polygon network gas fee.
           </div>
 
           <div v-if="pendingWithdrawals >= 15" class="alert-warning text-center mb-5 font-bold">
-            There are <strong>{{ pendingWithdrawals }}</strong> pending withdrawals waiting to be
-            processed. So, your withdrawal might be delayed.
+            There are <strong>{{ pendingWithdrawals }}</strong> pending withdrawals waiting to be processed. So, your
+            withdrawal might be delayed.
           </div>
 
-          <SearchSelect
-            v-model="selectedToken"
-            classes="rounded-md mb-3"
-            menu-class="rounded-md"
-            :options="tokens"
-          />
+          <SearchSelect v-model="selectedToken" classes="rounded-md mb-3" menu-class="rounded-md" :options="tokens" />
 
           <template v-if="selectedToken">
             <template v-if="isWithdrawalDisabled.disabled">
@@ -152,13 +144,11 @@
                 Minimum withdrawal amount: {{ minimumWithdrawAmount }} {{ selectedToken }}
               </div>
 
-              <div class="mb-3">
-                You will receive (estimated): {{ receiveAmount }} {{ receiveSymbol }}
-              </div>
+              <div class="mb-3">You will receive (estimated): {{ receiveAmount }} {{ receiveSymbol }}</div>
 
               <div v-if="selectedToken === 'SWAP.BLURT'" class="text-sm mb-3">
-                SWAP.BLURT withdrawal has 0.100 SWAP.BLURT transaction fee of the Blurt Blockchain
-                on top of the 0.75% withdrawal fee of Hive-Engine.
+                SWAP.BLURT withdrawal has 0.100 SWAP.BLURT transaction fee of the Blurt Blockchain on top of the 0.75%
+                withdrawal fee of Hive-Engine.
               </div>
 
               <button
@@ -172,7 +162,7 @@
                 @click.prevent="withdrawToken"
               >
                 <Spinner v-if="btnBusy" />
-                {{ " " }} Withdraw
+                {{ ' ' }} Withdraw
                 {{ isEvmToken ? evmToken : selectedToken }}
               </button>
             </template>
@@ -192,9 +182,7 @@
     @closed="onFeeDepositModalClose"
   >
     <div class="flex items-center justify-between px-6 py-4">
-      <div class="text-2xl font-bold leading-6 text-gray-900 dark:text-gray-300">
-        Deposit Gas Fee
-      </div>
+      <div class="text-2xl font-bold leading-6 text-gray-900 dark:text-gray-300">Deposit Gas Fee</div>
 
       <button class="dark:text-gray-300" @click="close">
         <XMarkIcon class="h-5 w-5" aria-hidden="true" />
@@ -203,9 +191,8 @@
 
     <div v-if="!modalBusy" class="p-6 flex-grow">
       <div class="mb-3">
-        In order to withdraw {{ selectedToken }} tokens, you must provide enough
-        {{ evmFeeSymbol }} to cover the network gas fee. This reserved fee balance is
-        non-refundable.
+        In order to withdraw {{ selectedToken }} tokens, you must provide enough {{ evmFeeSymbol }} to cover the network
+        gas fee. This reserved fee balance is non-refundable.
       </div>
 
       <div class="font-bold mb-3">Fee deposits can take up to 5 minutes to reflect in balance.</div>
@@ -248,21 +235,21 @@
 </template>
 
 <script>
-import { computed, defineComponent, inject, onBeforeUnmount, onMounted, ref, watch } from "vue";
-import { XMarkIcon } from "@heroicons/vue/24/outline";
-import { useVuelidate } from "@vuelidate/core";
-import { required, requiredIf } from "@vuelidate/validators";
-import { useStore } from "../../stores";
-import { useUserStore } from "../../stores/user";
-import { useTokenStore } from "../../stores/token";
-import { useWalletStore } from "../../stores/wallet";
-import { sidechain } from "../../plugins/sidechain";
-import { toFixedWithoutRounding } from "../../utils";
-import SearchSelect from "../utilities/SearchSelect.vue";
-import { utils } from "ethers";
+import { XMarkIcon } from '@heroicons/vue/24/outline';
+import { useVuelidate } from '@vuelidate/core';
+import { required, requiredIf } from '@vuelidate/validators';
+import { utils } from 'ethers';
+import { computed, defineComponent, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { sidechain } from '../../plugins/sidechain';
+import { useStore } from '../../stores';
+import { useTokenStore } from '../../stores/token';
+import { useUserStore } from '../../stores/user';
+import { useWalletStore } from '../../stores/wallet';
+import { toFixedWithoutRounding } from '../../utils';
+import SearchSelect from '../utilities/SearchSelect.vue';
 
 export default defineComponent({
-  name: "WithdrawModal",
+  name: 'WithdrawModal',
 
   components: {
     XMarkIcon,
@@ -270,8 +257,8 @@ export default defineComponent({
   },
 
   setup() {
-    const vfm$ = inject("$vfm");
-    const event = inject("eventBus");
+    const vfm$ = inject('$vfm');
+    const event = inject('eventBus');
     const show = ref(false);
     const feeDepositModalshow = ref(false);
     const modalBusy = ref(true);
@@ -283,12 +270,12 @@ export default defineComponent({
     const walletStore = useWalletStore();
 
     const selectedToken = ref(null);
-    const withdrawAmount = ref("");
-    const withdrawAddress = ref("");
-    const withdrawMemo = ref("");
+    const withdrawAmount = ref('');
+    const withdrawAddress = ref('');
+    const withdrawMemo = ref('');
     const tokenBalance = ref(0);
 
-    const feeDepositAmount = ref("");
+    const feeDepositAmount = ref('');
     const evmFeeSymbolBalance = ref(0);
 
     const settings = computed(() => store.settings);
@@ -312,22 +299,22 @@ export default defineComponent({
       ];
 
       if (settings.value.eth_bridge.erc_20.enabled) {
-        tokens.push({ name: "Ethereum Tokens", symbol: "ERC20", pegged_token_symbol: "ERC20" });
+        tokens.push({ name: 'Ethereum Tokens', symbol: 'ERC20', pegged_token_symbol: 'ERC20' });
       }
 
       if (settings.value.bsc_bridge.bep_20.enabled) {
         tokens.push({
-          name: "Binance Smart Chain Tokens",
-          symbol: "BEP20",
-          pegged_token_symbol: "BEP20",
+          name: 'Binance Smart Chain Tokens',
+          symbol: 'BEP20',
+          pegged_token_symbol: 'BEP20',
         });
       }
 
       if (settings.value.polygon_bridge.erc_20.enabled) {
         tokens.push({
-          name: "Polygon Tokens",
-          symbol: "POLY-ERC20",
-          pegged_token_symbol: "POLY-ERC20",
+          name: 'Polygon Tokens',
+          symbol: 'POLY-ERC20',
+          pegged_token_symbol: 'POLY-ERC20',
         });
       }
 
@@ -339,7 +326,7 @@ export default defineComponent({
           symbol: t.symbol,
         }));
 
-      return [{ value: null, text: "Please select a token" }, ...tokens];
+      return [{ value: null, text: 'Please select a token' }, ...tokens];
     });
 
     const evmTokenOptions = computed(() => {
@@ -348,13 +335,11 @@ export default defineComponent({
         text: `${t.name} (${t.symbol})`,
       }));
 
-      return [{ value: null, text: "Please select a token" }, ...allEvmTokens];
+      return [{ value: null, text: 'Please select a token' }, ...allEvmTokens];
     });
 
     const isWithdrawalDisabled = computed(() => {
-      const token = settings.value.disabled_withdrawals.find(
-        (t) => t.symbol === selectedToken.value
-      );
+      const token = settings.value.disabled_withdrawals.find((t) => t.symbol === selectedToken.value);
 
       return {
         disabled: !!token,
@@ -397,7 +382,7 @@ export default defineComponent({
         BNB: peggedBnb,
         BEP20: peggedBnb,
         MATIC: peggedMatic,
-        "POLY-ERC20": peggedMatic,
+        'POLY-ERC20': peggedMatic,
       };
 
       return feeSymbols[selectedToken.value];
@@ -405,12 +390,12 @@ export default defineComponent({
 
     const network = computed(() => {
       const networks = {
-        ["SWAP.ETH"]: "eth",
-        ERC20: "eth",
-        ["SWAP.BNB"]: "bsc",
-        BEP20: "bsc",
-        ["SWAP.MATIC"]: "polygon",
-        "POLY-ERC20": "polygon",
+        ['SWAP.ETH']: 'eth',
+        ERC20: 'eth',
+        ['SWAP.BNB']: 'bsc',
+        BEP20: 'bsc',
+        ['SWAP.MATIC']: 'polygon',
+        'POLY-ERC20': 'polygon',
       };
 
       return networks[selectedToken.value];
@@ -422,11 +407,11 @@ export default defineComponent({
       if (withdrawAmount.value > 0) {
         receiveAmount = toFixedWithoutRounding(withdrawAmount.value * 0.9925, 8);
 
-        if ([...evmAssets.value, "ERC20", "BEP20", "POLY-ERC20"].includes(selectedToken.value)) {
+        if ([...evmAssets.value, 'ERC20', 'BEP20', 'POLY-ERC20'].includes(selectedToken.value)) {
           receiveAmount = toFixedWithoutRounding(withdrawAmount.value * 0.99 - evmGasFee.value, 8);
-        } else if (selectedToken.value === "SWAP.BLURT") {
+        } else if (selectedToken.value === 'SWAP.BLURT') {
           receiveAmount = toFixedWithoutRounding(receiveAmount - 0.1, 3);
-        } else if (selectedToken.value === "SWAP.HIVE") {
+        } else if (selectedToken.value === 'SWAP.HIVE') {
           receiveAmount = toFixedWithoutRounding(receiveAmount, 3);
         }
       }
@@ -460,7 +445,7 @@ export default defineComponent({
     });
 
     const showMemoField = computed(() => {
-      const supportsMemo = ["SWAP.EOS", "SWAP.BTS"];
+      const supportsMemo = ['SWAP.EOS', 'SWAP.BTS'];
 
       return supportsMemo.includes(selectedToken.value);
     });
@@ -479,7 +464,7 @@ export default defineComponent({
 
       withdrawAddress: {
         requiredIf: requiredIf(() => {
-          return selectedToken.value !== "SWAP.HIVE";
+          return selectedToken.value !== 'SWAP.HIVE';
         }),
         validAddress: (value) => {
           if (evmAssets.value.includes(selectedToken.value) || isEvmToken.value) {
@@ -504,13 +489,13 @@ export default defineComponent({
     const withdrawToken = async () => {
       v$.value.$touch();
 
-      const symbol = ["ERC20", "BEP20", "POLY-ERC20"].includes(selectedToken.value)
+      const symbol = ['ERC20', 'BEP20', 'POLY-ERC20'].includes(selectedToken.value)
         ? evmToken.value
         : selectedToken.value;
 
       let amount = withdrawAmount.value;
 
-      if (symbol === "SWAP.BLURT") {
+      if (symbol === 'SWAP.BLURT') {
         amount = toFixedWithoutRounding(amount, 3);
       }
       if (!v$.value.$invalid) {
@@ -535,10 +520,7 @@ export default defineComponent({
         await store.fetchSettings();
       }
 
-      const [pending] = await Promise.all([
-        sidechain.getPendingWithdrawals(),
-        tokenStore.fetchPeggedTokens(),
-      ]);
+      const [pending] = await Promise.all([sidechain.getPendingWithdrawals(), tokenStore.fetchPeggedTokens()]);
 
       pendingWithdrawals.value = pending.length;
 
@@ -547,9 +529,9 @@ export default defineComponent({
 
     const modalClose = () => {
       selectedToken.value = null;
-      withdrawAmount.value = "";
-      withdrawAddress.value = "";
-      withdrawMemo.value = "";
+      withdrawAmount.value = '';
+      withdrawAddress.value = '';
+      withdrawMemo.value = '';
       tokenBalance.value = 0;
     };
 
@@ -560,18 +542,18 @@ export default defineComponent({
     };
 
     const onFeeDepositModalClose = () => {
-      feeDepositAmount.value = "";
+      feeDepositAmount.value = '';
       evmFeeSymbolBalance.value = 0;
     };
 
     onMounted(() => {
-      event.on("fee-deposit-successful", () => {
+      event.on('fee-deposit-successful', () => {
         feeDepositModalshow.value = false;
       });
     });
 
     onBeforeUnmount(() => {
-      event.off("fee-deposit-successful");
+      event.off('fee-deposit-successful');
     });
 
     watch(selectedToken, async (value) => {
@@ -582,13 +564,13 @@ export default defineComponent({
       isEvmToken.value = false;
       tokenBalance.value = 0;
 
-      withdrawAddress.value = "";
+      withdrawAddress.value = '';
 
-      if (value === "SWAP.HIVE") {
+      if (value === 'SWAP.HIVE') {
         withdrawAddress.value = username.value;
       } else if (evmAssets.value.includes(value)) {
         await walletStore.fetchGasFee(network.value, value);
-      } else if (["ERC20", "BEP20", "POLY-ERC20"].includes(value)) {
+      } else if (['ERC20', 'BEP20', 'POLY-ERC20'].includes(value)) {
         isEvmToken.value = true;
 
         await Promise.all([
@@ -597,10 +579,10 @@ export default defineComponent({
         ]);
       }
 
-      withdrawMemo.value = "";
-      withdrawAmount.value = "";
+      withdrawMemo.value = '';
+      withdrawAmount.value = '';
 
-      if (!["ERC20", "BEP20", "POLY-ERC20"].includes(value)) {
+      if (!['ERC20', 'BEP20', 'POLY-ERC20'].includes(value)) {
         const balance = await sidechain.getBalance(username.value, value);
 
         tokenBalance.value = balance ? Number(balance.balance) : 0;

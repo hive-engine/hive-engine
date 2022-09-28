@@ -13,13 +13,7 @@
     <div v-for="(category, c) of faqCategories" :key="c" class="mb-10">
       <h3 class="text-2xl font-bold mb-3">{{ makeTitle(category) }}</h3>
 
-      <Disclosure
-        v-for="(faq, i) of FAQ[category]"
-        v-slot="{ open }"
-        :key="i"
-        as="div"
-        class="mb-3"
-      >
+      <Disclosure v-for="(faq, i) of FAQ[category]" v-slot="{ open }" :key="i" as="div" class="mb-3">
         <DisclosureButton
           :class="[
             open ? 'rounded-b-none' : '',
@@ -42,14 +36,14 @@
 </template>
 
 <script>
-import { defineComponent } from "vue";
-import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
-import { ChevronUpIcon } from "@heroicons/vue/24/outline";
-import FAQ from "../assets/jsons/faq.json";
-import PageFooter from "../components/PageFooter.vue";
+import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue';
+import { ChevronUpIcon } from '@heroicons/vue/24/outline';
+import { defineComponent } from 'vue';
+import FAQ from '../assets/jsons/faq.json';
+import PageFooter from '../components/PageFooter.vue';
 
 export default defineComponent({
-  name: "FAQ",
+  name: 'FAQ',
 
   components: {
     Disclosure,
@@ -64,8 +58,8 @@ export default defineComponent({
 
     const makeTitle = (str) => {
       return str
-        .split("_")
-        .join(" ")
+        .split('_')
+        .join(' ')
         .replace(/\b(\w)/g, (s) => s.toUpperCase());
     };
 

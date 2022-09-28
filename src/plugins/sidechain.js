@@ -1,18 +1,18 @@
-import axios from "axios";
-import { SIDECHAIN_RPC, HISTORY_API } from "../config";
+import axios from 'axios';
+import { HISTORY_API, SIDECHAIN_RPC } from '@/config';
 
 const instance = axios.create({
   baseURL: SIDECHAIN_RPC,
   headers: {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
   },
 });
 
 const sidechain = {
   async call(endpoint, request) {
     const postData = {
-      jsonrpc: "2.0",
+      jsonrpc: '2.0',
       id: Date.now(),
       ...request,
     };
@@ -21,8 +21,8 @@ const sidechain = {
 
     const query = await instance.post(`${endpoint}`, postData, {
       headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
       },
     });
 
@@ -42,19 +42,19 @@ const sidechain = {
   },
 
   blockchain(request) {
-    return this.call("blockchain", request);
+    return this.call('blockchain', request);
   },
 
   contract(request) {
-    return this.call("contracts", request);
+    return this.call('contracts', request);
   },
 
   getContractParams(contractName) {
     const request = {
-      method: "findOne",
+      method: 'findOne',
       params: {
         contract: contractName,
-        table: "params",
+        table: 'params',
         query: {},
       },
     };
@@ -66,10 +66,10 @@ const sidechain = {
     const query = { account };
 
     const request = {
-      method: "find",
+      method: 'find',
       params: {
-        contract: "tokens",
-        table: "balances",
+        contract: 'tokens',
+        table: 'balances',
         query,
       },
     };
@@ -78,7 +78,7 @@ const sidechain = {
       if (Array.isArray(symbol)) {
         request.params.query = { ...query, symbol: { $in: symbol } };
       } else {
-        request.method = "findOne";
+        request.method = 'findOne';
         request.params.query = { ...query, symbol };
       }
     }
@@ -88,10 +88,10 @@ const sidechain = {
 
   getTokens(query = {}, offset = 0, limit = 1000) {
     const request = {
-      method: "find",
+      method: 'find',
       params: {
-        contract: "tokens",
-        table: "tokens",
+        contract: 'tokens',
+        table: 'tokens',
         query,
         offset,
         limit,
@@ -111,10 +111,10 @@ const sidechain = {
     }
 
     const request = {
-      method: "find",
+      method: 'find',
       params: {
-        contract: "tokens",
-        table: "pendingUnstakes",
+        contract: 'tokens',
+        table: 'pendingUnstakes',
         query,
       },
     };
@@ -124,37 +124,37 @@ const sidechain = {
 
   getMetrics(query = {}, offset = 0, limit = 1000) {
     const request = {
-      method: "find",
+      method: 'find',
       params: {
-        contract: "market",
-        table: "metrics",
+        contract: 'market',
+        table: 'metrics',
         query,
         limit,
         offset,
       },
     };
 
-    if (typeof query === "string") {
-      request.method = "findOne";
+    if (typeof query === 'string') {
+      request.method = 'findOne';
       request.params.query = { symbol: query };
     }
 
     return this.contract(request);
   },
 
-  getOrders(query, type = "buy", limit = 100, descending = true) {
+  getOrders(query, type = 'buy', limit = 100, descending = true) {
     const request = {
-      method: "find",
+      method: 'find',
       params: {
-        contract: "market",
+        contract: 'market',
         query,
-        indexes: [{ index: "priceDec", descending }],
+        indexes: [{ index: 'priceDec', descending }],
         limit,
         offset: 0,
       },
     };
 
-    request.params.table = type === "buy" ? "buyBook" : "sellBook";
+    request.params.table = type === 'buy' ? 'buyBook' : 'sellBook';
 
     return this.contract(request);
   },
@@ -169,14 +169,14 @@ const sidechain = {
     }
 
     const request = {
-      method: "find",
+      method: 'find',
       params: {
-        contract: "market",
-        table: "tradesHistory",
+        contract: 'market',
+        table: 'tradesHistory',
         query,
         limit,
         offset: 0,
-        indexes: [{ index: "_id", descending: true }],
+        indexes: [{ index: '_id', descending: true }],
       },
     };
 
@@ -191,10 +191,10 @@ const sidechain = {
     }
 
     const request = {
-      method: "find",
+      method: 'find',
       params: {
-        contract: "hivepegged",
-        table: "withdrawals",
+        contract: 'hivepegged',
+        table: 'withdrawals',
         query,
       },
     };
@@ -204,7 +204,7 @@ const sidechain = {
 
   getTransaction(txid) {
     const request = {
-      method: "getTransactionInfo",
+      method: 'getTransactionInfo',
       params: {
         txid,
       },
@@ -214,7 +214,7 @@ const sidechain = {
   },
 
   getAccountHistory(params) {
-    return this.callHistory("accountHistory", params);
+    return this.callHistory('accountHistory', params);
   },
 };
 
@@ -224,6 +224,6 @@ export default {
   install: (app) => {
     app.config.globalProperties.$sidechain = sidechain;
 
-    app.provide("sidechain", sidechain);
+    app.provide('sidechain', sidechain);
   },
 };

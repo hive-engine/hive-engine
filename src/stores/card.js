@@ -1,9 +1,10 @@
 import axios from 'axios';
+import { addDays, formatDistance, parseISO } from 'date-fns';
 import { defineStore } from 'pinia';
-import { useStore } from '.';
 import { HESL_API, SL_API } from '../config';
 import { getCardBcx, getCardCooldown, getCardLevel, getCardPower, groupBy, toFixedNoRounding } from '../utils';
 import { useUserStore } from './user';
+import { useStore } from '.';
 
 export const slApi = axios.create({
   baseURL: SL_API,
@@ -18,6 +19,7 @@ export const useCardStore = defineStore({
 
   state: () => ({
     player: null,
+    authorized: false,
     settings: null,
     cart: [],
     sl_settings: null,
@@ -27,6 +29,8 @@ export const useCardStore = defineStore({
     selectedCards: [],
     for_rent: [],
     token: null,
+    balances: new Map(),
+    active_rentals: [],
   }),
 
   getters: {
@@ -37,11 +41,15 @@ export const useCardStore = defineStore({
     },
 
     undelegatable(state) {
-      return state.selectedCards.filter((c) => c.delegated_to);
+      return state.selectedCards.filter((c) => c.player === this.player && c.delegated_to);
     },
 
     cancellable(state) {
       return state.selectedCards.filter((c) => c.market_id && !c.delegated_to);
+    },
+
+    changeable(state) {
+      return state.selectedCards.filter((c) => c.market_id && !c.delegated_to && c.market_listing_type === 'HE_RENT');
     },
   },
 
@@ -57,6 +65,8 @@ export const useCardStore = defineStore({
     },
 
     async fetchSettings() {
+      if (this.settings) return;
+
       try {
         const { data } = await heslApi.get('settings');
 
@@ -67,6 +77,8 @@ export const useCardStore = defineStore({
     },
 
     async fetchSLSettings() {
+      if (this.sl_settings) return;
+
       try {
         const params = { token: this.token, username: this.player };
 
@@ -78,7 +90,25 @@ export const useCardStore = defineStore({
       }
     },
 
+    async fetchBalances() {
+      const { data } = await heslApi.get('players/balances', { params: { username: this.player } });
+
+      data.forEach((b) => {
+        this.balances.set(b.currency, Number(b.balance));
+      });
+    },
+
+    async fetchBalanceHistory({ currency, page = 1, limit = 30 }) {
+      const { data } = await heslApi.get('players/balance_history', {
+        params: { username: this.player, currency, page, limit },
+      });
+
+      return data;
+    },
+
     async fetchCardDetails() {
+      if (this.details.size > 0) return;
+
       try {
         const params = { token: this.token, username: this.player };
 
@@ -100,12 +130,14 @@ export const useCardStore = defineStore({
       try {
         const params = { token: this.token, username: this.player };
 
-        const [{ data: collection }, { data: forRent }] = await Promise.all([
+        const [{ data: collection }, { data: forRent }, { data: activeRentals }] = await Promise.all([
           slApi.get(`/cards/collection/${account}`, { params }),
           heslApi.get(`market/for_rent_by_user`, { params: { username: account } }),
+          heslApi.get(`market/active_rentals`, { params: { username: account } }),
         ]);
 
         const rentals = new Map(forRent.map((c) => [c.uid, c]));
+        const rented = new Map(activeRentals.map((c) => [c.uid, c]));
 
         this.cards = collection.cards
           .filter((c) => c.edition !== 6)
@@ -119,7 +151,7 @@ export const useCardStore = defineStore({
             let currency = c.currency;
             let marketListingType = c.market_listing_type;
 
-            const rental = rentals.get(c.uid);
+            const rental = rentals.get(c.uid) || rented.get(c.uid);
 
             if (rental) {
               marketId = rental.market_id;
@@ -141,6 +173,35 @@ export const useCardStore = defineStore({
           });
       } catch (error) {
         console.error(error.message);
+      }
+    },
+
+    async fetchActiveRentals(renter) {
+      try {
+        const { data } = await heslApi.get('market/active_rentals', { params: { renter, limit: 1000000 } });
+
+        this.active_rentals = data.map((c) => {
+          const { name, color, rarity } = this.details.get(c.card_detail_id);
+          const bcx = getCardBcx(c);
+          const level = getCardLevel(c);
+          const price = Number(c.price);
+          const remaining = formatDistance(addDays(parseISO(c.rented_at), c.days), Date.now(), {
+            includeSeconds: true,
+          });
+
+          return {
+            ...c,
+            name,
+            color,
+            rarity,
+            price,
+            bcx,
+            level,
+            remaining,
+          };
+        });
+      } catch (error) {
+        console.error(error);
       }
     },
 
@@ -180,6 +241,8 @@ export const useCardStore = defineStore({
 
         const { data } = await heslApi.get(`market/for_rent_by_card`, { params });
 
+        const { name } = this.details.get(id);
+
         this.for_rent = data.map((c) => {
           const bcx = getCardBcx(c);
           const power = getCardPower(c);
@@ -187,6 +250,7 @@ export const useCardStore = defineStore({
 
           return {
             ...c,
+            name,
             bcx,
             power,
             level,
@@ -230,6 +294,22 @@ export const useCardStore = defineStore({
       }
     },
 
+    async fetchAuthorities(username) {
+      let { data: auths } = await slApi.get('players/authorities', { params: { players: username || this.player } });
+
+      if (Array.isArray(auths) && auths.length > 0) {
+        auths = auths[0].authorities ? auths[0].authorities : {};
+
+        if (auths.delegation && auths.delegation.includes(this.settings.account)) {
+          this.authorized = true;
+        } else {
+          this.authorized = false;
+        }
+      }
+
+      return auths;
+    },
+
     async requestListCards({ price, currency }) {
       const store = useStore();
 
@@ -247,7 +327,26 @@ export const useCardStore = defineStore({
           currency,
         },
         eventName: 'list-cards-successful',
-        eventData: cards.map((c) => c.uid),
+        eventData: cards.map((c) => c[0]),
+      });
+    },
+
+    async requestChangePrice({ price, currency }) {
+      const store = useStore();
+
+      const precisions = new Map(this.settings.precisions);
+
+      const items = this.changeable.map((c) => [c.market_id, toFixedNoRounding(price, precisions.get(currency))]);
+
+      await store.requestBroadcastJson({
+        id: `${this.settings.prefix}_update_rental_price`,
+        key: 'Active',
+        message: 'Update Rental Price',
+        json: {
+          items,
+        },
+        eventName: 'change-price-successful',
+        eventData: items.map((c) => c[0]),
       });
     },
 
@@ -277,6 +376,83 @@ export const useCardStore = defineStore({
       }
     },
 
+    async requestUndelegateCards() {
+      const store = useStore();
+
+      const cards = this.undelegatable.map((c) => c.uid);
+
+      await store.requestBroadcastJson({
+        id: 'sm_undelegate_cards',
+        key: 'Active',
+        message: 'Cancel Rental',
+        json: { cards },
+        eventName: 'undelegate-cards-successful',
+        eventData: cards,
+      });
+    },
+
+    async requestPayment({ currency, days = 2 }) {
+      const store = useStore();
+
+      const items = this.cart.filter((c) => c.currency === currency);
+
+      const rentables = items.filter((c) => c.market_id);
+
+      if (rentables.length > 0) {
+        await store.requestBroadcastJson({
+          id: `${this.settings.prefix}_market_rent`,
+          key: 'Active',
+          message: `Rent Cards (${currency})`,
+          json: {
+            items: rentables.map((c) => c.market_id),
+            days,
+            currency,
+          },
+          eventName: 'rent-cards-successful',
+          eventData: rentables.map((c) => c.uid),
+        });
+      }
+
+      const renewables = items.filter((c) => c.sell_trx_id);
+
+      if (renewables.length > 0) {
+        await store.requestBroadcastJson({
+          id: `${this.settings.prefix}_market_renew_rental`,
+          key: 'Active',
+          message: `Renew Cards (${currency})`,
+          json: {
+            items: renewables.map((c) => c.sell_trx_id),
+            days,
+            currency,
+          },
+          eventName: 'rent-cards-successful',
+          eventData: renewables.map((c) => c.uid),
+        });
+      }
+    },
+
+    async requestAddAuthority() {
+      const store = useStore();
+
+      const auths = await this.fetchAuthorities();
+
+      const json = auths;
+
+      if (json.delegation) {
+        json.delegation.push(this.settings.account);
+      } else {
+        json.delegation = [this.settings.account];
+      }
+
+      await store.requestBroadcastJson({
+        id: `sm_set_authority`,
+        key: 'Active',
+        message: `Set Authority`,
+        json,
+        eventName: 'add-authority-successful',
+      });
+    },
+
     async logIntoSplinterlands() {
       const store = useStore();
       const userStore = useUserStore();
@@ -299,11 +475,15 @@ export const useCardStore = defineStore({
           params: { name: userStore.username, ts: timestamp, sig: result },
         });
 
-        this.player = userStore.username;
-        this.token = data.token;
+        if (!data.error) {
+          this.player = data.name;
+          this.token = data.token;
 
-        localStorage.setItem('sl_token', data.jwt_token);
-        localStorage.setItem('sl_expiration', data.jwt_expiration_dt);
+          localStorage.setItem('sl_token', data.jwt_token);
+          localStorage.setItem('sl_expiration', data.jwt_expiration_dt);
+
+          await this.fetchAuthorities();
+        }
       }
     },
 
@@ -337,6 +517,8 @@ export const useCardStore = defineStore({
 
         localStorage.setItem('sl_token', data.jwt_token);
         localStorage.setItem('sl_expiration', data.jwt_expiration_dt);
+
+        await this.fetchAuthorities();
       }
     },
   },

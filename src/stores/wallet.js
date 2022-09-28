@@ -1,17 +1,17 @@
-import Big from "big.js";
-import axios from "axios";
-import { format } from "date-fns";
-import { utils } from "ethers";
-import { defineStore } from "pinia";
-import { useStore } from ".";
-import { useUserStore } from "./user";
-import { useTokenStore } from "./token";
-import { sidechain } from "../plugins/sidechain";
-import { toFixedWithoutRounding } from "../utils";
-import { BSC_BRIDGE_API, CTC_API, ETH_BRIDGE_API, POLYGON_BRIDGE_API, SCOT_API } from "../config";
+import axios from 'axios';
+import Big from 'big.js';
+import { format } from 'date-fns';
+import { utils } from 'ethers';
+import { defineStore } from 'pinia';
+import { BSC_BRIDGE_API, CTC_API, ETH_BRIDGE_API, POLYGON_BRIDGE_API, SCOT_API } from '../config';
+import { sidechain } from '../plugins/sidechain';
+import { toFixedWithoutRounding } from '../utils';
+import { useTokenStore } from './token';
+import { useUserStore } from './user';
+import { useStore } from '.';
 
 export const useWalletStore = defineStore({
-  id: "wallet",
+  id: 'wallet',
 
   state: () => ({
     wallet: [],
@@ -72,8 +72,8 @@ export const useWalletStore = defineStore({
 
     async requestTransfer({ symbol, to, quantity, memo, eventName }) {
       const json = {
-        contractName: "tokens",
-        contractAction: "transfer",
+        contractName: 'tokens',
+        contractAction: 'transfer',
         contractPayload: {
           symbol,
           to,
@@ -91,8 +91,8 @@ export const useWalletStore = defineStore({
 
     async requestDelegate({ symbol, to, quantity }) {
       const json = {
-        contractName: "tokens",
-        contractAction: "delegate",
+        contractName: 'tokens',
+        contractAction: 'delegate',
         contractPayload: {
           to,
           symbol,
@@ -109,8 +109,8 @@ export const useWalletStore = defineStore({
 
     async requestUndelegate({ symbol, from, quantity }) {
       const json = {
-        contractName: "tokens",
-        contractAction: "undelegate",
+        contractName: 'tokens',
+        contractAction: 'undelegate',
         contractPayload: {
           from,
           symbol,
@@ -127,8 +127,8 @@ export const useWalletStore = defineStore({
 
     async requestStake({ symbol, to, quantity }) {
       const json = {
-        contractName: "tokens",
-        contractAction: "stake",
+        contractName: 'tokens',
+        contractAction: 'stake',
         contractPayload: {
           to,
           symbol,
@@ -145,8 +145,8 @@ export const useWalletStore = defineStore({
 
     async requestUnstake({ symbol, quantity }) {
       const json = {
-        contractName: "tokens",
-        contractAction: "unstake",
+        contractName: 'tokens',
+        contractAction: 'unstake',
         contractPayload: {
           symbol,
           quantity,
@@ -162,8 +162,8 @@ export const useWalletStore = defineStore({
 
     async requestCancelUnstake({ symbol, trxId }) {
       const json = {
-        contractName: "tokens",
-        contractAction: "cancelUnstake",
+        contractName: 'tokens',
+        contractAction: 'cancelUnstake',
         contractPayload: {
           txID: trxId,
         },
@@ -207,10 +207,10 @@ export const useWalletStore = defineStore({
       this.depositInfo = depositInfo;
     },
 
-    async fetchEvmAddress(network = "eth") {
+    async fetchEvmAddress(network = 'eth') {
       const userStore = useUserStore();
 
-      let address = "";
+      let address = '';
 
       const endpoints = {
         eth: `${ETH_BRIDGE_API}/utils/ethaddress`,
@@ -219,9 +219,9 @@ export const useWalletStore = defineStore({
       };
 
       const addressKeys = {
-        eth: "ethereumAddress",
-        bsc: "bscAddress",
-        polygon: "polygonAddress",
+        eth: 'ethereumAddress',
+        bsc: 'bscAddress',
+        polygon: 'polygonAddress',
       };
 
       try {
@@ -234,7 +234,7 @@ export const useWalletStore = defineStore({
         console.log(e.message);
       }
 
-      return utils.isAddress(address) ? address : "";
+      return utils.isAddress(address) ? address : '';
     },
 
     async fetchGasFee(network, evmToken) {
@@ -283,19 +283,19 @@ export const useWalletStore = defineStore({
       const bridgeAccount = store.settings[`${network}_bridge`].account;
 
       const json = {
-        contractName: "tokens",
-        contractAction: "transfer",
+        contractName: 'tokens',
+        contractAction: 'transfer',
         contractPayload: {
           symbol,
           to: bridgeAccount,
           quantity: amount.toFixed(8),
-          memo: "fee",
+          memo: 'fee',
         },
       };
 
-      const message = "Deposit Reserved Gas Fee";
+      const message = 'Deposit Reserved Gas Fee';
 
-      await store.requestBroadcastJson({ message, json, eventName: "fee-deposit-successful" });
+      await store.requestBroadcastJson({ message, json, eventName: 'fee-deposit-successful' });
     },
 
     async getWithdrawalAddress({ symbol, address }) {
@@ -332,15 +332,15 @@ export const useWalletStore = defineStore({
         const store = useStore();
 
         let json = {
-          contractName: "tokens",
-          contractAction: "transfer",
+          contractName: 'tokens',
+          contractAction: 'transfer',
           contractPayload: {},
         };
 
-        if (symbol === "SWAP.HIVE") {
+        if (symbol === 'SWAP.HIVE') {
           json = {
-            contractName: "hivepegged",
-            contractAction: "withdraw",
+            contractName: 'hivepegged',
+            contractAction: 'withdraw',
             contractPayload: {
               quantity: toFixedWithoutRounding(Number(amount), 3).toFixed(3),
             },
@@ -361,7 +361,7 @@ export const useWalletStore = defineStore({
 
           let withdrawMemo = withdrawInfo.memo;
 
-          if (memo && memo !== "") {
+          if (memo && memo !== '') {
             withdrawMemo = `${withdrawMemo} ${memo}`;
           }
 
@@ -402,40 +402,40 @@ export const useWalletStore = defineStore({
         ]);
 
         withdrawals = withdrawals
-          .filter((w) => w.from_coin_symbol.includes("SWAP."))
+          .filter((w) => w.from_coin_symbol.includes('SWAP.'))
           .map((w) => {
             const amount = Number(w.to_amount);
             const fee = Number(w.ex_fee);
             const timestamp = new Date(w.created_at).getTime();
 
             return {
-              type: "Withdraw",
+              type: 'Withdraw',
               symbol: w.to_coin_symbol,
               address: w.to_address,
               trx_id: w.to_txid,
               amount: toFixedWithoutRounding(amount + fee, 8),
               fee,
               timestamp,
-              date: format(timestamp, "Pp"),
+              date: format(timestamp, 'Pp'),
             };
           });
 
         deposits = deposits
-          .filter((w) => w.to_coin_symbol.includes("SWAP."))
+          .filter((w) => w.to_coin_symbol.includes('SWAP.'))
           .map((w) => {
             const amount = Number(w.to_amount);
             const fee = Number(w.ex_fee);
             const timestamp = new Date(w.created_at).getTime();
 
             return {
-              type: "Deposit",
+              type: 'Deposit',
               symbol: w.to_coin_symbol,
               address: w.from_address,
               trx_id: w.to_txid,
               amount: toFixedWithoutRounding(amount + fee, 8),
               fee,
               timestamp,
-              date: format(timestamp, "Pp"),
+              date: format(timestamp, 'Pp'),
             };
           });
 
@@ -491,11 +491,11 @@ export const useWalletStore = defineStore({
       const message = `Claim SCOT Rewards`;
 
       await store.requestBroadcastJson({
-        id: "scot_claim_token",
-        key: "Posting",
+        id: 'scot_claim_token',
+        key: 'Posting',
         message,
         json,
-        eventName: "scot-claim-successful",
+        eventName: 'scot-claim-successful',
       });
     },
   },

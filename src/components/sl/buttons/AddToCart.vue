@@ -11,9 +11,9 @@
 </template>
 
 <script setup>
-import { useCardStore } from '@/stores/card';
 import { PlusIcon, XMarkIcon } from '@heroicons/vue/24/outline';
 import { computed } from 'vue';
+import { useCardStore } from '@/stores/card';
 
 const cardStore = useCardStore();
 

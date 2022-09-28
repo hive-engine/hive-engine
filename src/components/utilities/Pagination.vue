@@ -45,8 +45,8 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/vue/24/outline";
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/24/outline';
+import { computed } from 'vue';
 
 const props = defineProps({
   pages: {
@@ -63,7 +63,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(['update:modelValue']);
 
 const pagination = computed(() => {
   const res = [];
@@ -71,8 +71,7 @@ const pagination = computed(() => {
   const minPaginationElems = 3 + props.rangeSize * 2;
 
   let rangeStart = props.pages <= minPaginationElems ? 1 : props.modelValue - props.rangeSize;
-  let rangeEnd =
-    props.pages <= minPaginationElems ? props.pages : props.modelValue + props.rangeSize;
+  let rangeEnd = props.pages <= minPaginationElems ? props.pages : props.modelValue + props.rangeSize;
 
   rangeEnd = rangeEnd > props.pages ? props.pages : rangeEnd;
 
@@ -114,7 +113,7 @@ const isPrevControlsActive = computed(() => props.modelValue > 1);
 const isNextControlsActive = computed(() => props.modelValue < props.pages);
 
 const updatePageHandler = (params) => {
-  emit("update:modelValue", params);
+  emit('update:modelValue', params);
 };
 
 // const goToFirst = () => {
@@ -125,7 +124,7 @@ const updatePageHandler = (params) => {
 
 const goToPrev = () => {
   if (isPrevControlsActive.value) {
-    emit("update:modelValue", props.modelValue - 1);
+    emit('update:modelValue', props.modelValue - 1);
   }
 };
 
@@ -137,7 +136,7 @@ const goToPrev = () => {
 
 const goToNext = () => {
   if (isNextControlsActive.value) {
-    emit("update:modelValue", props.modelValue + 1);
+    emit('update:modelValue', props.modelValue + 1);
   }
 };
 </script>

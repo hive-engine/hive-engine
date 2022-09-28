@@ -26,6 +26,7 @@ export const useStore = defineStore({
   state: () => ({
     settings: null,
     hivePrice: 0,
+    loading: false,
   }),
 
   actions: {

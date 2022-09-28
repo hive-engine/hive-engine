@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
-import { useStore } from '.';
 import { emitter } from '../plugins/mitt';
 import { useCardStore } from './card';
+import { useStore } from '.';
 
 export const useUserStore = defineStore({
   id: 'user',
@@ -36,10 +36,14 @@ export const useUserStore = defineStore({
         let { redirect } = this.router.currentRoute.value.query;
 
         if (redirect) {
-          redirect = atob(redirect);
+          try {
+            redirect = JSON.parse(atob(redirect));
 
-          if (this.router.hasRoute(redirect)) {
-            this.router.push({ name: redirect });
+            if (this.router.hasRoute(redirect.name)) {
+              await this.router.push(redirect);
+            }
+          } catch (e) {
+            this.router.replace({ query: {} });
           }
         }
       }

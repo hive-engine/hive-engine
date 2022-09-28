@@ -1,9 +1,9 @@
-import Big from "big.js";
-import axios from "axios";
-import { format } from "date-fns";
-import { defineStore } from "pinia";
-import { useStore } from ".";
-import { sidechain } from "../plugins/sidechain";
+import axios from 'axios';
+import Big from 'big.js';
+import { format } from 'date-fns';
+import { defineStore } from 'pinia';
+import { sidechain } from '../plugins/sidechain';
+import { useStore } from '.';
 
 const processOrderBook = (orderBook) => {
   let volume = Big(0);
@@ -53,7 +53,7 @@ const processOrderBook = (orderBook) => {
 };
 
 export const useMarketStore = defineStore({
-  id: "market",
+  id: 'market',
 
   state: () => ({
     buyBook: [],
@@ -80,15 +80,15 @@ export const useMarketStore = defineStore({
         .sort((a, b) => Number(b.timestamp) - Number(a.timestamp))
         .map((o) => ({
           ...o,
-          type: o.tokensLocked ? "BUY" : "SELL",
+          type: o.tokensLocked ? 'BUY' : 'SELL',
           total: Big(o.quantity).times(o.price),
-          timestamp: format(new Date(o.timestamp * 1000), "Pp"),
+          timestamp: format(new Date(o.timestamp * 1000), 'Pp'),
         }));
     },
 
     tradesHistoryFormatted(state) {
       return state.tradesHistory.map((o) => ({
-        timestamp: format(new Date(o.timestamp * 1000), "Pp"),
+        timestamp: format(new Date(o.timestamp * 1000), 'Pp'),
         type: o.type.toUpperCase(),
         buyer: o.buyer,
         seller: o.seller,
@@ -105,8 +105,8 @@ export const useMarketStore = defineStore({
         const query = { symbol };
 
         const [buyBook, sellBook] = await Promise.all([
-          sidechain.getOrders(query, "buy", 1000, true),
-          sidechain.getOrders(query, "sell", 1000, false),
+          sidechain.getOrders(query, 'buy', 1000, true),
+          sidechain.getOrders(query, 'sell', 1000, false),
         ]);
 
         this.buyBook = buyBook;
@@ -125,8 +125,8 @@ export const useMarketStore = defineStore({
         }
 
         const [buyOrders, sellOrders] = await Promise.all([
-          sidechain.getOrders(query, "buy", 1000, true),
-          sidechain.getOrders(query, "sell", 1000, false),
+          sidechain.getOrders(query, 'buy', 1000, true),
+          sidechain.getOrders(query, 'sell', 1000, false),
         ]);
 
         this.buyOrders = buyOrders;
@@ -151,15 +151,13 @@ export const useMarketStore = defineStore({
         const [token] = await sidechain.getTokens({ symbol });
 
         let metadata = {};
-        let icon = "https://cdn.tribaldex.com/tribaldex/token-icons/UNKNOWN.png";
+        let icon = 'https://cdn.tribaldex.com/tribaldex/token-icons/UNKNOWN.png';
 
         try {
           metadata = JSON.parse(token.metadata);
 
-          if (metadata.icon && metadata.icon.startsWith("http")) {
-            icon = metadata.icon.endsWith(".svg")
-              ? metadata.icon
-              : `https://images.hive.blog/0x0/${metadata.icon}`;
+          if (metadata.icon && metadata.icon.startsWith('http')) {
+            icon = metadata.icon.endsWith('.svg') ? metadata.icon : `https://images.hive.blog/0x0/${metadata.icon}`;
           }
         } catch {
           //
@@ -185,9 +183,9 @@ export const useMarketStore = defineStore({
       }
     },
 
-    async fetchMarketHistory(symbol, interval = "daily") {
+    async fetchMarketHistory(symbol, interval = 'daily') {
       try {
-        const { data: history } = await axios.get("https://info-api.tribaldex.com/market/ohlcv", {
+        const { data: history } = await axios.get('https://info-api.tribaldex.com/market/ohlcv', {
           params: { symbol, interval },
         });
 
@@ -197,11 +195,11 @@ export const useMarketStore = defineStore({
       }
     },
 
-    async requestPlaceOrder({ action = "buy", type = "limit", symbol, price, quantity, total }) {
-      const orderQuantity = action === "buy" && type === "market" ? total : quantity;
+    async requestPlaceOrder({ action = 'buy', type = 'limit', symbol, price, quantity, total }) {
+      const orderQuantity = action === 'buy' && type === 'market' ? total : quantity;
 
       const json = {
-        contractName: "market",
+        contractName: 'market',
         contractAction: action,
         contractPayload: {
           symbol,
@@ -210,19 +208,17 @@ export const useMarketStore = defineStore({
         },
       };
 
-      if (type === "market") {
+      if (type === 'market') {
         delete json.contractPayload.price;
 
-        if (action === "buy") {
-          json.contractAction = "marketBuy";
+        if (action === 'buy') {
+          json.contractAction = 'marketBuy';
         } else {
-          json.contractAction = "marketSell";
+          json.contractAction = 'marketSell';
         }
       }
 
-      const message = `${type === "limit" ? "Limit" : "Market"} ${
-        action === "buy" ? "Buy" : "Sell"
-      } (${symbol})`;
+      const message = `${type === 'limit' ? 'Limit' : 'Market'} ${action === 'buy' ? 'Buy' : 'Sell'} (${symbol})`;
 
       const store = useStore();
 
@@ -231,8 +227,8 @@ export const useMarketStore = defineStore({
 
     async requestCancelOrders(orderIds) {
       const json = orderIds.map((o) => ({
-        contractName: "market",
-        contractAction: "cancel",
+        contractName: 'market',
+        contractAction: 'cancel',
         contractPayload: {
           type: o.type.toLowerCase(),
           id: o.txId,
@@ -241,7 +237,7 @@ export const useMarketStore = defineStore({
 
       const store = useStore();
 
-      await store.requestBroadcastJson({ message: "Cancel Order(s)", json });
+      await store.requestBroadcastJson({ message: 'Cancel Order(s)', json });
     },
   },
 });

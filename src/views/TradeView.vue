@@ -19,12 +19,7 @@
     >
       <div class="mb-3 pr-2 sm:basis-0 sm:flex-grow md:basis-12">
         <div class="flex items-center">
-          <SearchSelect
-            v-model="symbol"
-            classes="rounded-l-md"
-            menu-class="rounded-md"
-            :options="tokens"
-          />
+          <SearchSelect v-model="symbol" classes="rounded-l-md" menu-class="rounded-md" :options="tokens" />
 
           <button
             class="self-stretch bg-white dark:bg-slate-600 border-gray-400 dark:border-gray-500 border border-l-0 rounded-r-md p-2 hover:text-red-400"
@@ -115,11 +110,7 @@
         Candle
       </button>
 
-      <button
-        :disabled="chartType === 'depth'"
-        class="btn-sm px-4 py-1 rounded-none"
-        @click="chartType = 'depth'"
-      >
+      <button :disabled="chartType === 'depth'" class="btn-sm px-4 py-1 rounded-none" @click="chartType = 'depth'">
         Depth
       </button>
 
@@ -148,11 +139,7 @@
               >
             </RadioGroupOption>
 
-            <RadioGroupOption
-              v-slot="{ checked, disabled }"
-              value="market"
-              :disabled="token.precision <= 3"
-            >
+            <RadioGroupOption v-slot="{ checked, disabled }" value="market" :disabled="token.precision <= 3">
               <span
                 :class="[
                   checked ? 'bg-red-700 shadow-red-800 shadow-inner' : 'bg-red-600',
@@ -270,11 +257,7 @@
               >
             </RadioGroupOption>
 
-            <RadioGroupOption
-              v-slot="{ checked, disabled }"
-              value="market"
-              :disabled="token.precision <= 3"
-            >
+            <RadioGroupOption v-slot="{ checked, disabled }" value="market" :disabled="token.precision <= 3">
               <span
                 :class="[
                   checked ? 'bg-red-700 shadow-red-800 shadow-inner' : 'bg-red-600',
@@ -347,9 +330,7 @@
         <div class="flex items-center justify-between mt-3">
           <div class="w-3/4">
             Balance:
-            <a class="cursor-pointer" @click="sellQuantity = symbolBalance"
-              >{{ symbolBalance }} {{ symbol }}</a
-            >
+            <a class="cursor-pointer" @click="sellQuantity = symbolBalance">{{ symbolBalance }} {{ symbol }}</a>
           </div>
 
           <button
@@ -427,9 +408,7 @@
         <h3 class="w-3/4 text-xl font-bold mt-5 mb-3">Open Orders</h3>
 
         <div v-if="selectedOrders.length > 1" class="w-full text-right">
-          <button class="btn-sm px-4" @click="marketStore.requestCancelOrders(selectedOrders)">
-            Cancel All
-          </button>
+          <button class="btn-sm px-4" @click="marketStore.requestCancelOrders(selectedOrders)">Cancel All</button>
         </div>
       </div>
 
@@ -439,10 +418,9 @@
         </template>
 
         <template #cell(type)="{ item }">
-          <span
-            :class="{ 'text-red-500': item.type === 'SELL', 'text-green-500': item.type === 'BUY' }"
-            >{{ item.type }}</span
-          >
+          <span :class="{ 'text-red-500': item.type === 'SELL', 'text-green-500': item.type === 'BUY' }">{{
+            item.type
+          }}</span>
         </template>
 
         <template #cell(txId)="{ item }">
@@ -457,10 +435,9 @@
 
     <custom-table :fields="tradesHistoryFields" :items="tradesHistory">
       <template #cell(type)="{ item }">
-        <span
-          :class="{ 'text-red-500': item.type === 'SELL', 'text-green-500': item.type === 'BUY' }"
-          >{{ item.type }}</span
-        >
+        <span :class="{ 'text-red-500': item.type === 'SELL', 'text-green-500': item.type === 'BUY' }">{{
+          item.type
+        }}</span>
       </template>
     </custom-table>
   </div>
@@ -470,30 +447,30 @@
 </template>
 
 <script setup>
-import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { RadioGroup, RadioGroupOption } from "@headlessui/vue";
-import { InformationCircleIcon, XMarkIcon } from "@heroicons/vue/24/outline";
-import { format } from "date-fns";
-import { useStore } from "../stores";
-import { useUserStore } from "../stores/user";
-import { useMarketStore } from "../stores/market";
-import { useWalletStore } from "../stores/wallet";
-import { useTokenStore } from "../stores/token";
-import { filterOutliers } from "../utils";
-import CustomTable from "../components/utilities/CustomTable.vue";
-import SearchSelect from "../components/utilities/SearchSelect.vue";
-import TokenInfo from "../components/modals/TokenInfo.vue";
-import PageFooter from "../components/PageFooter.vue";
-import CandleChart from "../components/charts/CandleChart.vue";
-import DepthChart from "../components/charts/DepthChart.vue";
-import VolumeChart from "../components/charts/VolumeChart.vue";
+import { RadioGroup, RadioGroupOption } from '@headlessui/vue';
+import { InformationCircleIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { format } from 'date-fns';
+import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import CandleChart from '../components/charts/CandleChart.vue';
+import DepthChart from '../components/charts/DepthChart.vue';
+import VolumeChart from '../components/charts/VolumeChart.vue';
+import TokenInfo from '../components/modals/TokenInfo.vue';
+import PageFooter from '../components/PageFooter.vue';
+import CustomTable from '../components/utilities/CustomTable.vue';
+import SearchSelect from '../components/utilities/SearchSelect.vue';
+import { useStore } from '../stores';
+import { useMarketStore } from '../stores/market';
+import { useTokenStore } from '../stores/token';
+import { useUserStore } from '../stores/user';
+import { useWalletStore } from '../stores/wallet';
+import { filterOutliers } from '../utils';
 
 const loading = ref(true);
 const route = useRoute();
 const router = useRouter();
-const vfm$ = inject("$vfm");
-const event = inject("eventBus");
+const vfm$ = inject('$vfm');
+const event = inject('eventBus');
 
 const store = useStore();
 const userStore = useUserStore();
@@ -501,22 +478,22 @@ const marketStore = useMarketStore();
 const walletStore = useWalletStore();
 const tokenStore = useTokenStore();
 
-const toFixedWithoutRounding = inject("toFixedWithoutRounding");
+const toFixedWithoutRounding = inject('toFixedWithoutRounding');
 
 const symbol = ref(route.params.symbol);
 
-const buyOrderType = ref("limit");
-const buyPrice = ref("");
-const buyQuantity = ref("");
-const buyTotal = ref("");
+const buyOrderType = ref('limit');
+const buyPrice = ref('');
+const buyQuantity = ref('');
+const buyTotal = ref('');
 
-const sellOrderType = ref("limit");
-const sellPrice = ref("");
-const sellQuantity = ref("");
-const sellTotal = ref("");
+const sellOrderType = ref('limit');
+const sellPrice = ref('');
+const sellQuantity = ref('');
+const sellTotal = ref('');
 
-const interval = ref("daily");
-const chartType = ref("candle");
+const interval = ref('daily');
+const chartType = ref('candle');
 const selectedOrders = ref([]);
 
 const candleChartData = ref({});
@@ -526,7 +503,7 @@ const volumeChartData = ref({});
 const isLoggedIn = computed(() => userStore.isLoggedIn);
 const username = computed(() => userStore.username);
 const hiveBalance = computed(() => {
-  const balance = walletStore.wallet.find((w) => w.symbol === "SWAP.HIVE");
+  const balance = walletStore.wallet.find((w) => w.symbol === 'SWAP.HIVE');
 
   return balance ? balance.balance : 0;
 });
@@ -545,13 +522,13 @@ const buyBook = computed(() =>
   marketStore.buyBookFormatted.map((b) => ({
     ...b,
     quantity: b.quantity.toFixed(token.value.precision),
-  }))
+  })),
 );
 const sellBook = computed(() =>
   marketStore.sellBookFormatted.map((b) => ({
     ...b,
     quantity: b.quantity.toFixed(token.value.precision),
-  }))
+  })),
 );
 const openOrders = computed(() => marketStore.openOrdersFormatted);
 const tradesHistory = computed(() => marketStore.tradesHistoryFormatted);
@@ -559,76 +536,68 @@ const metrics = computed(() => marketStore.metrics);
 const marketHistory = computed(() => marketStore.marketHistory);
 
 const buyBookFields = [
-  { key: "hive_volume", label: "Total HIVE", class: "md:hidden lg:table-cell" },
-  { key: "total", label: "HIVE" },
-  { key: "quantity", label: symbol.value },
-  { key: "price", label: "BID" },
+  { key: 'hive_volume', label: 'Total HIVE', class: 'md:hidden lg:table-cell' },
+  { key: 'total', label: 'HIVE' },
+  { key: 'quantity', label: symbol.value },
+  { key: 'price', label: 'BID' },
 ];
 
 const sellBookFields = [
-  { key: "price", label: "ASK" },
-  { key: "quantity", label: symbol.value },
-  { key: "total", label: "HIVE" },
-  { key: "hive_volume", label: "Total HIVE", class: "md:hidden lg:table-cell" },
+  { key: 'price', label: 'ASK' },
+  { key: 'quantity', label: symbol.value },
+  { key: 'total', label: 'HIVE' },
+  { key: 'hive_volume', label: 'Total HIVE', class: 'md:hidden lg:table-cell' },
 ];
 
 const openOrdersFields = [
-  { key: "checkbox", label: "" },
-  { key: "timestamp", label: "DATE" },
-  { key: "type", label: "TYPE" },
-  { key: "quantity", label: symbol.value },
-  { key: "price", label: "PRICE" },
-  { key: "total", label: "TOTAL HIVE" },
-  { key: "txId", label: "Action" },
+  { key: 'checkbox', label: '' },
+  { key: 'timestamp', label: 'DATE' },
+  { key: 'type', label: 'TYPE' },
+  { key: 'quantity', label: symbol.value },
+  { key: 'price', label: 'PRICE' },
+  { key: 'total', label: 'TOTAL HIVE' },
+  { key: 'txId', label: 'Action' },
 ];
 
 const tradesHistoryFields = [
-  { key: "timestamp", label: "DATE" },
-  { key: "type", label: "TYPE" },
-  { key: "buyer", label: "BUYER", class: "hidden sm:table-cell" },
-  { key: "seller", label: "SELLER", class: "hidden sm:table-cell" },
-  { key: "quantity", label: symbol.value },
-  { key: "price", label: "PRICE" },
-  { key: "total", label: "TOTAL HIVE" },
+  { key: 'timestamp', label: 'DATE' },
+  { key: 'type', label: 'TYPE' },
+  { key: 'buyer', label: 'BUYER', class: 'hidden sm:table-cell' },
+  { key: 'seller', label: 'SELLER', class: 'hidden sm:table-cell' },
+  { key: 'quantity', label: symbol.value },
+  { key: 'price', label: 'PRICE' },
+  { key: 'total', label: 'TOTAL HIVE' },
 ];
 
 const disabledBuyButton = computed(() => {
-  return (
-    buyQuantity.value <= 0 ||
-    Number(buyTotal.value) <= 0 ||
-    Number(buyTotal.value) > hiveBalance.value
-  );
+  return buyQuantity.value <= 0 || Number(buyTotal.value) <= 0 || Number(buyTotal.value) > hiveBalance.value;
 });
 
 const disabledSellButton = computed(() => {
-  return (
-    sellQuantity.value <= 0 ||
-    Number(sellTotal.value) <= 0 ||
-    sellQuantity.value > symbolBalance.value
-  );
+  return sellQuantity.value <= 0 || Number(sellTotal.value) <= 0 || sellQuantity.value > symbolBalance.value;
 });
 
 watch(isLoggedIn, async (loggedIn) => {
   if (loggedIn) {
     await Promise.all([
       marketStore.fetchUserOrders(symbol.value, username.value),
-      walletStore.fetchWallet(username.value, ["SWAP.HIVE", symbol.value]),
+      walletStore.fetchWallet(username.value, ['SWAP.HIVE', symbol.value]),
     ]);
   }
 });
 
 watch(symbol, () => {
-  router.push({ name: "trade", params: { symbol: symbol.value } });
+  router.push({ name: 'trade', params: { symbol: symbol.value } });
 });
 
 watch(buyPrice, () => {
-  if (buyPrice.value > 0 && buyQuantity.value > 0 && buyOrderType.value !== "market") {
+  if (buyPrice.value > 0 && buyQuantity.value > 0 && buyOrderType.value !== 'market') {
     buyTotal.value = (buyQuantity.value * buyPrice.value).toFixed(8);
   }
 });
 
 watch(buyQuantity, () => {
-  if (buyPrice.value > 0 && buyQuantity.value > 0 && buyOrderType.value !== "market") {
+  if (buyPrice.value > 0 && buyQuantity.value > 0 && buyOrderType.value !== 'market') {
     buyTotal.value = (buyQuantity.value * buyPrice.value).toFixed(8);
   }
 });
@@ -637,7 +606,7 @@ watch(buyTotal, (value) => {
   let balance = value;
   let totalQuantity = 0;
 
-  if (buyOrderType.value === "market") {
+  if (buyOrderType.value === 'market') {
     for (let i = 0; i < sellBook.value.length; i += 1) {
       let { quantity, price } = sellBook.value[i];
 
@@ -661,13 +630,13 @@ watch(buyTotal, (value) => {
 });
 
 watch(sellPrice, () => {
-  if (sellPrice.value > 0 && sellQuantity.value > 0 && sellOrderType.value !== "market") {
+  if (sellPrice.value > 0 && sellQuantity.value > 0 && sellOrderType.value !== 'market') {
     sellTotal.value = (sellQuantity.value * sellPrice.value).toFixed(8);
   }
 });
 
 watch(sellQuantity, (value) => {
-  if (sellPrice.value > 0 && sellQuantity.value > 0 && sellOrderType.value !== "market") {
+  if (sellPrice.value > 0 && sellQuantity.value > 0 && sellOrderType.value !== 'market') {
     sellTotal.value = (sellQuantity.value * sellPrice.value).toFixed(8);
   } else {
     let totalQuantity = value;
@@ -716,9 +685,9 @@ const produceCandleChart = () => {
         label: symbol,
         data: history,
         color: {
-          up: "#01c075",
-          down: "#d92f4d",
-          unchanged: "#999",
+          up: '#01c075',
+          down: '#d92f4d',
+          unchanged: '#999',
         },
       },
     ],
@@ -732,19 +701,11 @@ const producevDepthChart = () => {
   buyOrderDataset.reverse();
 
   const buyOrderLabels = [
-    ...new Set(
-      buyBook.value
-        .filter((o) => buyOrderDataset.includes(o.volume))
-        .map((o) => parseFloat(o.price))
-    ),
+    ...new Set(buyBook.value.filter((o) => buyOrderDataset.includes(o.volume)).map((o) => parseFloat(o.price))),
   ];
 
   const sellOrderLabels = [
-    ...new Set(
-      sellBook.value
-        .filter((o) => sellOrderDataset.includes(o.volume))
-        .map((o) => parseFloat(o.price))
-    ),
+    ...new Set(sellBook.value.filter((o) => sellOrderDataset.includes(o.volume)).map((o) => parseFloat(o.price))),
   ];
 
   buyOrderLabels.reverse();
@@ -753,18 +714,18 @@ const producevDepthChart = () => {
     labels: buyOrderLabels.concat(sellOrderLabels),
     datasets: [
       {
-        label: "Buy",
-        borderColor: "#02c076",
-        backgroundColor: "#02c076",
-        fill: "origin",
+        label: 'Buy',
+        borderColor: '#02c076',
+        backgroundColor: '#02c076',
+        fill: 'origin',
         pointRadius: 0,
         data: buyOrderDataset,
       },
       {
-        label: "Sell",
-        borderColor: "#d9304e",
-        backgroundColor: "#d9304e",
-        fill: "origin",
+        label: 'Sell',
+        borderColor: '#d9304e',
+        backgroundColor: '#d9304e',
+        fill: 'origin',
         pointRadius: 0,
         data: new Array(buyOrderDataset.length).fill(null).concat(sellOrderDataset),
       },
@@ -781,16 +742,16 @@ const produceVolumeChart = () => {
   history.reverse();
 
   volumeChartData.value = {
-    labels: history.map((h) => format(new Date(h.timestamp * 1000), "Pp")),
+    labels: history.map((h) => format(new Date(h.timestamp * 1000), 'Pp')),
     datasets: [
       {
-        label: "SWAP.HIVE",
-        backgroundColor: "#01c075",
+        label: 'SWAP.HIVE',
+        backgroundColor: '#01c075',
         data: history.map((h) => Number(h.quoteVolume)),
       },
       {
         label: symbol,
-        backgroundColor: "#d92f4d",
+        backgroundColor: '#d92f4d',
         data: history.map((h) => Number(h.baseVolume)),
       },
     ],
@@ -813,7 +774,7 @@ const fetchTokenMarket = async () => {
 
     if (isLoggedIn.value) {
       requests.push(marketStore.fetchUserOrders(symbol.value, username.value));
-      requests.push(walletStore.fetchWallet(username.value, ["SWAP.HIVE", symbol.value]));
+      requests.push(walletStore.fetchWallet(username.value, ['SWAP.HIVE', symbol.value]));
     }
 
     await Promise.all(requests);
@@ -827,15 +788,15 @@ const fetchTokenMarket = async () => {
 };
 
 const resetForm = () => {
-  buyOrderType.value = "limit";
-  buyPrice.value = "";
-  buyQuantity.value = "";
-  buyTotal.value = "";
+  buyOrderType.value = 'limit';
+  buyPrice.value = '';
+  buyQuantity.value = '';
+  buyTotal.value = '';
 
-  sellOrderType.value = "limit";
-  sellPrice.value = "";
-  sellQuantity.value = "";
-  sellTotal.value = "";
+  sellOrderType.value = 'limit';
+  sellPrice.value = '';
+  sellQuantity.value = '';
+  sellTotal.value = '';
 
   selectedOrders.value = [];
 };
@@ -867,15 +828,15 @@ onBeforeMount(async () => {
 onMounted(() => {
   refreshTimeout = setInterval(fetchTokenMarket, 60 * 1000);
 
-  event.on("broadcast-success", onBroadcastSuccess);
+  event.on('broadcast-success', onBroadcastSuccess);
 
-  event.on("transaction-validated", onTransactionValidated);
+  event.on('transaction-validated', onTransactionValidated);
 });
 
 onBeforeUnmount(() => {
   clearInterval(refreshTimeout);
 
-  event.off("broadcast-success", onBroadcastSuccess);
-  event.off("transaction-validated", onTransactionValidated);
+  event.off('broadcast-success', onBroadcastSuccess);
+  event.off('transaction-validated', onTransactionValidated);
 });
 </script>

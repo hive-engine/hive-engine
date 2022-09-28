@@ -11,5 +11,5 @@
 </template>
 
 <script setup>
-import PageFooter from "../components/PageFooter.vue";
+import PageFooter from '../components/PageFooter.vue';
 </script>

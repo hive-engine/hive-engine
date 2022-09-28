@@ -66,6 +66,33 @@
         </g>
       </svg>
     </template>
+    <template v-else-if="edition === 8">
+      <svg
+        id="Capa_1"
+        version="1.1"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        x="0px"
+        y="0px"
+        viewBox="0 0 187.8 182"
+        style="enable-background: new 0 0 187.8 182"
+        xml:space="preserve"
+      >
+        <g id="Group_4447" transform="translate(24.389 30)">
+          <g transform="matrix(1, 0, 0, 1, -24.39, -30)">
+            <path
+              id="Path_14891-2"
+              fill="currentColor"
+              d="M47.1,91l46.8,70.2L140.6,91L93.9,20.7L47.1,91z M93.9,131.4L66.9,91l26.9-40.4L120.8,91
+			L93.9,131.4z"
+            />
+          </g>
+          <path id="Path_14892" fill="currentColor" d="M69.5,85.4L85.9,61L69.5,36.5L53,61L69.5,85.4z" />
+          <path id="Path_14893" fill="currentColor" d="M117.4,12.4v28L136.8,61l-19.5,20.5v28l46-48.5L117.4,12.4z" />
+          <path id="Path_14894" fill="currentColor" d="M22,110.1V82L2.1,61l19.9-21V11.9L-24.4,61L22,110.1z" />
+        </g>
+      </svg>
+    </template>
   </div>
 </template>
 

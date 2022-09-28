@@ -2,18 +2,34 @@
   <div class="page-header">
     <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 text-gray-200">
       <div class="grid md:grid-cols-4 text-center md:text-left min-h-[120px] items-center">
-        <div class="col-span-full md:col-span-3 mt-3">
+        <div class="col-span-full md:col-span-2 mt-3">
           <h1 class="text-4xl uppercase">@{{ route.params.account }}'s Collection</h1>
         </div>
 
-        <div class="col-span-full md:col-span-1 mt-3">
-          <button
-            v-if="userStore.isLoggedIn && !cardStore.isLoggedIn"
-            class="btn"
-            @click="cardStore.logIntoSplinterlands"
-          >
-            Log Into Splinterlands
-          </button>
+        <div class="col-span-full md:col-span-2 mt-3">
+          <div class="flex flex-wrap items-center justify-end gap-4">
+            <button
+              v-if="userStore.isLoggedIn && !cardStore.isLoggedIn"
+              class="btn"
+              @click="cardStore.logIntoSplinterlands"
+            >
+              Log Into Splinterlands
+            </button>
+
+            <button
+              v-if="cardStore.isLoggedIn && !cardStore.authorized"
+              class="btn"
+              @click="cardStore.requestAddAuthority"
+            >
+              Add Authority
+            </button>
+
+            <select v-model="filter" name="filter" class="bg-slate-600 border-gray-500 max-w-[180px]">
+              <option v-for="opt of filterOptions" :key="opt.key" :value="opt.key">
+                {{ opt.label }}
+              </option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -23,7 +39,7 @@
 
           <div class="flex items-center gap-1 xl:gap-2">
             <label
-              v-for="edition of [0, 1, 2, 3, 4, 5, 7]"
+              v-for="edition of [0, 1, 2, 3, 4, 5, 7, 8]"
               :key="edition"
               v-tooltip="getEdition(edition)"
               class="cursor-pointer"
@@ -141,7 +157,7 @@
   <Loading v-if="loading" />
 
   <div v-else class="page-content pt-3">
-    <div class="grid sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 mt-5">
+    <div v-if="groupedCollection.length > 0" class="grid sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 mt-5">
       <div
         v-for="(card, idx) of groupedCollection"
         :key="idx"
@@ -154,28 +170,35 @@
             {{ card.cards }}
           </div>
         </div>
-        <img :src="getThumbByLevel(card)" :alt="card.name" class="w-full" height="300px" width="250px" />
+        <img v-lazy="getThumbByLevel(card)" :alt="card.name" class="w-full" height="300px" width="250px" />
       </div>
+    </div>
+
+    <div v-else class="text-center py-10 px-6 mt-10 bg-black bg-opacity-10 text-xl">
+      No cards matches your selected filters!
     </div>
   </div>
 
   <Collection />
   <List />
+  <ChangePrice />
 </template>
 
 <script setup>
-import { computed, onBeforeMount, ref, watch } from 'vue';
+import { computed, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { useCardStore } from '@/stores/card';
-import { useUserStore } from '@/stores/user';
-import { getEdition, getElement, getThumbByLevel } from '@/utils';
 import Edition from '@/components/sl/Edition.vue';
 import Element from '@/components/sl/Element.vue';
 import Foil from '@/components/sl/Foil.vue';
-import Rarity from '@/components/sl/Rarity.vue';
-import Role from '@/components/sl/Role.vue';
+import ChangePrice from '@/components/sl/modals/ChangePrice.vue';
 import Collection from '@/components/sl/modals/Collection.vue';
 import List from '@/components/sl/modals/List.vue';
+import Rarity from '@/components/sl/Rarity.vue';
+import Role from '@/components/sl/Role.vue';
+import { emitter } from '@/plugins/mitt';
+import { useCardStore } from '@/stores/card';
+import { useUserStore } from '@/stores/user';
+import { getEdition, getElement, getThumbByLevel, sleep } from '@/utils';
 
 const loading = ref(true);
 const route = useRoute();
@@ -190,37 +213,66 @@ const roles = ref([]);
 const rarities = ref([]);
 const elements = ref([]);
 
+const filter = ref('rentable');
+const filterOptions = [
+  { key: 'all', label: 'All' },
+  { key: 'rentable', label: 'Rentable' },
+  { key: 'for_rent_he', label: 'For Rent (HE)' },
+  { key: 'for_rent_sl', label: 'For Rent (SL)' },
+  { key: 'for_sell_sl', label: 'For Sell (SL)' },
+  { key: 'rented_out_he', label: 'Rented Out (HE)' },
+  { key: 'rented_to_me_he', label: 'Rented To Me (HE)' },
+];
+
 const groupedCollection = computed(() => {
-  const group = cardStore.cards.reduce((acc, cur) => {
-    const { card_detail_id: id, edition, gold } = cur;
+  const group = cardStore.cards
+    .filter((c) => {
+      if (filter.value === 'rentable') {
+        return !c.cooldown && !c.delegated_to && !c.market_id;
+      } else if (filter.value === 'for_rent_he') {
+        return c.market_id && c.market_listing_type === 'HE_RENT';
+      } else if (filter.value === 'for_rent_sl') {
+        return c.market_id && c.market_listing_type === 'RENT';
+      } else if (filter.value === 'for_sell_sl') {
+        return c.market_id && c.market_listing_type === 'SELL';
+      } else if (filter.value === 'rented_out_he') {
+        return c.market_listing_type === 'HE_RENT' && c.player === cardStore.player && c.delegated_to;
+      } else if (filter.value === 'rented_to_me_he') {
+        return c.market_listing_type === 'HE_RENT' && c.delegated_to === cardStore.player;
+      }
 
-    const key = `${id}_${edition}_${gold}`;
+      return true;
+    })
+    .reduce((acc, cur) => {
+      const { card_detail_id: id, edition, gold } = cur;
 
-    if (!acc[key]) {
-      const { name, type, color, rarity, tier } = cardStore.details.get(cur.card_detail_id);
+      const key = `${id}_${edition}_${gold}`;
 
-      acc[key] = {
-        name,
-        color,
-        rarity,
-        card_detail_id: id,
-        edition,
-        gold,
-        level: 1,
-        cards: 0,
-        tier,
-        type,
-      };
-    }
+      if (!acc[key]) {
+        const { name, type, color, rarity, tier } = cardStore.details.get(cur.card_detail_id);
 
-    acc[key].cards += 1;
+        acc[key] = {
+          name,
+          color,
+          rarity,
+          card_detail_id: id,
+          edition,
+          gold,
+          level: 1,
+          cards: 0,
+          tier,
+          type,
+        };
+      }
 
-    if (cur.level > acc[key].level) {
-      acc[key].level = cur.level;
-    }
+      acc[key].cards += 1;
 
-    return acc;
-  }, {});
+      if (cur.level > acc[key].level) {
+        acc[key].level = cur.level;
+      }
+
+      return acc;
+    }, {});
 
   let cards = Object.values(group);
 
@@ -251,6 +303,18 @@ const groupedCollection = computed(() => {
     .sort((a, b) => elementOrder[a.color] - elementOrder[b.color]);
 });
 
+const onAddAuthority = async () => {
+  loading.value = true;
+
+  cardStore.authorized = true;
+
+  await sleep(20 * 1000);
+
+  await cardStore.fetchAuthorities();
+
+  loading.value = false;
+};
+
 watch(
   () => cardStore.isLoggedIn,
   async (loggedIn) => {
@@ -268,5 +332,13 @@ onBeforeMount(async () => {
   await cardStore.fetchCollection(route.params.account);
 
   loading.value = false;
+});
+
+onMounted(() => {
+  emitter.on('add-authority-successful', onAddAuthority);
+});
+
+onBeforeUnmount(() => {
+  emitter.off('add-authority-successful', onAddAuthority);
 });
 </script>

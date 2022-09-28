@@ -4,7 +4,7 @@ export const NODES = [
   'https://rpc.ecency.com',
   'https://api.hive.blog',
 ];
-export const SIDECHAIN_RPC = 'https://ha.herpc.dtools.dev';
+export const SIDECHAIN_RPC = 'https://enginerpc.com';
 export const SIDECHAIN_ID = 'ssc-mainnet-hive';
 export const HISTORY_API = 'https://history.hive-engine.com';
 export const CTC_API = 'https://converter-api.hive-engine.com/api';
@@ -19,4 +19,4 @@ export const DSWAP_SOURCE_ID = '60f0880d47262b9a30fef8bf';
 export const DSWAP_API_VERSION = '2.0';
 export const BANXA_API = 'https://banxa.tribaldex.com';
 export const SL_API = 'https://api2.splinterlands.com';
-export const HESL_API = 'http://localhost:7070';
+export const HESL_API = 'https://splinterlands.tribaldex.com';

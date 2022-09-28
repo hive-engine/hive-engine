@@ -76,12 +76,9 @@
               </template>
             </CustomTable>
 
-            <div
-              v-if="params.symbol && params.symbol.startsWith('SWAP.')"
-              class="alert-warning font-bold"
-            >
-              If you are trying to withdraw to an external chain, please use the Withdraw menu. This
-              window is for transferring to another Hive account.
+            <div v-if="params.symbol && params.symbol.startsWith('SWAP.')" class="alert-warning font-bold">
+              If you are trying to withdraw to an external chain, please use the Withdraw menu. This window is for
+              transferring to another Hive account.
             </div>
 
             <div class="block mb-2 font-bold">Available</div>
@@ -96,26 +93,18 @@
                 v-model="to"
                 type="text"
                 :class="[
-                  v$.to.$error
-                    ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
-                    : '',
+                  v$.to.$error ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500' : '',
                   'rounded-md dark:bg-slate-600 w-full',
                 ]"
                 placeholder="Hive username"
                 @input="(event) => (to = event.target.value.toLowerCase())"
               />
-              <div v-if="v$.to.$error" class="text-sm text-red-500 mt-1">
-                Please enter a valid hive username.
-              </div>
+              <div v-if="v$.to.$error" class="text-sm text-red-500 mt-1">Please enter a valid hive username.</div>
               <div v-if="popularChoices.length" class="text-sm mt-1">
                 Popular choice:
-                <a
-                  v-for="(choice, i) of popularChoices"
-                  :key="i"
-                  class="cursor-pointer"
-                  @click="to = choice.value"
-                  >{{ choice.text }}</a
-                >
+                <a v-for="(choice, i) of popularChoices" :key="i" class="cursor-pointer" @click="to = choice.value">{{
+                  choice.text
+                }}</a>
               </div>
             </div>
 
@@ -126,17 +115,13 @@
                 v-model="from"
                 type="text"
                 :class="[
-                  v$.from.$error
-                    ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
-                    : '',
+                  v$.from.$error ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500' : '',
                   'rounded-md dark:bg-slate-600 w-full',
                 ]"
                 placeholder="Hive username"
                 @input="(event) => (from = event.target.value.toLowerCase())"
               />
-              <div v-if="v$.from.$error" class="text-sm text-red-500 mt-1">
-                Please enter a valid hive username.
-              </div>
+              <div v-if="v$.from.$error" class="text-sm text-red-500 mt-1">Please enter a valid hive username.</div>
             </div>
 
             <div class="mb-3">
@@ -155,9 +140,7 @@
                   ]"
                   placeholder="Amount"
                 />
-                <div
-                  class="bg-gray-200 dark:bg-slate-600 h-full p-2 border border-l-0 rounded-r-md border-gray-500"
-                >
+                <div class="bg-gray-200 dark:bg-slate-600 h-full p-2 border border-l-0 rounded-r-md border-gray-500">
                   {{ params.symbol }}
                 </div>
               </div>
@@ -168,21 +151,12 @@
 
             <div v-if="params.action === 'transfer'" class="mb-3">
               <label for="memo" class="block mb-2 font-bold">Memo</label>
-              <input
-                id="memo"
-                v-model="memo"
-                type="text"
-                class="rounded-md dark:bg-slate-600 w-full"
-              />
+              <input id="memo" v-model="memo" type="text" class="rounded-md dark:bg-slate-600 w-full" />
             </div>
 
-            <button
-              class="btn"
-              :disabled="quantity > params.available"
-              @click="requestAction(params)"
-            >
+            <button class="btn" :disabled="quantity > params.available" @click="requestAction(params)">
               <Spinner v-if="btnBusy" />
-              {{ " " }} {{ actionName }}
+              {{ ' ' }} {{ actionName }}
             </button>
           </template>
         </template>
@@ -192,45 +166,45 @@
 </template>
 
 <script setup>
-import { computed, inject, ref, onMounted, onBeforeUnmount } from "vue";
-import { useVuelidate } from "@vuelidate/core";
-import { required, minLength, maxLength } from "@vuelidate/validators";
-import { XMarkIcon } from "@heroicons/vue/24/outline";
-import { useWalletStore } from "../../stores/wallet";
-import { useUserStore } from "../../stores/user";
-import { sidechain } from "../../plugins/sidechain";
-import CustomTable from "../utilities/CustomTable.vue";
+import { XMarkIcon } from '@heroicons/vue/24/outline';
+import { useVuelidate } from '@vuelidate/core';
+import { maxLength, minLength, required } from '@vuelidate/validators';
+import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
+import { sidechain } from '../../plugins/sidechain';
+import { useUserStore } from '../../stores/user';
+import { useWalletStore } from '../../stores/wallet';
+import CustomTable from '../utilities/CustomTable.vue';
 
-const eventBus = inject("eventBus");
+const eventBus = inject('eventBus');
 const show = ref(false);
 
 const userStore = useUserStore();
 const walletStore = useWalletStore();
 
-const modalAction = ref("transfer");
+const modalAction = ref('transfer');
 const modalBusy = ref(true);
 const btnBusy = ref(false);
 
-const to = ref("");
-const from = ref("");
-const quantity = ref("");
-const memo = ref("");
+const to = ref('');
+const from = ref('');
+const quantity = ref('');
+const memo = ref('');
 
-const tokenSymbol = ref("");
+const tokenSymbol = ref('');
 
 const delegations = ref([]);
 const delegationFields = [
-  { key: "to", label: "From" },
-  { key: "quantity", label: "Amount" },
-  { key: "actions", label: "" },
+  { key: 'to', label: 'From' },
+  { key: 'quantity', label: 'Amount' },
+  { key: 'actions', label: '' },
 ];
 
 const pendingUnstakes = ref([]);
 const pendingUnstakeFields = [
-  { key: "quantity", label: "Quantity" },
-  { key: "quantityLeft", label: "Remaining" },
-  { key: "nextTransactionTimestamp", label: "Next Withdrawal" },
-  { key: "actions", label: "" },
+  { key: 'quantity', label: 'Quantity' },
+  { key: 'quantityLeft', label: 'Remaining' },
+  { key: 'nextTransactionTimestamp', label: 'Next Withdrawal' },
+  { key: 'actions', label: '' },
 ];
 
 const username = computed(() => userStore.username);
@@ -241,7 +215,7 @@ const rules = {
     minLength: minLength(3),
     maxLength: maxLength(16),
     validUsername: (value) => {
-      if (value === "") {
+      if (value === '') {
         return true;
       }
 
@@ -254,7 +228,7 @@ const rules = {
     minLength: minLength(3),
     maxLength: maxLength(16),
     validUsername: (value) => {
-      if (value === "") {
+      if (value === '') {
         return true;
       }
 
@@ -265,7 +239,7 @@ const rules = {
   quantity: {
     required,
     greaterThanZero: (v) => {
-      if (v === "") {
+      if (v === '') {
         return true;
       }
 
@@ -294,15 +268,15 @@ const v$ = useVuelidate(computedRules, { to, from, quantity });
 
 const actionName = computed(() => {
   const obj = {
-    transfer: "Transfer",
-    delegate: "Delegate",
-    undelegate: "Undelegate",
-    stake: "Stake",
-    unstake: "Unstake",
-    pendingUnstakes: "Pending Unstakes",
+    transfer: 'Transfer',
+    delegate: 'Delegate',
+    undelegate: 'Undelegate',
+    stake: 'Stake',
+    unstake: 'Unstake',
+    pendingUnstakes: 'Pending Unstakes',
   };
 
-  return obj[modalAction.value] || "";
+  return obj[modalAction.value] || '';
 });
 
 const requestAction = async (params) => {
@@ -330,35 +304,35 @@ const requestAction = async (params) => {
 const popularChoices = computed(() => {
   if (
     [
-      "ORB",
-      "ALPHA",
-      "BETA",
-      "UNTAMED",
-      "DEC",
-      "SLDICE",
-      "PLOT",
-      "ZONE",
-      "SECTOR",
-      "TRACT",
-      "REGION",
-      "RAFFLE",
-      "TOTEMC",
-      "TOTEMR",
-      "TOTEME",
-      "TOTEML",
-      "SPS",
-      "CHAOS",
-      "VOUCHER",
+      'ORB',
+      'ALPHA',
+      'BETA',
+      'UNTAMED',
+      'DEC',
+      'SLDICE',
+      'PLOT',
+      'ZONE',
+      'SECTOR',
+      'TRACT',
+      'REGION',
+      'RAFFLE',
+      'TOTEMC',
+      'TOTEMR',
+      'TOTEME',
+      'TOTEML',
+      'SPS',
+      'CHAOS',
+      'VOUCHER',
     ].includes(tokenSymbol.value)
   ) {
-    return [{ text: "Splinterlands", value: "steemmonsters" }];
+    return [{ text: 'Splinterlands', value: 'steemmonsters' }];
   }
 
   return [];
 });
 
-const showTo = computed(() => ["transfer", "stake", "delegate"].includes(modalAction.value));
-const showFrom = computed(() => ["undelegate"].includes(modalAction.value));
+const showTo = computed(() => ['transfer', 'stake', 'delegate'].includes(modalAction.value));
+const showFrom = computed(() => ['undelegate'].includes(modalAction.value));
 
 const beforeOpen = async (e) => {
   modalBusy.value = true;
@@ -367,14 +341,14 @@ const beforeOpen = async (e) => {
   modalAction.value = action;
   tokenSymbol.value = symbol;
 
-  if (modalAction.value === "stake") {
+  if (modalAction.value === 'stake') {
     to.value = username.value;
-  } else if (modalAction.value === "undelegate") {
+  } else if (modalAction.value === 'undelegate') {
     const result = await sidechain.contract({
-      method: "find",
+      method: 'find',
       params: {
-        contract: "tokens",
-        table: "delegations",
+        contract: 'tokens',
+        table: 'delegations',
         query: { symbol, from: username.value },
       },
     });
@@ -383,7 +357,7 @@ const beforeOpen = async (e) => {
       ...d,
       quantity: Number(d.quantity),
     }));
-  } else if (modalAction.value === "pendingUnstakes") {
+  } else if (modalAction.value === 'pendingUnstakes') {
     const result = await sidechain.getPendingUnstakes(username.value, symbol);
 
     pendingUnstakes.value = result.map((p) => ({
@@ -399,34 +373,34 @@ const beforeOpen = async (e) => {
 const modalClose = () => {
   v$.value.$reset();
 
-  modalAction.value = "transfer";
+  modalAction.value = 'transfer';
 
-  to.value = "";
-  from.value = "";
-  quantity.value = "";
-  memo.value = "";
+  to.value = '';
+  from.value = '';
+  quantity.value = '';
+  memo.value = '';
 
   delegations.value = [];
   pendingUnstakes.value = [];
 };
 
 onMounted(() => {
-  eventBus.on("broadcast-awaiting", () => {
+  eventBus.on('broadcast-awaiting', () => {
     btnBusy.value = true;
   });
 
-  eventBus.on("broadcast-done", () => {
+  eventBus.on('broadcast-done', () => {
     btnBusy.value = false;
   });
 
-  eventBus.on("broadcast-success", () => {
+  eventBus.on('broadcast-success', () => {
     show.value = false;
   });
 });
 
 onBeforeUnmount(() => {
-  eventBus.off("broadcast-awaiting");
-  eventBus.off("broadcast-done");
-  eventBus.off("broadcast-success");
+  eventBus.off('broadcast-awaiting');
+  eventBus.off('broadcast-done');
+  eventBus.off('broadcast-success');
 });
 </script>

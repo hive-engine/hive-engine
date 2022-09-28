@@ -10,9 +10,8 @@
   <section class="flex items-center justify-center text-gray-700 dark:text-gray-300">
     <div class="w-full max-w-5xl mx-auto py-16 px-2 sm:px-6 lg:px-8 text-center">
       <h2 class="text-2xl">
-        Hive Engine is a platform that empowers communities, project owners, fundraisers,
-        developers, and businesses to quickly and easily build on the Hive blockchain like never
-        before.
+        Hive Engine is a platform that empowers communities, project owners, fundraisers, developers, and businesses to
+        quickly and easily build on the Hive blockchain like never before.
       </h2>
     </div>
   </section>
@@ -22,13 +21,13 @@
       <h3 class="text-4xl uppercase text-yellow-400">Full Steam</h3>
 
       <p class="mt-5 text-xl">
-        Up until now, you’ve only been tapping into a very small fraction of Hive's true potential.
-        It’s like you’ve been using the Death Star to charge your phone.
+        Up until now, you’ve only been tapping into a very small fraction of Hive's true potential. It’s like you’ve
+        been using the Death Star to charge your phone.
       </p>
 
       <p class="mt-5 text-xl">
-        Hive Engine unlocks unlimited possibilities by adding a layer of functionality that
-        seamlessly integrates with the blockchain.
+        Hive Engine unlocks unlimited possibilities by adding a layer of functionality that seamlessly integrates with
+        the blockchain.
       </p>
 
       <p class="mt-5 text-xl">Are you ready to rock 'n' roll?</p>
@@ -40,19 +39,15 @@
       <h3 class="text-4xl uppercase">Holy Smart Contract, Batman!</h3>
 
       <p class="mt-10 text-xl">
-        The Hive-Engine platform makes smart contracts on the Hive blockchain a reality. The first
-        smart contract being introduced is the ability to quickly and easily create custom tokens.
+        The Hive-Engine platform makes smart contracts on the Hive blockchain a reality. The first smart contract being
+        introduced is the ability to quickly and easily create custom tokens.
       </p>
 
       <p class="mt-8">Do you know the best part?</p>
 
       <p class="mt-5 uppercase font-bold text-yellow-400">No coding required!</p>
 
-      <img
-        class="block mx-auto mt-5"
-        src="/images/hive-engine-overview.png"
-        alt="Hive-Engine Overview"
-      />
+      <img class="block mx-auto mt-5" src="/images/hive-engine-overview.png" alt="Hive-Engine Overview" />
     </div>
   </section>
 
@@ -66,17 +61,17 @@
         <p class="mt-5">Today is Token Creation. Tomorrow the world!</p>
 
         <p class="mt-5">
-          We wanted to get Tokens out to you guys ASAP, but don't worry. There's lots more to come.
-          This includes more robust token management and an internal market to trade tokens against
-          Hive, just like the existing HIVE/SBD market.
+          We wanted to get Tokens out to you guys ASAP, but don't worry. There's lots more to come. This includes more
+          robust token management and an internal market to trade tokens against Hive, just like the existing HIVE/SBD
+          market.
         </p>
 
         <p class="mt-5">But wait. There's more!</p>
 
         <p class="mt-5">
-          Smart contracts are capable of doing so much more. As we add more smart contracts to the
-          platform, so will the service offerings on this site. All easy to use and deploy for
-          non-developers. If you ARE a developer, you'll have lots of toys to play with as well.
+          Smart contracts are capable of doing so much more. As we add more smart contracts to the platform, so will the
+          service offerings on this site. All easy to use and deploy for non-developers. If you ARE a developer, you'll
+          have lots of toys to play with as well.
         </p>
       </div>
     </div>
@@ -86,15 +81,15 @@
 </template>
 
 <script setup>
-import { useRoute, useRouter } from "vue-router";
-import PageFooter from "../components/PageFooter.vue";
+import { useRoute, useRouter } from 'vue-router';
+import PageFooter from '../components/PageFooter.vue';
 
 const router = useRouter();
 const route = useRoute();
 
 const { p, t } = route.query;
 
-if (p === "market" && t !== "") {
-  router.push({ name: "trade", params: { symbol: t } });
+if (p === 'market' && t !== '') {
+  router.push({ name: 'trade', params: { symbol: t } });
 }
 </script>

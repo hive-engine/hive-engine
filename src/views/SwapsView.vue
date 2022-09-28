@@ -20,9 +20,7 @@
     <CustomTable :fields="swapFields" :items="swaps">
       <template #cell(from)="{ item }">{{ item.fromAmount }} {{ item.fromSymbol }}</template>
 
-      <template #cell(requested)="{ item }"
-        >{{ item.amountRequested }} {{ item.toSymbol }}</template
-      >
+      <template #cell(requested)="{ item }">{{ item.amountRequested }} {{ item.toSymbol }}</template>
 
       <template #cell(realized)="{ item }">{{ item.actualAmount }} {{ item.toSymbol }}</template>
 
@@ -38,13 +36,13 @@
 </template>
 
 <script setup>
-import axios from "axios";
-import { format } from "date-fns";
-import { computed, onBeforeMount, ref } from "vue";
-import { DSWAP_API, DSWAP_SOURCE_ID } from "../config";
-import { useUserStore } from "../stores/user";
-import PageFooter from "../components/PageFooter.vue";
-import CustomTable from "../components/utilities/CustomTable.vue";
+import axios from 'axios';
+import { format } from 'date-fns';
+import { computed, onBeforeMount, ref } from 'vue';
+import PageFooter from '../components/PageFooter.vue';
+import CustomTable from '../components/utilities/CustomTable.vue';
+import { DSWAP_API, DSWAP_SOURCE_ID } from '../config';
+import { useUserStore } from '../stores/user';
 
 const loading = ref(true);
 
@@ -53,29 +51,29 @@ const userStore = useUserStore();
 const username = computed(() => userStore.username);
 
 const statusObj = {
-  1: "Init",
-  2: "In progress",
-  3: "Success",
-  4: "Failed",
-  7: "Expired",
+  1: 'Init',
+  2: 'In progress',
+  3: 'Success',
+  4: 'Failed',
+  7: 'Expired',
 };
 
 const statusClass = {
-  Init: "bg-yellow-400 text-yellow-900",
-  "In progress": "bg-yellow-400 text-yellow-900",
-  Success: "bg-green-400 text-green-900",
-  Failed: "bg-red-400 text-red-900",
-  Expired: "bg-gray-400 text-black-900",
+  Init: 'bg-yellow-400 text-yellow-900',
+  'In progress': 'bg-yellow-400 text-yellow-900',
+  Success: 'bg-green-400 text-green-900',
+  Failed: 'bg-red-400 text-red-900',
+  Expired: 'bg-gray-400 text-black-900',
 };
 
 const swaps = ref([]);
 
 const swapFields = [
-  { key: "date", label: "DATE" },
-  { key: "from", label: "FROM" },
-  { key: "requested", label: "AMOUNT REQUESTED" },
-  { key: "realized", label: "AMOUNT REALIZED" },
-  { key: "status", label: "STATUS" },
+  { key: 'date', label: 'DATE' },
+  { key: 'from', label: 'FROM' },
+  { key: 'requested', label: 'AMOUNT REQUESTED' },
+  { key: 'realized', label: 'AMOUNT REALIZED' },
+  { key: 'status', label: 'STATUS' },
 ];
 
 const getStatusClass = (status) => {
@@ -91,7 +89,7 @@ onBeforeMount(async () => {
     });
 
     data = data.map((s) => ({
-      date: format(new Date(s.CreatedAt), "Pp"),
+      date: format(new Date(s.CreatedAt), 'Pp'),
       fromSymbol: s.TokenInput,
       fromAmount: s.TokenInputAmount,
       toSymbol: s.TokenOutput,

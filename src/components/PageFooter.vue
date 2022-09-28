@@ -19,9 +19,7 @@
           <div class="flex items-center mt-5">
             <div class="w-full">
               <p class="text-yellow-400">Having issue?</p>
-              <a href="https://eng-support.privex.io/open.php" target="_blank"
-                >Create a support ticket</a
-              >
+              <a href="https://eng-support.privex.io/open.php" target="_blank">Create a support ticket</a>
             </div>
 
             <div class="p-1 text-red-500 text-right">
@@ -35,9 +33,7 @@
         <div class="text-center md:text-left md:col-span-3 md:order-first">
           <img src="/images/logo-large-dark.png" class="block mx-auto md:mx-0 w-56 mt-12" />
 
-          <p class="font-bold mt-5">
-            &copy; {{ new Date().getFullYear() }} Hive Engine, all rights reserved.
-          </p>
+          <p class="font-bold mt-5">&copy; {{ new Date().getFullYear() }} Hive Engine, all rights reserved.</p>
         </div>
       </div>
     </div>
@@ -45,5 +41,5 @@
 </template>
 
 <script setup>
-import { ChatBubbleLeftRightIcon, UserGroupIcon } from "@heroicons/vue/24/outline";
+import { ChatBubbleLeftRightIcon, UserGroupIcon } from '@heroicons/vue/24/outline';
 </script>

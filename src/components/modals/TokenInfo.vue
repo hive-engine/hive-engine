@@ -19,9 +19,7 @@
         <a target="_blank" :href="`https://hive.blog/@${params.issuer}`">@{{ params.issuer }}</a>
       </div>
 
-      <template
-        v-if="params.metadata && params.metadata.url && params.metadata.url.startsWith('http')"
-      >
+      <template v-if="params.metadata && params.metadata.url && params.metadata.url.startsWith('http')">
         <div class="mt-5 font-bold">Website</div>
         <div>
           <a target="_blank" :href="`${params.metadata.url}`">{{ params.metadata.url }}</a>
@@ -41,19 +39,16 @@
 
         <div class="col-span-1 mt-3">
           <div class="font-bold">Staking</div>
-          <div>{{ params.stakingEnabled ? "Yes" : "No" }}</div>
+          <div>{{ params.stakingEnabled ? 'Yes' : 'No' }}</div>
           <div v-if="params.stakingEnabled" class="text-sm">
-            Cooldown: {{ params.unstakingCooldown }} days in
-            {{ params.numberTransactions }} transction(s)
+            Cooldown: {{ params.unstakingCooldown }} days in {{ params.numberTransactions }} transction(s)
           </div>
         </div>
 
         <div class="col-span-1 mt-3">
           <div class="font-bold">Delegation</div>
-          <div>{{ params.delegationEnabled ? "Yes" : "No" }}</div>
-          <div v-if="params.delegationEnabled" class="text-sm">
-            Cooldown: {{ params.undelegationCooldown }} days
-          </div>
+          <div>{{ params.delegationEnabled ? 'Yes' : 'No' }}</div>
+          <div v-if="params.delegationEnabled" class="text-sm">Cooldown: {{ params.undelegationCooldown }} days</div>
         </div>
       </div>
     </template>
@@ -61,8 +56,8 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import Modal from "./Modal.vue";
+import { ref } from 'vue';
+import Modal from './Modal.vue';
 
 const show = ref(false);
 </script>

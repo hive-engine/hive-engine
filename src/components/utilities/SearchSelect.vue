@@ -46,31 +46,31 @@
 </template>
 
 <script setup>
-import { computed, ref, toRefs } from "vue";
-import { ChevronUpDownIcon } from "@heroicons/vue/24/outline";
+import { ChevronUpDownIcon } from '@heroicons/vue/24/outline';
+import { computed, ref, toRefs } from 'vue';
 
 const props = defineProps({
   options: { type: Array, required: true },
   modelValue: { type: [String, Object], default: null },
-  placeholder: { type: String, default: "" },
-  classes: { type: String, default: "" },
-  menuClass: { type: String, default: "" },
-  optionClass: { type: String, default: "" },
+  placeholder: { type: String, default: '' },
+  classes: { type: String, default: '' },
+  menuClass: { type: String, default: '' },
+  optionClass: { type: String, default: '' },
   disabled: { type: Boolean, default: false },
 });
 
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(['update:modelValue']);
 
 const { options, modelValue, placeholder } = toRefs(props);
 
-const searchText = ref("");
+const searchText = ref('');
 const showMenu = ref(false);
 const mousedownState = ref(false);
 
 const input = ref(null);
 
 const escapedRegExp = (str) => {
-  return new RegExp(str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+  return new RegExp(str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
 };
 
 const filteredOptions = computed(() => {
@@ -83,13 +83,11 @@ const filteredOptions = computed(() => {
   return options.value;
 });
 
-const selectedOption = computed(() =>
-  options.value.find((option) => option.value === modelValue.value)
-);
+const selectedOption = computed(() => options.value.find((option) => option.value === modelValue.value));
 
 const inputText = computed(() => {
   if (searchText.value) {
-    return "";
+    return '';
   } else {
     let text = placeholder.value;
 
@@ -118,20 +116,20 @@ const closeMenu = () => {
 
 const blurInput = () => {
   if (!mousedownState.value) {
-    searchText.value = "";
+    searchText.value = '';
     closeMenu();
   }
 };
 
 const selectItem = (option) => {
-  searchText.value = "";
+  searchText.value = '';
 
   closeMenu();
 
-  if (typeof modelValue.value === "object" && modelValue.value) {
-    emit("update:modelValue", option);
+  if (typeof modelValue.value === 'object' && modelValue.value) {
+    emit('update:modelValue', option);
   } else {
-    emit("update:modelValue", option.value);
+    emit('update:modelValue', option.value);
 
     if (option.value === option.text) {
       searchText.value = option.value;

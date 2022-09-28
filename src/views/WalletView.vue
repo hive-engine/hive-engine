@@ -3,27 +3,15 @@
     <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 text-gray-200">
       <div class="grid md:grid-cols-4 text-center md:text-left min-h-[160px] items-center">
         <div class="col-span-full md:col-span-3">
-          <h1 class="text-4xl uppercase">
-            {{ disableActions ? `@${account}'s` : "My" }} Token Wallet
-          </h1>
+          <h1 class="text-4xl uppercase">{{ disableActions ? `@${account}'s` : 'My' }} Token Wallet</h1>
 
-          <div v-if="!loading" class="text-lg">
-            Estimated value: ${{ estimatedValue.toLocaleString() }} USD
-          </div>
+          <div v-if="!loading" class="text-lg">Estimated value: ${{ estimatedValue.toLocaleString() }} USD</div>
         </div>
 
         <div class="col-span-full md:col-span-1">
-          <button
-            :disabled="disableActions"
-            class="btn mr-3 mt-3"
-            @click="vfm$.show('depositModal')"
-          >
-            Deposit
-          </button>
+          <button :disabled="disableActions" class="btn mr-3 mt-3" @click="vfm$.show('depositModal')">Deposit</button>
 
-          <button :disabled="disableActions" class="btn mt-3" @click="vfm$.show('withdrawModal')">
-            Withdraw
-          </button>
+          <button :disabled="disableActions" class="btn mt-3" @click="vfm$.show('withdrawModal')">Withdraw</button>
         </div>
       </div>
     </div>
@@ -32,9 +20,7 @@
   <Loading v-if="loading" />
 
   <div v-else class="page-content">
-    <div
-      class="flex flex-wrap items-center text-center sm:text-left justify-center sm:justify-between"
-    >
+    <div class="flex flex-wrap items-center text-center sm:text-left justify-center sm:justify-between">
       <div class="mb-5">
         <input
           v-model="filter"
@@ -45,9 +31,7 @@
       </div>
 
       <div>
-        <label class="mb-1 block">
-          <input v-model="hiveZeroBalance" type="checkbox" /> Hide small balances
-        </label>
+        <label class="mb-1 block"> <input v-model="hiveZeroBalance" type="checkbox" /> Hide small balances </label>
 
         <label class="mb-3 block">
           <input v-model="includeAll" type="checkbox" /> Value includes stake and delegated
@@ -97,11 +81,7 @@
       </template>
 
       <template v-if="!disableActions" #cell(actions)="{ item }">
-        <button
-          class="btn-sm mr-1 mt-1 mb-1"
-          title="Transfer"
-          @click="vfm$.show('tokenInfoModal', item.token)"
-        >
+        <button class="btn-sm mr-1 mt-1 mb-1" title="Transfer" @click="vfm$.show('tokenInfoModal', item.token)">
           <InformationCircleIcon class="h-5 w-5" />
         </button>
 
@@ -223,44 +203,44 @@
 </template>
 
 <script setup>
-import Big from "big.js";
-import { computed, inject, onBeforeMount, ref, onMounted, onBeforeUnmount } from "vue";
-import { useRoute } from "vue-router";
 import {
-  InformationCircleIcon,
+  ArrowRightIcon,
+  ArrowTrendingDownIcon,
+  ArrowTrendingUpIcon,
+  ArrowsRightLeftIcon,
+  Bars3CenterLeftIcon,
   BoltIcon,
+  InformationCircleIcon,
   LockClosedIcon,
   LockOpenIcon,
-  ArrowRightIcon,
-  Bars3CenterLeftIcon,
-  ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon,
-  ArrowsRightLeftIcon,
-} from "@heroicons/vue/24/outline";
-import { useStorage } from "@vueuse/core";
-import { useStore } from "../stores";
-import { useTokenStore } from "../stores/token";
-import { useWalletStore } from "../stores/wallet";
-import { useUserStore } from "../stores/user";
-import { toFixedWithoutRounding, toFixedNoRounding, addCommas } from "../utils";
-import CustomTable from "../components/utilities/CustomTable.vue";
-import WalletAction from "../components/modals/WalletAction.vue";
-import Deposit from "../components/modals/Deposit.vue";
-import Withdraw from "../components/modals/Withdraw.vue";
-import TokenInfo from "../components/modals/TokenInfo.vue";
-import PageFooter from "../components/PageFooter.vue";
+} from '@heroicons/vue/24/outline';
+import { useStorage } from '@vueuse/core';
+import Big from 'big.js';
+import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import Deposit from '../components/modals/Deposit.vue';
+import TokenInfo from '../components/modals/TokenInfo.vue';
+import WalletAction from '../components/modals/WalletAction.vue';
+import Withdraw from '../components/modals/Withdraw.vue';
+import PageFooter from '../components/PageFooter.vue';
+import CustomTable from '../components/utilities/CustomTable.vue';
+import { useStore } from '../stores';
+import { useTokenStore } from '../stores/token';
+import { useUserStore } from '../stores/user';
+import { useWalletStore } from '../stores/wallet';
+import { addCommas, toFixedNoRounding, toFixedWithoutRounding } from '../utils';
 
 const loading = ref(true);
-const vfm$ = inject("$vfm");
-const event = inject("eventBus");
+const vfm$ = inject('$vfm');
+const event = inject('eventBus');
 
 const route = useRoute();
 
 const { account } = route.params;
 
-const filter = ref("");
-const hiveZeroBalance = useStorage("hide-small-balances", false);
-const includeAll = useStorage("value-includes-all", false);
+const filter = ref('');
+const hiveZeroBalance = useStorage('hide-small-balances', false);
+const includeAll = useStorage('value-includes-all', false);
 
 let refreshTimeout = null;
 
@@ -286,11 +266,8 @@ const lockedStakes = computed(() => {
 
         acc[cur.symbol] = acc[cur.symbol].plus(
           cur.quantityLeft.minus(
-            toFixedNoRounding(
-              cur.quantity.div(token.numberTransactions).toString(),
-              token.precision
-            )
-          )
+            toFixedNoRounding(cur.quantity.div(token.numberTransactions).toString(), token.precision),
+          ),
         );
       }
 
@@ -301,11 +278,11 @@ const lockedStakes = computed(() => {
 const hivePrice = computed(() => store.hivePrice);
 
 const wallet = computed(() => {
-  const regExp = new RegExp(filter.value, "i");
+  const regExp = new RegExp(filter.value, 'i');
 
   return walletStore.wallet
     .filter((t) => {
-      if (filter.value !== "") {
+      if (filter.value !== '') {
         return regExp.test(t.symbol);
       }
 
@@ -323,9 +300,7 @@ const wallet = computed(() => {
 
       const balance = b.balance;
 
-      const stakesAndDelegated = b.delegationsOut
-        .plus(b.stake)
-        .plus(b.pendingUnstake.minus(lockedStake));
+      const stakesAndDelegated = b.delegationsOut.plus(b.stake).plus(b.pendingUnstake.minus(lockedStake));
 
       const valueHive = metrics
         ? balance.plus(includeAll.value ? stakesAndDelegated : 0).times(metrics.lastPrice)
@@ -364,14 +339,14 @@ const estimatedValue = computed(() => {
 });
 
 const walletTableFields = [
-  { key: "icon", label: "" },
-  { key: "symbol", label: "Symbol", sortable: true },
-  { key: "balance", label: "Balance", sortable: true },
-  { key: "usdValue", label: "USD Value", sortable: true },
-  { key: "changePct", label: "% Change", sortable: true },
-  { key: "stake", label: "Stake" },
-  { key: "delegation", label: "Delegation" },
-  { key: "actions", label: "" },
+  { key: 'icon', label: '' },
+  { key: 'symbol', label: 'Symbol', sortable: true },
+  { key: 'balance', label: 'Balance', sortable: true },
+  { key: 'usdValue', label: 'USD Value', sortable: true },
+  { key: 'changePct', label: '% Change', sortable: true },
+  { key: 'stake', label: 'Stake' },
+  { key: 'delegation', label: 'Delegation' },
+  { key: 'actions', label: '' },
 ];
 
 const fetchWallet = async () => {
@@ -410,16 +385,16 @@ onBeforeMount(async () => {
 });
 
 onMounted(async () => {
-  refreshTimeout = setInterval(fetchWallet, 60 * 1000);
+  refreshTimeout = setInterval(fetchWallet, 3 * 60 * 1000);
 
-  event.on("broadcast-success", onBoardcastSuccess);
-  event.on("transaction-validated", onTransactionValidated);
+  event.on('broadcast-success', onBoardcastSuccess);
+  event.on('transaction-validated', onTransactionValidated);
 });
 
 onBeforeUnmount(() => {
   clearInterval(refreshTimeout);
 
-  event.off("broadcast-success", onBoardcastSuccess);
-  event.off("transaction-validated", onTransactionValidated);
+  event.off('broadcast-success', onBoardcastSuccess);
+  event.off('transaction-validated', onTransactionValidated);
 });
 </script>

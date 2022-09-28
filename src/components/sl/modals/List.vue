@@ -34,8 +34,8 @@
 
 <script setup>
 import { inject, onBeforeUnmount, onMounted, ref } from 'vue';
-import { useCardStore } from '@/stores/card';
 import Modal from '@/components/modals/Modal.vue';
+import { useCardStore } from '@/stores/card';
 
 const show = ref(false);
 
@@ -55,8 +55,6 @@ const onClosed = () => {
 };
 
 const onListCardsSuccessful = ({ id, eventData }) => {
-  console.log(eventData);
-
   eventData.forEach((uid, idx) => {
     const index = cardStore.cards.findIndex((c) => c.uid === uid);
 

@@ -38,15 +38,15 @@
 
 <script setup>
 import { computed, ref } from 'vue';
-import { useCardStore } from '@/stores/card';
-import { getEdition, getRarity, getElement } from '@/utils';
-import CustomTable from '@/components/utilities/CustomTable.vue';
+import Modal from '@/components/modals/Modal.vue';
+import AddToCart from '@/components/sl/buttons/AddToCart.vue';
 import Edition from '@/components/sl/Edition.vue';
 import Element from '@/components/sl/Element.vue';
-import Rarity from '@/components/sl/Rarity.vue';
 import Foil from '@/components/sl/Foil.vue';
-import Modal from '@/components/modals/Modal.vue';
-import AddToCart from '../buttons/AddToCart.vue';
+import Rarity from '@/components/sl/Rarity.vue';
+import CustomTable from '@/components/utilities/CustomTable.vue';
+import { useCardStore } from '@/stores/card';
+import { getEdition, getElement, getRarity } from '@/utils';
 
 const show = ref(false);
 const cardStore = useCardStore();

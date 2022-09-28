@@ -3,13 +3,13 @@
 </template>
 
 <script setup>
-import { Chart, BarController, BarElement, Tooltip, Legend, LogarithmicScale } from "chart.js";
-import { ref } from "vue";
-import { defineChartComponent } from "vue-chart-3";
+import { BarController, BarElement, Chart, Legend, LogarithmicScale, Tooltip } from 'chart.js';
+import { ref } from 'vue';
+import { defineChartComponent } from 'vue-chart-3';
 
 Chart.register(BarController, BarElement, Tooltip, Legend, LogarithmicScale);
 
-const VolumeBarChart = defineChartComponent("VolumeBarChart", "bar");
+const VolumeBarChart = defineChartComponent('VolumeBarChart', 'bar');
 
 defineProps({
   chartData: { type: Object, required: true },
@@ -18,26 +18,26 @@ defineProps({
 const options = ref({
   maintainAspectRatio: false,
   interaction: {
-    mode: "index",
+    mode: 'index',
     intersect: false,
   },
   scales: {
     y: {
       ticks: {
-        color: "#647882",
+        color: '#647882',
       },
       grid: {
-        color: "rgba(100, 100, 100, .2)",
+        color: 'rgba(100, 100, 100, .2)',
         borderWidth: 0,
       },
-      type: "logarithmic",
+      type: 'logarithmic',
     },
     x: {
       ticks: {
-        color: "#647882",
+        color: '#647882',
       },
       grid: {
-        color: "rgba(100, 100, 100, .2)",
+        color: 'rgba(100, 100, 100, .2)',
         borderWidth: 0,
       },
       stacked: true,

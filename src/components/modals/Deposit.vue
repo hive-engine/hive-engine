@@ -10,9 +10,7 @@
   >
     <div class="border dark:border-gray-800 rounded bg-white dark:bg-gray-600 dark:text-gray-300">
       <div class="flex items-center justify-between px-6 py-4">
-        <div class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300">
-          Deposit Tokens
-        </div>
+        <div class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300">Deposit Tokens</div>
 
         <button class="dark:text-gray-300" @click="close">
           <XMarkIcon class="h-5 w-5" aria-hidden="true" />
@@ -24,26 +22,19 @@
 
         <template v-else>
           <div class="alert-warning mb-5 font-bold">
-            There is a 0.75% fee on deposits. Ethereum, ERC-20, BNB, BEP-20, Polygon (MATIC) and
-            Polygon ERC-20 deposits have no deposit fees, but you'll pay the Ethereum / BSC /
-            Polygon network gas fee.
+            There is a 0.75% fee on deposits. Ethereum, ERC-20, BNB, BEP-20, Polygon (MATIC) and Polygon ERC-20 deposits
+            have no deposit fees, but you'll pay the Ethereum / BSC / Polygon network gas fee.
           </div>
 
           <div v-if="!selectedToken && !depositInfo" class="alert-warning">
             We have optimized our internal
-            <strong>Bitcoin (BTC) wallet</strong>. As a result, all deposit addresses generated
-            before <strong>July 15, 2021</strong> are invalid. We may not be able to recover funds
-            sent to an old address. Make sure you generate a new address by selecting BTC from the
-            select box below.
+            <strong>Bitcoin (BTC) wallet</strong>. As a result, all deposit addresses generated before
+            <strong>July 15, 2021</strong> are invalid. We may not be able to recover funds sent to an old address. Make
+            sure you generate a new address by selecting BTC from the select box below.
           </div>
 
           <template v-if="!depositInfo">
-            <SearchSelect
-              v-model="selectedToken"
-              classes="rounded-md"
-              menu-class="rounded-md"
-              :options="tokens"
-            />
+            <SearchSelect v-model="selectedToken" classes="rounded-md" menu-class="rounded-md" :options="tokens" />
           </template>
 
           <template v-else-if="isDepositDisabled.disabled">
@@ -77,15 +68,13 @@
               @click.prevent="depositHive"
             >
               <Spinner v-if="btnBusy" />
-              {{ " " }} Deposit {{ selectedToken }}
+              {{ ' ' }} Deposit {{ selectedToken }}
             </button>
           </template>
 
           <template v-else-if="isEvmToken && depositInfo">
             <div class="mb-3">
-              <label for="evmAddress" class="block mb-2 font-bold"
-                >Your {{ evmToken }} Address</label
-              >
+              <label for="evmAddress" class="block mb-2 font-bold">Your {{ evmToken }} Address</label>
 
               <div class="flex items-center">
                 <input
@@ -139,7 +128,7 @@
                 @click.prevent="depositEvmAsset(networks[selectedToken])"
               >
                 <Spinner v-if="btnBusy" />
-                {{ " " }} Deposit {{ selectedToken }}
+                {{ ' ' }} Deposit {{ selectedToken }}
               </button>
             </template>
 
@@ -177,19 +166,16 @@
                 @click.prevent="depositEvmToken(networks[selectedToken])"
               >
                 <Spinner v-if="btnBusy" />
-                {{ " " }} Deposit {{ evmToken }}
+                {{ ' ' }} Deposit {{ evmToken }}
               </button>
             </template>
           </template>
 
           <template v-else>
             <div class="font-bold mb-5">
-              Please send any amount of {{ selectedToken }} to the following address and you will
-              receive an equal amount of {{ depositInfo.pegged_token_symbol }} in the @{{
-                depositInfo.destination
-              }}
-              account once the transaction has received the required number of confirmations on the
-              external chain.
+              Please send any amount of {{ selectedToken }} to the following address and you will receive an equal
+              amount of {{ depositInfo.pegged_token_symbol }} in the @{{ depositInfo.destination }}
+              account once the transaction has received the required number of confirmations on the external chain.
             </div>
 
             <div v-if="depositInfo.address">
@@ -207,7 +193,7 @@
                     class="btn-sm leading-4 py-3 rounded-l-none border-l-0"
                     @click="copyAddress(depositInfo.address)"
                   >
-                    {{ addressCopied ? "Copied" : "Copy" }}
+                    {{ addressCopied ? 'Copied' : 'Copy' }}
                   </button>
                 </div>
               </div>
@@ -228,7 +214,7 @@
                     class="btn-sm leading-4 py-3 rounded-l-none border-l-0"
                     @click="copyAddress(depositInfo.account)"
                   >
-                    {{ addressCopied ? "Copied" : "Copy" }}
+                    {{ addressCopied ? 'Copied' : 'Copy' }}
                   </button>
                 </div>
               </div>
@@ -243,11 +229,8 @@
                     :value="depositInfo.memo"
                   />
 
-                  <button
-                    class="btn-sm leading-4 py-3 rounded-l-none border-l-0"
-                    @click="copyMemo(depositInfo.memo)"
-                  >
-                    {{ memoCopied ? "Copied" : "Copy" }}
+                  <button class="btn-sm leading-4 py-3 rounded-l-none border-l-0" @click="copyMemo(depositInfo.memo)">
+                    {{ memoCopied ? 'Copied' : 'Copy' }}
                   </button>
                 </div>
               </div>
@@ -260,64 +243,64 @@
 </template>
 
 <script setup>
-import { computed, inject, ref, watch } from "vue";
-import { XMarkIcon, ArrowPathIcon } from "@heroicons/vue/24/outline";
-import { providers, utils, Contract } from "ethers";
-import { notify } from "@kyvg/vue3-notification";
-import { useClipboard } from "@vueuse/core";
-import { useStore } from "../../stores";
-import { useUserStore } from "../../stores/user";
-import { useTokenStore } from "../../stores/token";
-import { useWalletStore } from "../../stores/wallet";
-import { toFixedWithoutRounding } from "../../utils";
-import SearchSelect from "../utilities/SearchSelect.vue";
+import { ArrowPathIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { notify } from '@kyvg/vue3-notification';
+import { useClipboard } from '@vueuse/core';
+import { Contract, providers, utils } from 'ethers';
+import { computed, inject, ref, watch } from 'vue';
+import { useStore } from '../../stores';
+import { useTokenStore } from '../../stores/token';
+import { useUserStore } from '../../stores/user';
+import { useWalletStore } from '../../stores/wallet';
+import { toFixedWithoutRounding } from '../../utils';
+import SearchSelect from '../utilities/SearchSelect.vue';
 
-const hiveClient = inject("hiveClient");
+const hiveClient = inject('hiveClient');
 let web3Provider = null;
 
 const networks = {
-  ETH: "eth",
-  ERC20: "eth",
-  BNB: "bsc",
-  BEP20: "bsc",
-  MATIC: "polygon",
-  "POLY-ERC20": "polygon",
+  ETH: 'eth',
+  ERC20: 'eth',
+  BNB: 'bsc',
+  BEP20: 'bsc',
+  MATIC: 'polygon',
+  'POLY-ERC20': 'polygon',
 };
 
 const chainIds = {
-  1: "Ethereum Mainnet",
-  3: "Ropsten Testnet",
-  4: "Rinkeby Testnet",
-  56: "Binance Smart Chain",
-  97: "Binance Smart Chain Testnet",
-  137: "Polygon Mainnet",
-  80001: "Polygon Mumbai Testnet",
+  1: 'Ethereum Mainnet',
+  3: 'Ropsten Testnet',
+  4: 'Rinkeby Testnet',
+  56: 'Binance Smart Chain',
+  97: 'Binance Smart Chain Testnet',
+  137: 'Polygon Mainnet',
+  80001: 'Polygon Mumbai Testnet',
 };
 
 const ABI = [
   {
     constant: true,
-    inputs: [{ name: "_owner", type: "address" }],
-    name: "balanceOf",
-    outputs: [{ name: "balance", type: "uint256" }],
-    type: "function",
+    inputs: [{ name: '_owner', type: 'address' }],
+    name: 'balanceOf',
+    outputs: [{ name: 'balance', type: 'uint256' }],
+    type: 'function',
   },
   {
     constant: true,
     inputs: [],
-    name: "decimals",
-    outputs: [{ name: "", type: "uint8" }],
-    type: "function",
+    name: 'decimals',
+    outputs: [{ name: '', type: 'uint8' }],
+    type: 'function',
   },
   {
     constant: false,
     inputs: [
-      { name: "_to", type: "address" },
-      { name: "_value", type: "uint256" },
+      { name: '_to', type: 'address' },
+      { name: '_value', type: 'uint256' },
     ],
-    name: "transfer",
-    outputs: [{ name: "", type: "bool" }],
-    type: "function",
+    name: 'transfer',
+    outputs: [{ name: '', type: 'bool' }],
+    type: 'function',
   },
 ];
 
@@ -331,8 +314,8 @@ const tokenStore = useTokenStore();
 const walletStore = useWalletStore();
 
 const selectedToken = ref(null);
-const depositAmount = ref("");
-const evmAddress = ref("");
+const depositAmount = ref('');
+const evmAddress = ref('');
 const evmToken = ref(null);
 
 const settings = computed(() => store.settings);
@@ -353,26 +336,26 @@ const tokens = computed(() => {
   ];
 
   if (settings.value.eth_bridge.erc_20.enabled) {
-    tokens.push({ name: "Ethereum Tokens", symbol: "ERC20" });
+    tokens.push({ name: 'Ethereum Tokens', symbol: 'ERC20' });
   }
 
   if (settings.value.bsc_bridge.bep_20.enabled) {
-    tokens.push({ name: "Binance Smart Chain Tokens", symbol: "BEP20" });
+    tokens.push({ name: 'Binance Smart Chain Tokens', symbol: 'BEP20' });
   }
 
   if (settings.value.polygon_bridge.erc_20.enabled) {
-    tokens.push({ name: "Polygon Tokens", symbol: "POLY-ERC20" });
+    tokens.push({ name: 'Polygon Tokens', symbol: 'POLY-ERC20' });
   }
 
   tokens = tokens
     .sort((a, b) => a.name.localeCompare(b.name))
     .map((t) => ({ value: t.symbol, text: `${t.name} (${t.symbol})` }));
 
-  return [{ value: null, text: "Please select a token" }, ...tokens];
+  return [{ value: null, text: 'Please select a token' }, ...tokens];
 });
 
 const isEvmToken = computed(() =>
-  ["ETH", "ERC20", "BNB", "BEP20", "MATIC", "POLY-ERC20"].includes(selectedToken.value)
+  ['ETH', 'ERC20', 'BNB', 'BEP20', 'MATIC', 'POLY-ERC20'].includes(selectedToken.value),
 );
 
 const evmTokenOptions = computed(() => {
@@ -381,7 +364,7 @@ const evmTokenOptions = computed(() => {
     text: `${t.name} (${t.symbol})`,
   }));
 
-  return [{ value: null, text: "Please select a token" }, ...allEvmTokens];
+  return [{ value: null, text: 'Please select a token' }, ...allEvmTokens];
 });
 
 const hiveReceiveAmount = computed(() => (depositAmount.value * 0.9925).toFixed(3));
@@ -410,24 +393,24 @@ const beforeOpen = async () => {
 const modalClose = () => {
   selectedToken.value = null;
 
-  depositAmount.value = "";
-  evmAddress.value = "";
+  depositAmount.value = '';
+  evmAddress.value = '';
   evmToken.value = null;
   walletStore.depositInfo = null;
 };
 
-const updateEvmAddress = async (network = "eth") => {
+const updateEvmAddress = async (network = 'eth') => {
   if (!window.ethereum) {
     return;
   }
 
-  const currentAddress = await web3Provider.send("eth_accounts");
+  const currentAddress = await web3Provider.send('eth_accounts');
 
   if (!currentAddress.map((a) => a.toLowerCase()).includes(evmAddress.value.toLowerCase())) {
     return notify({
-      title: "Error",
-      text: "Your entered address does not match with the connected Metamask address.",
-      type: "error",
+      title: 'Error',
+      text: 'Your entered address does not match with the connected Metamask address.',
+      type: 'error',
     });
   }
 
@@ -440,9 +423,9 @@ const updateEvmAddress = async (network = "eth") => {
       const bridgeConfig = `${network}_bridge`;
 
       const addressKeys = {
-        eth: "ethereumAddress",
-        bsc: "bscAddress",
-        polygon: "polygonAddress",
+        eth: 'ethereumAddress',
+        bsc: 'bscAddress',
+        polygon: 'polygonAddress',
       };
 
       const memo = JSON.stringify({
@@ -455,9 +438,9 @@ const updateEvmAddress = async (network = "eth") => {
 
       await store.requestBrodcastTransfer({
         to: settings.value[bridgeConfig].account,
-        amount: "0.001",
+        amount: '0.001',
         memo,
-        currency: "HIVE",
+        currency: 'HIVE',
       });
     } catch (e) {
       console.log(e.message);
@@ -471,25 +454,25 @@ const checkEvmAddress = async (network) => {
   try {
     evmAddress.value = await walletStore.fetchEvmAddress(network);
 
-    const currentAddress = await web3Provider.send("eth_accounts");
+    const currentAddress = await web3Provider.send('eth_accounts');
 
     if (!currentAddress.map((a) => a.toLowerCase()).includes(evmAddress.value.toLowerCase())) {
       success = false;
 
       notify({
-        title: "Error",
-        text: "Your address does not match with the connected Metamask address.",
-        type: "error",
+        title: 'Error',
+        text: 'Your address does not match with the connected Metamask address.',
+        type: 'error',
       });
 
-      await web3Provider.send("wallet_requestPermissions", [{ eth_accounts: {} }]);
+      await web3Provider.send('wallet_requestPermissions', [{ eth_accounts: {} }]);
     } else if (!utils.isAddress(evmAddress.value)) {
       success = false;
 
       notify({
-        title: "Error",
-        text: "Please make sure you have added/updated your address before proceeding.",
-        type: "error",
+        title: 'Error',
+        text: 'Please make sure you have added/updated your address before proceeding.',
+        type: 'error',
       });
     }
   } catch (e) {
@@ -508,10 +491,7 @@ const getEvmTokenBalance = async (contractAddress, walletAddress) => {
 
   const contract = new Contract(contractAddress, ABI, web3Provider);
 
-  const [balance, decimals] = await Promise.all([
-    contract.balanceOf(walletAddress),
-    contract.decimals(),
-  ]);
+  const [balance, decimals] = await Promise.all([contract.balanceOf(walletAddress), contract.decimals()]);
 
   return utils.formatUnits(balance, decimals);
 };
@@ -522,8 +502,8 @@ const depositHive = async () => {
   const memo = JSON.stringify({
     id: settings.value.sidechain_id,
     json: {
-      contractName: "hivepegged",
-      contractAction: "buy",
+      contractName: 'hivepegged',
+      contractAction: 'buy',
       contractPayload: {},
     },
   });
@@ -532,7 +512,7 @@ const depositHive = async () => {
     to: settings.value.hive_pegged_account,
     amount: toFixedWithoutRounding(depositAmount.value, 3).toFixed(3),
     memo,
-    currency: "HIVE",
+    currency: 'HIVE',
   });
 
   btnBusy.value = false;
@@ -543,7 +523,7 @@ const depositEvmAsset = async (network) => {
 
   try {
     if (await checkEvmAddress(network)) {
-      await web3Provider.send("eth_sendTransaction", [
+      await web3Provider.send('eth_sendTransaction', [
         {
           to: depositInfo.value.deposit_address,
           from: evmAddress.value,
@@ -564,7 +544,7 @@ const depositEvmToken = async (network) => {
   try {
     if (await checkEvmAddress(network)) {
       const { contract_address: contractAddress, evm_precision: precision } = evmTokens.value.find(
-        (t) => t.symbol === evmToken.value
+        (t) => t.symbol === evmToken.value,
       );
 
       const contract = new Contract(contractAddress, ABI, web3Provider.getSigner());
@@ -583,17 +563,17 @@ const depositEvmToken = async (network) => {
 watch(selectedToken, async (value) => {
   modalBusy.value = true;
 
-  if (value === "HIVE") {
+  if (value === 'HIVE') {
     const [account] = await hiveClient.database.getAccounts([userStore.username]);
 
     walletStore.depositInfo = { balance: parseFloat(account.balance) };
   } else if (
-    value === "ETH" ||
-    value === "ERC20" ||
-    value === "BNB" ||
-    value === "BEP20" ||
-    value === "MATIC" ||
-    value === "POLY-ERC20"
+    value === 'ETH' ||
+    value === 'ERC20' ||
+    value === 'BNB' ||
+    value === 'BEP20' ||
+    value === 'MATIC' ||
+    value === 'POLY-ERC20'
   ) {
     if (window.ethereum) {
       web3Provider = new providers.Web3Provider(window.ethereum);
@@ -601,7 +581,7 @@ watch(selectedToken, async (value) => {
       const network = networks[value];
       const bridgeConfig = `${network}_bridge`;
 
-      const chainId = await web3Provider.send("net_version");
+      const chainId = await web3Provider.send('net_version');
       const requiredChainId = settings.value[bridgeConfig].chain_id;
 
       if (Number(chainId) !== requiredChainId) {
@@ -610,13 +590,13 @@ watch(selectedToken, async (value) => {
         const text = `Please make sure Metamask network is set to ${chainIds[requiredChainId]}.`;
 
         notify({
-          title: "Error",
+          title: 'Error',
           text,
-          type: "error",
+          type: 'error',
         });
       } else {
         try {
-          await web3Provider.send("eth_requestAccounts", []);
+          await web3Provider.send('eth_requestAccounts', []);
 
           evmAddress.value = await walletStore.fetchEvmAddress(network);
 
@@ -624,12 +604,9 @@ watch(selectedToken, async (value) => {
 
           const depositAddress = settings.value[bridgeConfig].gateway_address;
 
-          if (value === "ETH" || value === "BNB" || value === "MATIC") {
+          if (value === 'ETH' || value === 'BNB' || value === 'MATIC') {
             if (utils.isAddress(evmAddress.value)) {
-              balance = toFixedWithoutRounding(
-                utils.formatEther(await web3Provider.getBalance(evmAddress.value)),
-                8
-              );
+              balance = toFixedWithoutRounding(utils.formatEther(await web3Provider.getBalance(evmAddress.value)), 8);
             }
           } else {
             await tokenStore.fetchSupportedEvmTokens({ network, deposit: true });
@@ -642,9 +619,9 @@ watch(selectedToken, async (value) => {
           selectedToken.value = null;
 
           notify({
-            title: "Error",
-            text: "Please allow us to connect to Metamask.",
-            type: "error",
+            title: 'Error',
+            text: 'Please allow us to connect to Metamask.',
+            type: 'error',
           });
         }
       }
@@ -652,9 +629,9 @@ watch(selectedToken, async (value) => {
       selectedToken.value = null;
 
       notify({
-        title: "Error",
-        text: "Metamask or other Web3 wallet was not found.",
-        type: "error",
+        title: 'Error',
+        text: 'Metamask or other Web3 wallet was not found.',
+        type: 'error',
       });
     }
   } else {
@@ -669,16 +646,11 @@ watch(evmToken, async (value) => {
     return;
   }
 
-  const { contract_address: contractAddress, network } = evmTokens.value.find(
-    (t) => t.symbol === value
-  );
+  const { contract_address: contractAddress, network } = evmTokens.value.find((t) => t.symbol === value);
 
   const bridgeConfig = `${network}_bridge`;
 
-  const balance = toFixedWithoutRounding(
-    await getEvmTokenBalance(contractAddress, evmAddress.value),
-    8
-  );
+  const balance = toFixedWithoutRounding(await getEvmTokenBalance(contractAddress, evmAddress.value), 8);
 
   walletStore.depositInfo = {
     balance,

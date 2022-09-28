@@ -27,12 +27,7 @@
                 type="number"
               />
 
-              <SearchSelect
-                v-model="source"
-                classes="rounded-md"
-                menu-class="rounded-md"
-                :options="fiats"
-              />
+              <SearchSelect v-model="source" classes="rounded-md" menu-class="rounded-md" :options="fiats" />
             </div>
             <div class="mt-1 text-sm">
               Orders for your selected payment type must be between {{ min }} and {{ max }}
@@ -49,12 +44,7 @@
                 readonly
               />
 
-              <SearchSelect
-                v-model="target"
-                classes="rounded-md"
-                menu-class="rounded-md"
-                :options="coins"
-              />
+              <SearchSelect v-model="target" classes="rounded-md" menu-class="rounded-md" :options="coins" />
             </div>
           </div>
 
@@ -74,9 +64,7 @@
             <input
               v-model="address"
               :class="[
-                v$.address.$error
-                  ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
-                  : '',
+                v$.address.$error ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500' : '',
                 'rounded-md w-full dark:bg-slate-600 dark:border-gray-500',
               ]"
               type="text"
@@ -85,11 +73,7 @@
 
           <div v-if="['BNB', 'XRP'].includes(target)" class="mb-3">
             <label>Memo / Tag</label>
-            <input
-              v-model="tag"
-              class="rounded-md w-full dark:bg-slate-600 dark:border-gray-500"
-              type="text"
-            />
+            <input v-model="tag" class="rounded-md w-full dark:bg-slate-600 dark:border-gray-500" type="text" />
           </div>
 
           <div class="grid grid-cols-2 gap-3 mb-3">
@@ -110,9 +94,7 @@
 
                 <div class="pl-3">
                   <div>{{ pm.name }}</div>
-                  <div class="text-sm">
-                    Gateway fee: {{ pm.fee }} {{ pm.fee_type === "percentage" ? "%" : source }}
-                  </div>
+                  <div class="text-sm">Gateway fee: {{ pm.fee }} {{ pm.fee_type === 'percentage' ? '%' : source }}</div>
                 </div>
               </div>
             </div>
@@ -126,16 +108,16 @@
 </template>
 
 <script setup>
-import axios from "axios";
-import { computed, ref, watch } from "vue";
-import { debouncedWatch } from "@vueuse/core";
-import { useVuelidate } from "@vuelidate/core";
-import { required, minValue, maxValue } from "@vuelidate/validators";
-import { useUserStore } from "../../stores/user";
-import { BANXA_API } from "../../config";
-import Modal from "./Modal.vue";
-import SearchSelect from "../utilities/SearchSelect.vue";
-import LoadingOverlay from "../utilities/LoadingOverlay.vue";
+import { useVuelidate } from '@vuelidate/core';
+import { maxValue, minValue, required } from '@vuelidate/validators';
+import { debouncedWatch } from '@vueuse/core';
+import axios from 'axios';
+import { computed, ref, watch } from 'vue';
+import { BANXA_API } from '../../config';
+import { useUserStore } from '../../stores/user';
+import LoadingOverlay from '../utilities/LoadingOverlay.vue';
+import SearchSelect from '../utilities/SearchSelect.vue';
+import Modal from './Modal.vue';
 
 const banxaApi = axios.create({ baseURL: BANXA_API });
 
@@ -147,18 +129,18 @@ const coins = ref([]);
 const fiats = ref([]);
 const coinsRaw = ref([]);
 
-const source = ref("USD");
-const sourceAmount = ref("");
-const target = ref("BTC");
-const targetAmount = ref("");
+const source = ref('USD');
+const sourceAmount = ref('');
+const target = ref('BTC');
+const targetAmount = ref('');
 
 const paymentMethods = ref([]);
 const method = ref(null);
 
-const blockchain = ref("BTC");
+const blockchain = ref('BTC');
 
-const address = ref("");
-const tag = ref("");
+const address = ref('');
+const tag = ref('');
 
 const min = ref(100);
 const max = ref(1000);
@@ -190,14 +172,14 @@ const v$ = useVuelidate(rules, { sourceAmount, address });
 const fetchPaymentMethods = async () => {
   formBusy.value = true;
 
-  const { data: methods } = await banxaApi.get("payment-methods", {
+  const { data: methods } = await banxaApi.get('payment-methods', {
     params: { source: source.value, target: target.value },
   });
 
   paymentMethods.value = methods.map((p) => {
     let fee = p.transaction_fees[0].fees[0].amount;
 
-    if (p.transaction_fees[0].fees[0].type === "percentage") {
+    if (p.transaction_fees[0].fees[0].type === 'percentage') {
       fee *= 100;
     }
 
@@ -244,8 +226,8 @@ const onBeforeOpen = async () => {
 
   if (coins.value.length <= 0 && fiats.value.length <= 0) {
     const [{ data: coinsData }, { data: fiatsData }] = await Promise.all([
-      banxaApi.get("coins"),
-      banxaApi.get("fiats"),
+      banxaApi.get('coins'),
+      banxaApi.get('fiats'),
     ]);
 
     coinsRaw.value = coinsData;
@@ -268,14 +250,14 @@ const onBeforeOpen = async () => {
 const onClosed = () => {
   v$.value.$reset();
 
-  source.value = "USD";
-  sourceAmount.value = "";
+  source.value = 'USD';
+  sourceAmount.value = '';
 
-  target.value = "BTC";
-  targetAmount.value = "";
+  target.value = 'BTC';
+  targetAmount.value = '';
 
-  address.value = "";
-  tag.value = "";
+  address.value = '';
+  tag.value = '';
 };
 
 const createOrder = () => {
@@ -295,41 +277,36 @@ const createOrder = () => {
     method: method.value,
     ts: Date.now(),
     blockchain: blockchain.value,
-    return_url: "https://hive-engine.com",
+    return_url: 'https://hive-engine.com',
   };
 
   if (!window.hive_keychain) {
-    return alert("Please install Hive Keychain!");
+    return alert('Please install Hive Keychain!');
   }
 
   btnBusy.value = true;
 
-  window.hive_keychain.requestSignBuffer(
-    payload.account,
-    `${payload.account}${payload.ts}`,
-    "Posting",
-    async (r) => {
-      if (r.success) {
-        payload.sig = r.result;
+  window.hive_keychain.requestSignBuffer(payload.account, `${payload.account}${payload.ts}`, 'Posting', async (r) => {
+    if (r.success) {
+      payload.sig = r.result;
 
-        try {
-          const { data: result } = await banxaApi.post(`order`, payload);
+      try {
+        const { data: result } = await banxaApi.post(`order`, payload);
 
-          if (result.checkout_url) {
-            const link = document.createElement("a");
-            link.href = result.checkout_url;
-            link.click();
+        if (result.checkout_url) {
+          const link = document.createElement('a');
+          link.href = result.checkout_url;
+          link.click();
 
-            show.value = false;
-          }
-        } catch (e) {
-          console.log(e);
+          show.value = false;
         }
+      } catch (e) {
+        console.log(e);
       }
-
-      btnBusy.value = false;
     }
-  );
+
+    btnBusy.value = false;
+  });
 };
 
 watch(source, async () => {
@@ -356,6 +333,6 @@ debouncedWatch(
   async () => {
     await fetchPrices();
   },
-  { debounce: 200 }
+  { debounce: 200 },
 );
 </script>

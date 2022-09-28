@@ -82,7 +82,7 @@ export const groupBy = (array, by) => {
 };
 
 export const getEdition = (edition) => {
-  const map = ['Alpha', 'Beta', 'Promo', 'Reward', 'Untamed', 'Dice', 'Gladius', 'Chaos Legion'];
+  const map = ['Alpha', 'Beta', 'Promo', 'Reward', 'Untamed', 'Dice', 'Gladius', 'Chaos Legion', 'Riftwatchers'];
 
   return map[edition];
 };
@@ -112,7 +112,10 @@ export const getThumbByLevel = (card, level = 1) => {
 
   return `${store.sl_settings?.asset_url}cards_by_level/${getEdition(card.edition)
     .toLowerCase()
-    .replace(' legion', '')}/${card.name || card.details.name}_lv${card.level || level}${card.gold ? '_gold' : ''}.png`;
+    .replace(' legion', '')
+    .replace('riftwatchers', 'rift')}/${card.name || card.details.name}_lv${card.level || level}${
+    card.gold ? '_gold' : ''
+  }.png`;
 };
 
 export const getCardBcx = (card) => {

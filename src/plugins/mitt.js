@@ -1,4 +1,4 @@
-import mitt from "mitt";
+import mitt from 'mitt';
 
 const emitter = mitt();
 
@@ -8,6 +8,6 @@ export default {
   install: (app) => {
     app.config.globalProperties.$event = emitter;
 
-    app.provide("eventBus", emitter);
+    app.provide('eventBus', emitter);
   },
 };

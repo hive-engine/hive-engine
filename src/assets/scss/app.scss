@@ -1,21 +1,19 @@
 @font-face {
-  font-family: "Nunito";
+  font-family: 'Nunito';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: local(""),
-    url("/fonts/nunito-v22-latin-ext_latin-regular.woff2") format("woff2"),
-    url("/fonts/nunito-v22-latin-ext_latin-regular.woff") format("woff");
+  src: local(''), url('/fonts/nunito-v22-latin-ext_latin-regular.woff2') format('woff2'),
+    url('/fonts/nunito-v22-latin-ext_latin-regular.woff') format('woff');
 }
 
 @font-face {
-  font-family: "Nunito";
+  font-family: 'Nunito';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: local(""),
-    url("/fonts/nunito-v22-latin-ext_latin-700.woff2") format("woff2"),
-    url("/fonts/nunito-v22-latin-ext_latin-700.woff") format("woff");
+  src: local(''), url('/fonts/nunito-v22-latin-ext_latin-700.woff2') format('woff2'),
+    url('/fonts/nunito-v22-latin-ext_latin-700.woff') format('woff');
 }
 
 thead tr > [aria-sort] {
@@ -26,16 +24,16 @@ thead tr > [aria-sort] {
   cursor: pointer;
 }
 
-thead tr > [aria-sort="ascending"] {
+thead tr > [aria-sort='ascending'] {
   background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' preserveAspectRatio='none'%3E%3Cpath d='M51 1l25 23 24 22H1l25-22z'/%3E%3Cpath opacity='.3' d='M51 101l25-23 24-22H1l25 22z'/%3E%3C/svg%3E");
 }
 
-thead tr > [aria-sort="descending"] {
+thead tr > [aria-sort='descending'] {
   background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' preserveAspectRatio='none'%3E%3Cpath opacity='.3' d='M51 1l25 23 24 22H1l25-22z'/%3E%3Cpath d='M51 101l25-23 24-22H1l25 22z'/%3E%3C/svg%3E");
 }
 
 .hero {
-  background-image: url("/images/bg-hero.jpg");
+  background-image: url('/images/bg-hero.jpg');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
@@ -43,7 +41,7 @@ thead tr > [aria-sort="descending"] {
 }
 
 .full-steam {
-  background-image: url("/images/bg-engine.jpg");
+  background-image: url('/images/bg-engine.jpg');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
@@ -51,7 +49,7 @@ thead tr > [aria-sort="descending"] {
 }
 
 .gears {
-  background-image: url("/images/bg-gears.jpg");
+  background-image: url('/images/bg-gears.jpg');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
@@ -59,7 +57,7 @@ thead tr > [aria-sort="descending"] {
 }
 
 .aboard-he {
-  background-image: url("/images/bg-train.svg");
+  background-image: url('/images/bg-train.svg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center left;
@@ -67,15 +65,14 @@ thead tr > [aria-sort="descending"] {
 }
 
 .footer {
-  background-image: url("/images/bg-footer.jpg");
+  background-image: url('/images/bg-footer.jpg');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
 }
 
 .page-header {
-  background: url("/images/img-gear.svg") no-repeat,
-    linear-gradient(263deg, #27475e, #080e13);
+  background: url('/images/img-gear.svg') no-repeat, linear-gradient(263deg, #27475e, #080e13);
 }
 
 .vue-notification-group {
