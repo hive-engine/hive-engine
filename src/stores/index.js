@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { defineStore } from 'pinia';
 import { $vfm } from 'vue-final-modal';
-import { TRIBALDEX_API } from '../config';
+import { SIDECHAIN_ID, TRIBALDEX_API } from '../config';
 import { emitter } from '../plugins/mitt';
 import { sidechain } from '../plugins/sidechain';
 import { useUserStore } from './user';
@@ -89,7 +89,7 @@ export const useStore = defineStore({
       const { success, result } = await this.requestKeychain(
         'requestCustomJson',
         useStore.username,
-        id || this.settings.sidechain_id,
+        id || SIDECHAIN_ID,
         key,
         JSON.stringify(json),
         message,

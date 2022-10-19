@@ -20,3 +20,4 @@ export const DSWAP_API_VERSION = '2.0';
 export const BANXA_API = 'https://banxa.tribaldex.com';
 export const SL_API = 'https://api2.splinterlands.com';
 export const HESL_API = 'https://splinterlands.tribaldex.com';
+export const LEASE_API = 'https://lease-api.tribaldex.com';

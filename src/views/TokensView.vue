@@ -7,12 +7,7 @@
         </div>
 
         <div class="col-span-full md:col-span-1 mt-3">
-          <input
-            v-model="filter"
-            type="text"
-            placeholder="Search tokens"
-            class="w-full dark:bg-slate-600 border-gray-400 dark:border-gray-500 dark:placeholder-slate-300 rounded-md focus:ring-0"
-          />
+          <input v-model="filter" type="text" placeholder="Search tokens" />
         </div>
       </div>
     </div>

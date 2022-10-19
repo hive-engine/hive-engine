@@ -94,7 +94,7 @@
                 type="text"
                 :class="[
                   v$.to.$error ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500' : '',
-                  'rounded-md dark:bg-slate-600 w-full',
+                  '',
                 ]"
                 placeholder="Hive username"
                 @input="(event) => (to = event.target.value.toLowerCase())"
@@ -116,7 +116,7 @@
                 type="text"
                 :class="[
                   v$.from.$error ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500' : '',
-                  'rounded-md dark:bg-slate-600 w-full',
+                  '',
                 ]"
                 placeholder="Hive username"
                 @input="(event) => (from = event.target.value.toLowerCase())"
@@ -136,7 +136,7 @@
                     v$.quantity.$error
                       ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
                       : '',
-                    'rounded-l-md dark:bg-slate-600 w-full',
+                    '!rounded-r-none',
                   ]"
                   placeholder="Amount"
                 />
@@ -151,7 +151,7 @@
 
             <div v-if="params.action === 'transfer'" class="mb-3">
               <label for="memo" class="block mb-2 font-bold">Memo</label>
-              <input id="memo" v-model="memo" type="text" class="rounded-md dark:bg-slate-600 w-full" />
+              <input id="memo" v-model="memo" type="text" />
             </div>
 
             <button class="btn" :disabled="quantity > params.available" @click="requestAction(params)">

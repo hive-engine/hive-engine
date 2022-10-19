@@ -9,6 +9,8 @@ import App from './App.vue';
 import Loading from './components/utilities/Loading.vue';
 import Spinner from './components/utilities/Spinner.vue';
 
+import { LEASE_API } from './config';
+import eventSource from './plugins/eventSource';
 import hive from './plugins/hive';
 import mitt from './plugins/mitt';
 import hiveEngine from './plugins/sidechain';
@@ -39,6 +41,7 @@ app.use(router);
 app.use(hiveEngine);
 app.use(mitt);
 app.use(hive);
+app.use(eventSource, { url: `${LEASE_API}/events` });
 app.use(vfmPlugin);
 app.use(FloatingVue);
 app.use(Notifications);

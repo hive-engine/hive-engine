@@ -1,4 +1,4 @@
-import { URL, fileURLToPath } from 'url';
+import { fileURLToPath } from 'url';
 import vue from '@vitejs/plugin-vue';
 import { defineConfig } from 'vite';
 

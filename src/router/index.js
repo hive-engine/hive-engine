@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useStore } from '@/stores';
 import { useCardStore } from '@/stores/card';
+import { useLeaseStore } from '@/stores/lease';
 import { useUserStore } from '@/stores/user';
 import HomeView from '@/views/HomeView.vue';
 
@@ -15,6 +16,18 @@ const beforeEnterSL = async () => {
   store.loading = true;
 
   await Promise.all([cardStore.fetchSettings(), cardStore.fetchSLSettings(), cardStore.fetchCardDetails()]);
+
+  store.loading = false;
+};
+
+const beforeEnterLease = async () => {
+  const store = useStore();
+  const leaseStore = useLeaseStore();
+
+  store.loading = true;
+
+  await leaseStore.fetchSettings();
+  await leaseStore.fetchMetrics();
 
   store.loading = false;
 };
@@ -120,6 +133,21 @@ const router = createRouter({
       path: '/faq',
       name: 'faq',
       component: loadView('Faq'),
+    },
+    {
+      path: '/lease',
+      name: 'lease',
+      component: () => import('../views/leasing/LeaseView.vue'),
+      beforeEnter: beforeEnterLease,
+    },
+    {
+      path: '/@:account/leases',
+      name: 'leasing-dashboard',
+      component: () => import('../views/leasing/LeasingDashboardView.vue'),
+      beforeEnter: [beforeEnterLease, validateUsername],
+      meta: {
+        requiresAuth: true,
+      },
     },
     {
       path: '/:pathMatch(.*)*',

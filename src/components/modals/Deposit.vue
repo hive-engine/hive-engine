@@ -51,13 +51,7 @@
 
             <div class="mb-3">
               <label for="depositAmount" class="block mb-2 font-bold">Deposit Amount</label>
-              <input
-                id="depositAmount"
-                v-model="depositAmount"
-                type="number"
-                step="any"
-                class="rounded-md w-full dark:bg-slate-600 dark:border-gray-500"
-              />
+              <input id="depositAmount" v-model="depositAmount" type="number" step="any" />
             </div>
 
             <div class="mb-3">You will receive: {{ hiveReceiveAmount }} HIVE</div>
@@ -77,18 +71,12 @@
               <label for="evmAddress" class="block mb-2 font-bold">Your {{ evmToken }} Address</label>
 
               <div class="flex items-center">
-                <input
-                  id="evmAddress"
-                  v-model="evmAddress"
-                  type="text"
-                  class="rounded-l-md w-full dark:bg-slate-600 dark:border-gray-500"
-                  placeholder="0x...."
-                />
+                <input id="evmAddress" v-model="evmAddress" type="text" class="!rounded-r-none" placeholder="0x...." />
 
                 <button
                   class="btn-sm self-stretch rounded-none border-r-red-800"
                   title="Refresh address"
-                  @click="fetchEvmAddress(networks[selectedToken])"
+                  @click="walletStore.fetchEvmAddress(networks[selectedToken])"
                 >
                   <ArrowPathIcon class="h-5 w-5" />
                 </button>
@@ -113,13 +101,7 @@
 
               <div class="mb-3">
                 <label for="depositAmount" class="block mb-2 font-bold">Deposit Amount</label>
-                <input
-                  id="depositAmount"
-                  v-model="depositAmount"
-                  type="number"
-                  step="any"
-                  class="rounded-md w-full dark:bg-slate-600 dark:border-gray-500"
-                />
+                <input id="depositAmount" v-model="depositAmount" type="number" step="any" />
               </div>
 
               <button
@@ -151,13 +133,7 @@
 
               <div class="mb-3">
                 <label for="depositAmount" class="block mb-2 font-bold">Deposit Amount</label>
-                <input
-                  id="depositAmount"
-                  v-model="depositAmount"
-                  type="number"
-                  step="any"
-                  class="rounded-md w-full dark:bg-slate-600 dark:border-gray-500"
-                />
+                <input id="depositAmount" v-model="depositAmount" type="number" step="any" />
               </div>
 
               <button
@@ -182,12 +158,7 @@
               <div class="mb-3">
                 <label for="address" class="block mb-2 font-bold">Deposit Address</label>
                 <div class="flex items-center">
-                  <input
-                    type="text"
-                    class="rounded-l-md w-full dark:bg-slate-600 dark:border-gray-500"
-                    readonly
-                    :value="depositInfo.address"
-                  />
+                  <input type="text" class="!rounded-r-none" readonly :value="depositInfo.address" />
 
                   <button
                     class="btn-sm leading-4 py-3 rounded-l-none border-l-0"
@@ -203,12 +174,7 @@
               <div class="mb-3">
                 <label for="account" class="block mb-2 font-bold">Deposit Account</label>
                 <div class="flex items-center">
-                  <input
-                    type="text"
-                    class="rounded-l-md w-full dark:bg-slate-600 dark:border-gray-500"
-                    readonly
-                    :value="depositInfo.account"
-                  />
+                  <input type="text" class="!rounded-r-none" readonly :value="depositInfo.account" />
 
                   <button
                     class="btn-sm leading-4 py-3 rounded-l-none border-l-0"
@@ -222,12 +188,7 @@
               <div class="mb-3">
                 <label for="memo" class="block mb-2 font-bold">Memo</label>
                 <div class="flex items-center">
-                  <input
-                    type="text"
-                    class="rounded-l-md w-full dark:bg-slate-600 dark:border-gray-500"
-                    readonly
-                    :value="depositInfo.memo"
-                  />
+                  <input type="text" class="!rounded-r-none" readonly :value="depositInfo.memo" />
 
                   <button class="btn-sm leading-4 py-3 rounded-l-none border-l-0" @click="copyMemo(depositInfo.memo)">
                     {{ memoCopied ? 'Copied' : 'Copy' }}

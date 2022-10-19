@@ -37,12 +37,6 @@
               > -->
 
               <router-link
-                :to="{ name: 'tokens' }"
-                class="text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
-                active-class="bg-gray-700 text-white"
-                >Tokens</router-link
-              >
-              <router-link
                 :to="{ name: 'trade', params: { symbol: 'BEE' } }"
                 class="text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
                 active-class="bg-gray-700 text-white"
@@ -62,18 +56,50 @@
                 >Rentals</router-link
               >
               <router-link
-                :to="{ name: 'faq' }"
+                :to="{ name: 'lease' }"
                 class="text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
                 active-class="bg-gray-700 text-white"
-                >FAQ</router-link
+                >Lease</router-link
               >
-              <a
-                href="https://he.dtools.dev"
-                target="_blank"
-                class="text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
-                active-class="bg-gray-700 text-white"
-                >Explorer</a
-              >
+
+              <Menu as="div" class="relative">
+                <MenuButton
+                  class="text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
+                  >More <ChevronDownIcon class="inline -mr-1 h-5 w-5" aria-hidden="true"
+                /></MenuButton>
+
+                <MenuItems
+                  class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
+                >
+                  <MenuItem v-slot="{ active }">
+                    <router-link
+                      :to="{ name: 'tokens' }"
+                      :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-gray-700']"
+                      active-class="bg-gray-700 hover:bg-gray-700 text-white"
+                      >Tokens</router-link
+                    >
+                  </MenuItem>
+
+                  <MenuItem v-slot="{ active }">
+                    <router-link
+                      :to="{ name: 'faq' }"
+                      :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-gray-700']"
+                      active-class="bg-gray-700 hover:bg-gray-700 text-white"
+                      >FAQ</router-link
+                    >
+                  </MenuItem>
+
+                  <MenuItem v-slot="{ active }">
+                    <a
+                      href="https://he.dtools.dev"
+                      target="_blank"
+                      :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-gray-700']"
+                      active-class="bg-gray-700 hover:bg-gray-700 text-white"
+                      >Explorer</a
+                    >
+                  </MenuItem>
+                </MenuItems>
+              </Menu>
 
               <router-link
                 v-if="isLoggedIn"
@@ -113,6 +139,7 @@
                   <router-link
                     :to="{ name: 'rewards' }"
                     :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-gray-700']"
+                    active-class="bg-gray-700 hover:bg-gray-700 text-white"
                     >Rewards</router-link
                   >
                 </MenuItem>
@@ -121,6 +148,7 @@
                   <router-link
                     :to="{ name: 'orders' }"
                     :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-gray-700']"
+                    active-class="bg-gray-700 hover:bg-gray-700 text-white"
                     >Open Orders</router-link
                   >
                 </MenuItem>
@@ -129,6 +157,7 @@
                   <router-link
                     :to="{ name: 'swaps' }"
                     :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-gray-700']"
+                    active-class="bg-gray-700 hover:bg-gray-700 text-white"
                     >Swaps</router-link
                   >
                 </MenuItem>
@@ -137,6 +166,7 @@
                   <router-link
                     :to="{ name: 'conversion-history' }"
                     :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-gray-700']"
+                    active-class="bg-gray-700 hover:bg-gray-700 text-white"
                     >Conversion History</router-link
                   >
                 </MenuItem>
@@ -145,6 +175,7 @@
                   <router-link
                     :to="{ name: 'sl-cards', params: { account: userStore.username } }"
                     :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-gray-700']"
+                    active-class="bg-gray-700 hover:bg-gray-700 text-white"
                     >Splinterlands Cards</router-link
                   >
                 </MenuItem>
@@ -153,7 +184,17 @@
                   <router-link
                     :to="{ name: 'sl-active-rentals', params: { account: userStore.username } }"
                     :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-gray-700']"
+                    active-class="bg-gray-700 hover:bg-gray-700 text-white"
                     >Active Rentals</router-link
+                  >
+                </MenuItem>
+
+                <MenuItem v-slot="{ active }">
+                  <router-link
+                    :to="{ name: 'leasing-dashboard', params: { account: userStore.username } }"
+                    :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-gray-700']"
+                    active-class="bg-gray-700 hover:bg-gray-700 text-white"
+                    >Leasing Dashboard</router-link
                   >
                 </MenuItem>
 
@@ -272,7 +313,7 @@
 
 <script setup>
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
-import { Bars3Icon, MoonIcon, SunIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { Bars3Icon, MoonIcon, SunIcon, XMarkIcon, ChevronDownIcon } from '@heroicons/vue/24/outline';
 import { useDark, useToggle } from '@vueuse/core';
 import { computed, onMounted } from 'vue';
 import { RouterLink, RouterView, useRoute } from 'vue-router';

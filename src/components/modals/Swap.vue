@@ -27,14 +27,9 @@
             <div class="mb-3">Current balance: {{ fromSymbolBalance }} {{ fromSymbol }}</div>
 
             <div class="flex items-center w-full">
-              <input
-                id="fromQuantity"
-                v-model="fromQuantity"
-                type="number"
-                class="w-full h-10 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
-              />
+              <input id="fromQuantity" v-model="fromQuantity" type="number" class="!rounded-r-none" />
               <div
-                class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
+                class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-500"
               >
                 {{ fromSymbol }}
               </div>
@@ -52,15 +47,9 @@
             <div class="mb-3">Current balance: {{ toSymbolBalance }} {{ toSymbol }}</div>
 
             <div class="flex items-center w-full">
-              <input
-                id="toQuantity"
-                v-model="toQuantity"
-                type="number"
-                class="w-full h-10 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
-                readonly
-              />
+              <input id="toQuantity" v-model="toQuantity" type="number" class="!rounded-r-none" readonly />
               <div
-                class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
+                class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-500"
               >
                 {{ toSymbol }}
               </div>
@@ -76,13 +65,9 @@
             <div class="text-sm font-bold mr-3">Max Slippage ({{ fromSymbol }} -> SWAP.HIVE)</div>
 
             <div class="flex items-center">
-              <input
-                v-model="slippageOne"
-                type="number"
-                class="w-16 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
-              />
+              <input v-model="slippageOne" type="number" class="w-16 !rounded-r-none" />
               <div
-                class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400"
+                class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-500"
               >
                 %
               </div>
@@ -93,13 +78,9 @@
             <div class="text-sm font-bold mr-3">Max Slippage (SWAP.HIVE -> {{ toSymbol }})</div>
 
             <div class="flex items-center">
-              <input
-                v-model="slippageTwo"
-                type="number"
-                class="w-16 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
-              />
+              <input v-model="slippageTwo" type="number" class="w-16 !rounded-r-none" />
               <div
-                class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400"
+                class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-500"
               >
                 %
               </div>

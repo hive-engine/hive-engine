@@ -13,7 +13,7 @@
         placeholder="Hive username"
         :class="[
           v$.username.$error ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500' : '',
-          'block max-w-sm mx-auto w-3/4 text-center text-xl px-3 py-3 dark:bg-slate-600 dark:border-gray-500 rounded-md focus:ring-0 border-gray-400 placeholder-gray-300',
+          'max-w-sm mx-auto w-3/4 text-center text-xl px-3 py-3 placeholder-gray-300',
         ]"
         required
         @blur="v$.username.$touch()"

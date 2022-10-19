@@ -22,7 +22,7 @@
           <SearchSelect v-model="symbol" classes="rounded-l-md" menu-class="rounded-md" :options="tokens" />
 
           <button
-            class="self-stretch bg-white dark:bg-slate-600 border-gray-400 dark:border-gray-500 border border-l-0 rounded-r-md p-2 hover:text-red-400"
+            class="self-stretch bg-white dark:bg-slate-600 border-gray-500 dark:border-gray-500 border border-l-0 rounded-r-md p-2 hover:text-red-400"
             @click="vfm$.show('tokenInfoModal', token)"
           >
             <information-circle-icon class="h-6 w-6" />
@@ -160,11 +160,11 @@
               id="buyPrice"
               v-model="buyPrice"
               type="number"
-              class="w-full dark:bg-slate-600 dark:border-gray-500 rounded-l-md h-10 focus:ring-0 border-r-inherit border-gray-400"
+              class="!rounded-r-none"
               :disabled="buyOrderType === 'market'"
             />
             <div
-              class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
+              class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-500"
             >
               HIVE/{{ symbol }}
             </div>
@@ -179,11 +179,11 @@
               id="buyQuantity"
               v-model="buyQuantity"
               type="number"
-              class="w-full dark:bg-slate-600 dark:border-gray-500 rounded-l-md h-10 focus:ring-0 border-r-inherit border-gray-400"
+              class="!rounded-r-none"
               :disabled="buyOrderType === 'market'"
             />
             <div
-              class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
+              class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-500"
             >
               {{ symbol }}
             </div>
@@ -198,11 +198,11 @@
               id="buyTotal"
               v-model="buyTotal"
               type="number"
-              class="w-full dark:bg-slate-600 dark:border-gray-500 rounded-l-md h-10 focus:ring-0 border-r-inherit border-gray-400"
+              class="!rounded-r-none"
               :readonly="buyOrderType === 'limit'"
             />
             <div
-              class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
+              class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-500"
             >
               HIVE
             </div>
@@ -278,11 +278,11 @@
               id="sellPrice"
               v-model="sellPrice"
               type="number"
-              class="w-full h-10 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400"
+              class="!rounded-r-none"
               :disabled="sellOrderType === 'market'"
             />
             <div
-              class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
+              class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-500"
             >
               HIVE/{{ symbol }}
             </div>
@@ -293,14 +293,9 @@
           <label for="sellQuantity" class="w-2/4 font-bold">Quantity</label>
 
           <div class="flex items-center w-full">
-            <input
-              id="sellQuantity"
-              v-model="sellQuantity"
-              type="number"
-              class="w-full h-10 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
-            />
+            <input id="sellQuantity" v-model="sellQuantity" type="number" class="!rounded-r-none" />
             <div
-              class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
+              class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-500"
             >
               {{ symbol }}
             </div>
@@ -315,12 +310,12 @@
               id="sellTotal"
               v-model="sellTotal"
               type="number"
-              class="w-full h-10 dark:bg-slate-600 dark:border-gray-500 rounded-l-md focus:ring-0 border-r-inherit border-gray-400 disabled:bg-[rgba(0,0,0,.05)]"
+              class="!rounded-r-none"
               :readonly="sellOrderType === 'limit'"
               :disabled="sellOrderType === 'market'"
             />
             <div
-              class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md h-10 p-2 border border-l-0 border-gray-400"
+              class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-500"
             >
               HIVE
             </div>
@@ -452,19 +447,19 @@ import { InformationCircleIcon, XMarkIcon } from '@heroicons/vue/24/outline';
 import { format } from 'date-fns';
 import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import CandleChart from '../components/charts/CandleChart.vue';
-import DepthChart from '../components/charts/DepthChart.vue';
-import VolumeChart from '../components/charts/VolumeChart.vue';
-import TokenInfo from '../components/modals/TokenInfo.vue';
-import PageFooter from '../components/PageFooter.vue';
-import CustomTable from '../components/utilities/CustomTable.vue';
-import SearchSelect from '../components/utilities/SearchSelect.vue';
-import { useStore } from '../stores';
-import { useMarketStore } from '../stores/market';
-import { useTokenStore } from '../stores/token';
-import { useUserStore } from '../stores/user';
-import { useWalletStore } from '../stores/wallet';
-import { filterOutliers } from '../utils';
+import CandleChart from '@/components/charts/CandleChart.vue';
+import DepthChart from '@/components/charts/DepthChart.vue';
+import VolumeChart from '@/components/charts/VolumeChart.vue';
+import TokenInfo from '@/components/modals/TokenInfo.vue';
+import PageFooter from '@/components/PageFooter.vue';
+import CustomTable from '@/components/utilities/CustomTable.vue';
+import SearchSelect from '@/components/utilities/SearchSelect.vue';
+import { useStore } from '@/stores';
+import { useMarketStore } from '@/stores/market';
+import { useTokenStore } from '@/stores/token';
+import { useUserStore } from '@/stores/user';
+import { useWalletStore } from '@/stores/wallet';
+import { filterOutliers } from '@/utils';
 
 const loading = ref(true);
 const route = useRoute();

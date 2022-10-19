@@ -1,7 +1,7 @@
 import { Client } from '@hiveio/dhive';
 import { NODES } from '@/config';
 
-const hiveClient = new Client(NODES);
+const hiveClient = new Client(NODES, { failoverThreshold: 0, consoleOnFailover: true, timeout: 3000 });
 
 export { hiveClient };
 

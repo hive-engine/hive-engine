@@ -68,11 +68,11 @@
                       v$.withdrawAmount.$error
                         ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
                         : '',
-                      'rounded-l-md w-full dark:bg-slate-600 dark:border-gray-500',
+                      '!rounded-r-none',
                     ]"
                   />
                   <div
-                    class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400"
+                    class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-500"
                   >
                     {{ isEvmToken && evmToken ? evmToken : selectedToken }}
                   </div>
@@ -92,7 +92,7 @@
                     v$.withdrawAddress.$error
                       ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
                       : '',
-                    'rounded-md w-full dark:bg-slate-600 dark:border-gray-500',
+                    '',
                   ]"
                   :disabled="selectedToken === 'SWAP.HIVE'"
                 />
@@ -103,12 +103,7 @@
 
               <div v-if="showMemoField" class="mb-3">
                 <label for="withdrawMemo" class="block mb-2 font-bold">Withdraw Memo</label>
-                <input
-                  id="withdrawMemo"
-                  v-model="withdrawMemo"
-                  type="text"
-                  class="rounded-md w-full dark:bg-slate-600 dark:border-gray-500"
-                />
+                <input id="withdrawMemo" v-model="withdrawMemo" type="text" class="" />
               </div>
 
               <template v-if="isEvmToken && evmToken">
@@ -208,16 +203,8 @@
         <label for="depositAmount" class="block mb-2 font-bold">Deposit Amount</label>
 
         <div class="flex items-center">
-          <input
-            id="depositAmount"
-            v-model="feeDepositAmount"
-            type="number"
-            step="any"
-            class="rounded-l-md w-full dark:bg-slate-600 dark:border-gray-500"
-          />
-          <div
-            class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-400"
-          >
+          <input id="depositAmount" v-model="feeDepositAmount" type="number" step="any" class="!rounded-r-none" />
+          <div class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0">
             {{ evmFeeSymbol }}
           </div>
         </div>
