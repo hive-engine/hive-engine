@@ -1,8 +1,8 @@
 export const NODES = [
-  'https://api.hive.blue',
   'https://api.deathwing.me',
   'https://rpc.ecency.com',
   'https://api.hive.blog',
+  'https://api.hive.blue',
 ];
 export const SIDECHAIN_RPC = 'https://enginerpc.com';
 export const SIDECHAIN_ID = 'ssc-mainnet-hive';
