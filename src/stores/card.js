@@ -91,6 +91,10 @@ export const useCardStore = defineStore({
     },
 
     async fetchBalances() {
+      if (!this.isLoggedIn) {
+        return;
+      }
+
       const { data } = await heslApi.get('players/balances', { params: { username: this.player } });
 
       data.forEach((b) => {

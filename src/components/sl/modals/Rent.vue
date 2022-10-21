@@ -2,37 +2,39 @@
   <Modal v-model="show" name="rentalModal" size="xl" @before-open="onBeforeOpen" @closed="onClosed">
     <template #title>{{ card.name }}</template>
 
-    <div class="flex flex-wrap items-center justify-between mb-5">
-      <div v-if="card.edition && card.color" class="flex flex-wrap gap-2 font-bold">
-        <div class="flex items-center justify-center gap-2">
-          <Edition class="h-6 w-6" :edition="card.edition" /> {{ getEdition(card.edition) }}
-        </div>
+    <LoadingOverlay :show="showOverlay">
+      <div class="flex flex-wrap items-center justify-between mb-5">
+        <div v-if="card.edition && card.color" class="flex flex-wrap gap-2 font-bold">
+          <div class="flex items-center justify-center gap-2">
+            <Edition class="h-6 w-6" :edition="card.edition" /> {{ getEdition(card.edition) }}
+          </div>
 
-        <div class="flex items-center justify-center gap-2">
-          <Element class="h-6 w-6" :color="card.color" /> {{ getElement(card.color) }}
-        </div>
+          <div class="flex items-center justify-center gap-2">
+            <Element class="h-6 w-6" :color="card.color" /> {{ getElement(card.color) }}
+          </div>
 
-        <div class="flex items-center justify-center gap-2">
-          <Rarity class="h-6 w-6" :rarity="card.rarity" /> {{ getRarity(card.rarity) }}
-        </div>
+          <div class="flex items-center justify-center gap-2">
+            <Rarity class="h-6 w-6" :rarity="card.rarity" /> {{ getRarity(card.rarity) }}
+          </div>
 
-        <div class="flex items-center justify-center gap-2">
-          <Foil class="h-6 w-6" :gold="card.gold" /> {{ card.gold ? 'Gold' : 'Regular' }}
+          <div class="flex items-center justify-center gap-2">
+            <Foil class="h-6 w-6" :gold="card.gold" /> {{ card.gold ? 'Gold' : 'Regular' }}
+          </div>
         </div>
       </div>
-    </div>
 
-    <CustomTable :key="key" :items="cards" :fields="fields" :per-page="12">
-      <template #cell(uid)="{ item }">
-        {{ item.uid }}
-      </template>
+      <CustomTable :key="key" :items="cards" :fields="fields" :per-page="12">
+        <template #cell(uid)="{ item }">
+          {{ item.uid }}
+        </template>
 
-      <template #cell(price)="{ item }"> {{ Number(item.price) }} {{ item.currency }}/Day </template>
+        <template #cell(price)="{ item }"> {{ Number(item.price) }} {{ item.currency }}/Day </template>
 
-      <template #cell(actions)="{ item }">
-        <AddToCart :card="item" />
-      </template>
-    </CustomTable>
+        <template #cell(actions)="{ item }">
+          <AddToCart :card="item" />
+        </template>
+      </CustomTable>
+    </LoadingOverlay>
   </Modal>
 </template>
 
@@ -45,10 +47,13 @@ import Element from '@/components/sl/Element.vue';
 import Foil from '@/components/sl/Foil.vue';
 import Rarity from '@/components/sl/Rarity.vue';
 import CustomTable from '@/components/utilities/CustomTable.vue';
+import LoadingOverlay from '@/components/utilities/LoadingOverlay.vue';
 import { useCardStore } from '@/stores/card';
 import { getEdition, getElement, getRarity } from '@/utils';
 
 const show = ref(false);
+const showOverlay = ref(true);
+
 const cardStore = useCardStore();
 
 const key = ref(null);
@@ -77,6 +82,8 @@ const cards = computed(() => {
 });
 
 const onBeforeOpen = async (e) => {
+  showOverlay.value = true;
+
   const { card_detail_id: id, edition, gold, currency } = e.ref.params.value;
 
   key.value = `${id}_${edition}_${gold}`;
@@ -92,6 +99,8 @@ const onBeforeOpen = async (e) => {
   };
 
   await cardStore.fetchForRentByCard({ id, edition, gold, currency });
+
+  showOverlay.value = false;
 };
 
 const onClosed = () => {};

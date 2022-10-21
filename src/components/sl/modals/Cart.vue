@@ -24,8 +24,8 @@
 
         <div class="mx-auto max-w-[150px] mt-10">
           <div class="flex items-center">
-            <input v-model="days" type="number" min="2" max="180" class="border-r-0" />
-            <div class="px-2 py-2 self-stretch border dark:bg-slate-600 dark:border-gray-500">Days</div>
+            <input v-model="days" type="number" min="2" max="180" class="border-r-0 !rounded-r-none" />
+            <div class="px-2 py-2 self-stretch border dark:bg-slate-600 dark:border-gray-500 rounded-r-md">Days</div>
           </div>
         </div>
 

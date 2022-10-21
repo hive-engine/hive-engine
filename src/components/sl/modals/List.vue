@@ -17,7 +17,7 @@
 
     <div class="max-w-sm mx-auto text-center mt-5">
       <label class="block font-bold mb-3">Rental Price for Each (per day)</label>
-      <div class="flex flex-wrap items-center justify-center mb-3">
+      <div class="flex flex-wrap items-center justify-center mb-3 gap-1">
         <input v-model="price" type="number" min="0.0001" class="max-w-[150px]" />
 
         <select v-model="currency" class="max-w-fit">
@@ -26,7 +26,7 @@
           </option>
         </select>
 
-        <button class="btn rounded-none self-stretch" :disabled="price < 0.0001" @click="listCards">List</button>
+        <button class="btn self-stretch" :disabled="price < 0.0001" @click="listCards">List</button>
       </div>
     </div>
   </Modal>
