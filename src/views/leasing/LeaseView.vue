@@ -7,10 +7,14 @@
         </div>
 
         <div class="col-span-full md:col-span-3 mt-3">
-          <div class="flex flex-wrap items-center justify-end gap-4">
-            <button v-if="userStore.isLoggedIn" class="btn" @click="$vfm.show('requestLeaseModal')">
-              Request a Lease
-            </button>
+          <div class="flex flex-wrap items-center justify-center md:justify-end gap-4">
+            <template v-if="userStore.isLoggedIn">
+              <button class="btn" @click="$vfm.show('requestLeaseModal')">Request a Lease</button>
+
+              <RouterLink class="btn" :to="{ name: 'leasing-dashboard', params: { account: userStore.username } }"
+                >Dashboard</RouterLink
+              >
+            </template>
 
             <button v-else class="btn" @click="$vfm.show('loginModal')">Login to Request</button>
           </div>
@@ -74,7 +78,6 @@ import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from
 import { $vfm } from 'vue-final-modal';
 import RequestLease from '@/components/modals/RequestLease.vue';
 import CustomTable from '@/components/utilities/CustomTable.vue';
-// import { LEASE_API } from '@/config';
 import { useStore } from '@/stores';
 import { useLeaseStore } from '@/stores/lease';
 import { useUserStore } from '@/stores/user';
@@ -118,8 +121,6 @@ const computedRequests = computed(() => {
     return true;
   });
 });
-
-// const eventSource = new EventSource(`${LEASE_API}/events`, { withCredentials: false });
 
 onBeforeMount(async () => {
   loading.value = true;

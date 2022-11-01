@@ -48,13 +48,13 @@
                 @click="$vfm.show('swapModal')"
                 >Swap</a
               >
-              <router-link
+              <!-- <router-link
                 v-if="isLoggedIn"
                 :to="{ name: 'sl-market' }"
                 class="text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
                 active-class="bg-gray-700 text-white"
                 >Rentals</router-link
-              >
+              > -->
               <router-link
                 :to="{ name: 'lease' }"
                 class="text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
@@ -171,7 +171,7 @@
                   >
                 </MenuItem>
 
-                <MenuItem v-slot="{ active }">
+                <!-- <MenuItem v-slot="{ active }">
                   <router-link
                     :to="{ name: 'sl-cards', params: { account: userStore.username } }"
                     :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-gray-700']"
@@ -187,7 +187,7 @@
                     active-class="bg-gray-700 hover:bg-gray-700 text-white"
                     >Active Rentals</router-link
                   >
-                </MenuItem>
+                </MenuItem> -->
 
                 <MenuItem v-slot="{ active }">
                   <router-link
@@ -256,12 +256,21 @@
           >
         </DisclosureButton>
 
-        <DisclosureButton class="w-full text-left">
+        <!-- <DisclosureButton class="w-full text-left">
           <router-link
             :to="{ name: 'sl-market' }"
             class="block text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
             active-class="bg-gray-700 text-white"
             >Rentals</router-link
+          >
+        </DisclosureButton> -->
+
+        <DisclosureButton class="w-full text-left">
+          <router-link
+            :to="{ name: 'lease' }"
+            class="block text-gray-700 dark:text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-bold"
+            active-class="bg-gray-700 text-white"
+            >Lease</router-link
           >
         </DisclosureButton>
 
