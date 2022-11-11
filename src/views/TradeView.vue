@@ -444,6 +444,7 @@
 <script setup>
 import { RadioGroup, RadioGroupOption } from '@headlessui/vue';
 import { InformationCircleIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { useDocumentVisibility } from '@vueuse/core';
 import { format } from 'date-fns';
 import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -472,6 +473,7 @@ const userStore = useUserStore();
 const marketStore = useMarketStore();
 const walletStore = useWalletStore();
 const tokenStore = useTokenStore();
+const visibility = useDocumentVisibility();
 
 const toFixedWithoutRounding = inject('toFixedWithoutRounding');
 
@@ -494,6 +496,8 @@ const selectedOrders = ref([]);
 const candleChartData = ref({});
 const depthChartData = ref({});
 const volumeChartData = ref({});
+
+const refresh = ref(true);
 
 const isLoggedIn = computed(() => userStore.isLoggedIn);
 const username = computed(() => userStore.username);
@@ -665,6 +669,14 @@ watch(interval, async () => {
   produceVolumeChart();
 });
 
+watch(visibility, (current) => {
+  if (current === 'visible') {
+    refresh.value = true;
+  } else {
+    refresh.value = false;
+  }
+});
+
 const produceCandleChart = () => {
   const history = marketHistory.value.map((h) => ({
     x: new Date(h.timestamp * 1000).getTime(),
@@ -782,6 +794,12 @@ const fetchTokenMarket = async () => {
   }
 };
 
+const refreshTokenMarket = async () => {
+  if (refresh.value) {
+    await fetchTokenMarket();
+  }
+};
+
 const resetForm = () => {
   buyOrderType.value = 'limit';
   buyPrice.value = '';
@@ -821,7 +839,7 @@ onBeforeMount(async () => {
 });
 
 onMounted(() => {
-  refreshTimeout = setInterval(fetchTokenMarket, 60 * 1000);
+  refreshTimeout = setInterval(refreshTokenMarket, 60 * 1000);
 
   event.on('broadcast-success', onBroadcastSuccess);
 

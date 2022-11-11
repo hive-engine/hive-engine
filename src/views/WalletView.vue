@@ -209,9 +209,9 @@ import {
   LockClosedIcon,
   LockOpenIcon,
 } from '@heroicons/vue/24/outline';
-import { useStorage } from '@vueuse/core';
+import { useDocumentVisibility, useStorage } from '@vueuse/core';
 import Big from 'big.js';
-import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import Deposit from '../components/modals/Deposit.vue';
 import TokenInfo from '../components/modals/TokenInfo.vue';
@@ -234,6 +234,7 @@ const route = useRoute();
 const { account } = route.params;
 
 const filter = ref('');
+const refresh = ref(true);
 const hiveZeroBalance = useStorage('hide-small-balances', false);
 const includeAll = useStorage('value-includes-all', false);
 
@@ -243,6 +244,7 @@ const store = useStore();
 const tokenStore = useTokenStore();
 const userStore = useUserStore();
 const walletStore = useWalletStore();
+const visibility = useDocumentVisibility();
 
 const disableActions = computed(() => !userStore.isLoggedIn || userStore.username !== account);
 
@@ -357,6 +359,12 @@ const fetchWallet = async () => {
   }
 };
 
+const refreshWallet = async () => {
+  if (refresh.value) {
+    await fetchWallet();
+  }
+};
+
 const onBoardcastSuccess = async ({ id, ntrx }) => {
   loading.value = true;
 
@@ -371,6 +379,14 @@ const onTransactionValidated = async () => {
   loading.value = false;
 };
 
+watch(visibility, (current) => {
+  if (current === 'visible') {
+    refresh.value = true;
+  } else {
+    refresh.value = false;
+  }
+});
+
 onBeforeMount(async () => {
   loading.value = true;
 
@@ -380,7 +396,7 @@ onBeforeMount(async () => {
 });
 
 onMounted(async () => {
-  refreshTimeout = setInterval(fetchWallet, 3 * 60 * 1000);
+  refreshTimeout = setInterval(refreshWallet, 3 * 60 * 1000);
 
   event.on('broadcast-success', onBoardcastSuccess);
   event.on('transaction-validated', onTransactionValidated);
