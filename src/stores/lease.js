@@ -180,9 +180,9 @@ export const useLeaseStore = defineStore({
 
         if (delegated && delegated.to === to) {
           if (undelegate) {
-            toDelegate = delegated.delegated_rc - amount;
+            toDelegate = parseFloat(delegated.delegated_rc) - amount;
           } else {
-            toDelegate += delegated.delegated_rc;
+            toDelegate += parseFloat(delegated.delegated_rc);
           }
         }
 
