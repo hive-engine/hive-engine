@@ -36,7 +36,7 @@ export const useWalletStore = defineStore({
         this.wallet = balances
           .filter((b) => !store.settings.disabled_tokens.includes(b.symbol))
           .map((b) => {
-            const balance = Big(b.balance);
+            const balance = Big(b.balance.trim());
             const delegationsIn = Big(b.delegationsIn ? b.delegationsIn : 0);
 
             const delegationsOut = Big(b.delegationsOut ? b.delegationsOut : 0);
