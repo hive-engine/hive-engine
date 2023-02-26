@@ -28,7 +28,11 @@
         <div class="mb-3">Total payment: {{ totalPayment }} {{ lease.currency }}</div>
         <div class="mb-3">Your balance: {{ currencyBalance }} {{ lease.currency }}</div>
 
-        <button class="btn" :disabled="btnBusy || totalPayment <= 0" @click="requestPayment">
+        <button
+          class="btn"
+          :disabled="btnBusy || totalPayment <= 0 || totalPayment > currencyBalance"
+          @click="requestPayment"
+        >
           <Spinner v-if="btnBusy" /> Pay {{ totalPayment }} {{ lease.currency }}
         </button>
       </template>
@@ -39,6 +43,7 @@
 <script setup>
 import { useVuelidate } from '@vuelidate/core';
 import { required, minValue } from '@vuelidate/validators';
+import Big from 'big.js';
 import { computed, ref } from 'vue';
 import LoadingOverlay from '@/components/utilities/LoadingOverlay.vue';
 import { useLeaseStore } from '@/stores/lease';
@@ -63,9 +68,12 @@ const totalPayment = computed(() => {
     return 0;
   }
 
-  return Number(
-    toFixedNoRounding(lease.value.daily_payment * duration.value * 7, leaseStore.precisions.get(lease.value.currency)),
-  );
+  const payment = new Big(lease.value.daily_payment)
+    .mul(duration.value)
+    .mul(7)
+    .toFixed(leaseStore.precisions.get(lease.value.currency));
+
+  return Number(payment);
 });
 
 const currencyBalance = computed(() => {
