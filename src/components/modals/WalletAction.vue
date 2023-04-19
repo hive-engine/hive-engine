@@ -219,6 +219,10 @@ const rules = {
         return true;
       }
 
+      if (value.includes('--')) {
+        return false;
+      }
+
       return /^([a-z])[a-z0-9-.]*$/.test(value);
     },
   },
@@ -230,6 +234,10 @@ const rules = {
     validUsername: (value) => {
       if (value === '') {
         return true;
+      }
+
+      if (value.includes('--')) {
+        return false;
       }
 
       return /^([a-z])[a-z0-9-.]*$/.test(value);
