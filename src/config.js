@@ -4,7 +4,7 @@ export const NODES = [
   'https://api.hive.blog',
   'https://api.hive.blue',
 ];
-export const SIDECHAIN_RPC = 'https://enginerpc.com';
+export const SIDECHAIN_RPC = 'https://herpc.dtools.dev';
 export const SIDECHAIN_ID = 'ssc-mainnet-hive';
 export const HISTORY_API = 'https://history.hive-engine.com';
 export const CTC_API = 'https://converter-api.hive-engine.com/api';
