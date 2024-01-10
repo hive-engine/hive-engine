@@ -35,7 +35,7 @@
           <tr
             v-for="(tr, i) of computedItems"
             :key="i"
-            class="odd:bg-gray-300 even:bg-gray-200 odd:dark:bg-slate-800 even:dark:bg-slate-700 dark:border-slate-700"
+            class="odd:bg-gray-300 even:bg-gray-200 dark:border-slate-700 odd:dark:bg-slate-800 even:dark:bg-slate-700"
           >
             <td
               v-for="(td, k) of fields"
@@ -51,7 +51,7 @@
 
         <tr
           v-else
-          class="odd:bg-gray-300 even:bg-gray-200 odd:dark:bg-slate-800 even:dark:bg-slate-700 dark:border-slate-700"
+          class="odd:bg-gray-300 even:bg-gray-200 dark:border-slate-700 odd:dark:bg-slate-800 even:dark:bg-slate-700"
         >
           <td class="px-4 py-2 text-center" :colspan="fields.length">No results</td>
         </tr>
@@ -59,7 +59,7 @@
     </table>
   </div>
 
-  <div v-if="perPage > 0" class="py-3 flex items-center justify-between border-t border-gray-200 dark:border-slate-600">
+  <div v-if="perPage > 0" class="flex items-center justify-between border-t border-gray-200 py-3 dark:border-slate-600">
     <div>
       <p class="text-sm text-gray-700 dark:text-gray-300">
         Showing {{ ' ' }}
@@ -82,7 +82,7 @@
 
 <script setup>
 import { computed, ref } from 'vue';
-import Pagination from '../utilities/Pagination.vue';
+import Pagination from '@/components/utilities/Pagination.vue';
 
 const props = defineProps({
   fields: { type: Array, required: true },
@@ -96,7 +96,7 @@ const sortKey = ref(null);
 const sortDirection = ref('none');
 
 const tableItems = computed(() => {
-  const items = props.items;
+  const items = props.items.slice();
 
   if (sortDirection.value !== 'none') {
     items.sort((a, b) => {

@@ -1,14 +1,14 @@
 <template>
-  <Modal v-model="show" name="buyCrypto" @before-open="onBeforeOpen" @closed="onClosed">
+  <Modal v-model="show" modal-id="buyCryptoModal" @before-open="onBeforeOpen" @closed="onClosed">
     <template #title>Buy Cryptocurrency</template>
 
     <Loading v-if="modalBusy" small />
 
     <template v-else>
-      <div v-if="!userStore.isLoggedIn" class="text-center pt-5 pb-5">
+      <div v-if="!userStore.isLoggedIn" class="pb-5 pt-5 text-center">
         <p class="mb-3">Please login in to buy cryptocurrency using fiat currency.</p>
 
-        <button class="btn" @click="$vfm.show('loginModal')">Login</button>
+        <button class="btn" @click="vfm.open('loginModal')">Login</button>
       </div>
 
       <template v-else>
@@ -20,9 +20,9 @@
                 v-model="sourceAmount"
                 :class="[
                   v$.sourceAmount.$error
-                    ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500'
                     : '',
-                  'rounded-md w-full dark:bg-slate-600 dark:border-gray-500',
+                  'w-full rounded-md dark:border-gray-500 dark:bg-slate-600',
                 ]"
                 type="number"
               />
@@ -39,7 +39,7 @@
             <div class="flex items-center gap-3">
               <input
                 v-model="targetAmount"
-                class="rounded-md w-full dark:bg-slate-600 dark:border-gray-500"
+                class="w-full rounded-md dark:border-gray-500 dark:bg-slate-600"
                 type="number"
                 readonly
               />
@@ -64,8 +64,8 @@
             <input
               v-model="address"
               :class="[
-                v$.address.$error ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500' : '',
-                'rounded-md w-full dark:bg-slate-600 dark:border-gray-500',
+                v$.address.$error ? 'border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500' : '',
+                'w-full rounded-md dark:border-gray-500 dark:bg-slate-600',
               ]"
               type="text"
             />
@@ -73,22 +73,22 @@
 
           <div v-if="['BNB', 'XRP'].includes(target)" class="mb-3">
             <label>Memo / Tag</label>
-            <input v-model="tag" class="rounded-md w-full dark:bg-slate-600 dark:border-gray-500" type="text" />
+            <input v-model="tag" class="w-full rounded-md dark:border-gray-500 dark:bg-slate-600" type="text" />
           </div>
 
-          <div class="grid grid-cols-2 gap-3 mb-3">
+          <div class="mb-3 grid grid-cols-2 gap-3">
             <div
               v-for="pm of paymentMethods"
               :key="pm.id"
               :class="[
-                'px-1.5 py-2 transition cursor-pointer border border-gray-700 hover:border-gray-500 hover:bg-[rgba(0,0,0,.2)]',
+                'cursor-pointer border border-gray-700 px-1.5 py-2 transition hover:border-gray-500 hover:bg-[rgba(0,0,0,.2)]',
                 method === pm.id ? 'border-gray-500 bg-[rgba(0,0,0,.2)]' : '',
               ]"
               @click.prevent="method = pm.id"
             >
-              <div class="flex items-center h-full">
+              <div class="flex h-full items-center">
                 <div
-                  class="bg-no-repeat bg-white bg-center rounded-full"
+                  class="rounded-full bg-white bg-center bg-no-repeat"
                   :style="`height:50px; width:50px; background-size:75%; background-image: url('${pm.logo_url}')`"
                 />
 
@@ -110,14 +110,17 @@
 <script setup>
 import { useVuelidate } from '@vuelidate/core';
 import { maxValue, minValue, required } from '@vuelidate/validators';
-import { debouncedWatch } from '@vueuse/core';
+import { watchDebounced } from '@vueuse/core';
 import axios from 'axios';
 import { computed, ref, watch } from 'vue';
-import { BANXA_API } from '../../config';
-import { useUserStore } from '../../stores/user';
-import LoadingOverlay from '../utilities/LoadingOverlay.vue';
-import SearchSelect from '../utilities/SearchSelect.vue';
-import Modal from './Modal.vue';
+import { useVfm } from 'vue-final-modal';
+import Modal from '@/components/modals/Modal.vue';
+import LoadingOverlay from '@/components/utilities/LoadingOverlay.vue';
+import SearchSelect from '@/components/utilities/SearchSelect.vue';
+import { BANXA_API } from '@/config';
+import { useUserStore } from '@/stores/user';
+
+const vfm = useVfm();
 
 const banxaApi = axios.create({ baseURL: BANXA_API });
 
@@ -328,7 +331,7 @@ watch(method, async () => {
   await fetchPrices();
 });
 
-debouncedWatch(
+watchDebounced(
   sourceAmount,
   async () => {
     await fetchPrices();

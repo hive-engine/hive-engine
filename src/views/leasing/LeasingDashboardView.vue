@@ -1,12 +1,10 @@
 <template>
   <div class="page-header">
-    <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 text-gray-200">
-      <div class="grid md:grid-cols-4 text-center md:text-left min-h-[120px] items-center">
-        <div class="col-span-full md:col-span-1 mt-3">
+    <div class="mx-auto w-full max-w-7xl px-2 text-gray-200 sm:px-6 lg:px-8">
+      <div class="grid min-h-[120px] items-center text-center md:grid-cols-4 md:text-left">
+        <div class="col-span-full mt-3 md:col-span-1">
           <h1 class="text-4xl uppercase">Lease Dashboard</h1>
         </div>
-
-        <!-- <div class="col-span-full md:col-span-3 mt-3">//</div> -->
       </div>
     </div>
   </div>
@@ -15,39 +13,39 @@
 
   <div v-else class="page-content pt-3">
     <div class="flex items-center justify-between gap-4">
-      <select v-model="selectedAsset" name="selectedAsset" class="w-[200px] mb-5">
+      <select v-model="selectedAsset" name="selectedAsset" class="mb-5 w-[200px]">
         <option :value="null">{{ selectedAsset ? 'Reset filter' : 'Filter by asset' }}</option>
         <option v-for="symbol of supportedAssets" :key="symbol" :value="symbol">{{ symbol }}</option>
       </select>
 
-      <select v-model="selectedCurrency" name="selectedCurrency" class="w-[200px] mb-5">
+      <select v-model="selectedCurrency" name="selectedCurrency" class="mb-5 w-[200px]">
         <option :value="null">{{ selectedCurrency ? 'Reset filter' : 'Filter by currency' }}</option>
         <option v-for="symbol of leaseStore.currencies" :key="symbol" :value="symbol">{{ symbol }}</option>
       </select>
     </div>
 
     <TabGroup :selected-index="selectedTab" @change="onTabChange">
-      <TabList class="flex space-x-4 bg-slate-500 dark:bg-slate-700 rounded-md p-1">
+      <TabList class="flex space-x-4 rounded-md bg-slate-500 p-1 dark:bg-slate-700">
         <Tab v-slot="{ selected }" as="templete">
-          <button :class="['btn !bg-transparent hover:!bg-red-600 focus:outline-none', selected ? '!bg-red-600' : '']">
+          <button :class="['btn hover:!bg-red-600 focus:outline-none', selected ? '!bg-red-600' : '!bg-transparent']">
             Requests
           </button>
         </Tab>
 
         <Tab v-slot="{ selected }" as="templete">
-          <button :class="['btn !bg-transparent hover:!bg-red-600 focus:outline-none', selected ? '!bg-red-600' : '']">
+          <button :class="['btn hover:!bg-red-600 focus:outline-none', selected ? '!bg-red-600' : '!bg-transparent']">
             Delegated (Out)
           </button>
         </Tab>
 
         <Tab v-slot="{ selected }" as="templete">
-          <button :class="['btn !bg-transparent hover:!bg-red-600 focus:outline-none', selected ? '!bg-red-600' : '']">
+          <button :class="['btn hover:!bg-red-600 focus:outline-none', selected ? '!bg-red-600' : '!bg-transparent']">
             Leased (In)
           </button>
         </Tab>
 
         <Tab v-slot="{ selected }" as="template">
-          <button :class="['btn !bg-transparent hover:!bg-red-600 focus:outline-none', selected ? '!bg-red-600' : '']">
+          <button :class="['btn hover:!bg-red-600 focus:outline-none', selected ? '!bg-red-600' : '!bg-transparent']">
             Expired Leases
           </button>
         </Tab>
@@ -108,7 +106,7 @@
               {{ item.expires_at.toLocaleString() }}
             </template>
             <template #cell(actions)="{ item }">
-              <button class="btn-sm" @click.prevent="$vfm.show('renewLeaseModal', { lease: item })">Renew</button>
+              <button class="btn-sm" @click.prevent="openRenewLeaseModal(item)">Renew</button>
             </template>
           </CustomTable>
         </TabPanel>
@@ -130,25 +128,31 @@
         </TabPanel>
       </TabPanels>
     </TabGroup>
-
-    <RenewLeaseModal />
   </div>
 </template>
 
 <script setup>
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue';
+import { useHead } from '@unhead/vue';
 import { watchThrottled } from '@vueuse/core';
 import { addWeeks } from 'date-fns';
-import { computed, inject, onBeforeMount, onMounted, onBeforeUnmount, ref } from 'vue';
-import { $vfm } from 'vue-final-modal';
-import RenewLeaseModal from '@/components/modals/RenewLeaseModal.vue';
+import { computed, inject, onBeforeMount, onMounted, onBeforeUnmount, ref, defineAsyncComponent } from 'vue';
+import { useModal, useVfm } from 'vue-final-modal';
 import CustomTable from '@/components/utilities/CustomTable.vue';
 import Loading from '@/components/utilities/Loading.vue';
 import { useStore } from '@/stores';
 import { useLeaseStore } from '@/stores/lease';
 import { addCommas, toFixedNoRounding } from '@/utils';
 
+const RenewLeaseModal = defineAsyncComponent(() => import('@/components/modals/RenewLeaseModal.vue'));
+
+useHead({
+  title: 'Lease Dashboard',
+});
+
 const loading = ref(false);
+
+const vfm = useVfm();
 
 const eventBus = inject('eventBus');
 const eventSource = inject('eventSource');
@@ -299,7 +303,7 @@ const onTabChange = (idx) => {
 };
 
 const onBoardcastSuccess = async ({ id }) => {
-  await $vfm.hideAll();
+  await vfm.closeAll();
 
   loading.value = true;
 
@@ -317,6 +321,12 @@ const onLeaseUndelegation = ({ eventData }) => {
       delegated: leaseStore.dashboard.delegated.filter((d) => d.id !== eventData.id),
     };
   }
+};
+
+const openRenewLeaseModal = async (lease) => {
+  const { open } = useModal({ component: RenewLeaseModal, attrs: { lease } });
+
+  await open();
 };
 
 let interval = null;

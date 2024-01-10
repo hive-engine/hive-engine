@@ -1,8 +1,8 @@
 import axios from 'axios';
 import Big from 'big.js';
 import { format } from 'date-fns';
-import { defineStore } from 'pinia';
-import { sidechain } from '../plugins/sidechain';
+import { acceptHMRUpdate, defineStore } from 'pinia';
+import { sidechain } from '@/plugins/sidechain';
 import { useStore } from '.';
 
 const processOrderBook = (orderBook) => {
@@ -157,7 +157,11 @@ export const useMarketStore = defineStore({
           metadata = JSON.parse(token.metadata);
 
           if (metadata.icon && metadata.icon.startsWith('http')) {
-            icon = metadata.icon.endsWith('.svg') ? metadata.icon : `https://images.hive.blog/0x0/${metadata.icon}`;
+            if (symbol === 'BEE') {
+              icon = 'https://hive-engine.com/images/logo-small.png';
+            } else {
+              icon = metadata.icon.endsWith('.svg') ? metadata.icon : `https://images.hive.blog/0x0/${metadata.icon}`;
+            }
           }
         } catch {
           //
@@ -241,3 +245,7 @@ export const useMarketStore = defineStore({
     },
   },
 });
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useMarketStore, import.meta.hot));
+}

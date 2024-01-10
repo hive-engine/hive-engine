@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex flex-col justify-center items-center bg-gray-800 border-2 border-white text-white border-opacity-50 rounded-full p-1"
+    class="flex flex-col items-center justify-center rounded-full border-2 border-white border-opacity-50 bg-gray-800 p-1 text-white"
   >
     <template v-if="edition === 0">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21.53 31.79">

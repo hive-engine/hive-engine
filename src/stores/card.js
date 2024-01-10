@@ -1,9 +1,9 @@
 import axios from 'axios';
 import { addDays, formatDistance, parseISO } from 'date-fns';
-import { defineStore } from 'pinia';
-import { HESL_API, SL_API } from '../config';
-import { getCardBcx, getCardCooldown, getCardLevel, getCardPower, groupBy, toFixedNoRounding } from '../utils';
-import { useUserStore } from './user';
+import { acceptHMRUpdate, defineStore } from 'pinia';
+import { HESL_API, SL_API } from '@/config';
+import { useUserStore } from '@/stores/user';
+import { getCardBcx, getCardCooldown, getCardLevel, getCardPower, groupBy, toFixedNoRounding } from '@/utils';
 import { useStore } from '.';
 
 export const slApi = axios.create({
@@ -527,3 +527,7 @@ export const useCardStore = defineStore({
     },
   },
 });
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useCardStore, import.meta.hot));
+}

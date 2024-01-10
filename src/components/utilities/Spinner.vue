@@ -1,6 +1,6 @@
 <template>
   <svg
-    :class="[large ? 'h-10 w-10' : 'h-5 w-5', 'animate-spin text-white inline-block']"
+    :class="[large ? 'h-10 w-10' : 'h-5 w-5', 'inline-block animate-spin text-white']"
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
     viewBox="0 0 24 24"

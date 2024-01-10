@@ -1,12 +1,12 @@
 <template>
-  <Candlestick :chart-data="chartData" :options="options" />
+  <Candlestick :data="data" :options="options" />
 </template>
 
 <script setup>
-import { Chart, LinearScale, TimeSeriesScale, Tooltip } from 'chart.js';
+import { Chart, LinearScale, TimeSeriesScale, CategoryScale, Tooltip } from 'chart.js';
 import { CandlestickController, CandlestickElement } from 'chartjs-chart-financial';
 import { ref } from 'vue';
-import { defineChartComponent } from 'vue-chart-3';
+import { createTypedChart } from 'vue-chartjs';
 import 'chartjs-adapter-date-fns';
 
 class CustomCandleChart extends CandlestickController {
@@ -15,7 +15,7 @@ class CustomCandleChart extends CandlestickController {
 
     const borderColor = '#999';
 
-    if (this.chart.tooltip._active && this.chart.tooltip._active.length) {
+    if (this.chart.tooltip && this.chart.tooltip._active && this.chart.tooltip._active.length) {
       const activePoint = this.chart.tooltip._active[0];
 
       const { x } = activePoint.element;
@@ -36,19 +36,26 @@ class CustomCandleChart extends CandlestickController {
   }
 }
 
-CustomCandleChart.id = 'CustomCandleChart';
+CustomCandleChart.id = 'CandleStick';
 CustomCandleChart.defaults = CandlestickController.defaults;
 
-Chart.register(CandlestickController, CandlestickElement, LinearScale, TimeSeriesScale, Tooltip, CustomCandleChart);
+Chart.register(
+  CandlestickController,
+  CandlestickElement,
+  LinearScale,
+  TimeSeriesScale,
+  CategoryScale,
+  Tooltip,
+  CustomCandleChart,
+);
 
-const Candlestick = defineChartComponent('CandleStick', 'CustomCandleChart');
+const Candlestick = createTypedChart('CandleStick', CustomCandleChart);
 
 defineProps({
-  chartData: { type: Object, required: true },
+  data: { type: Object, required: true },
 });
 
 const options = ref({
-  maintainAspectRatio: false,
   scales: {
     y: {
       ticks: {

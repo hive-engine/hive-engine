@@ -1,8 +1,8 @@
 <template>
   <div class="page-header">
-    <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 text-gray-200">
-      <div class="grid md:grid-cols-4 text-center md:text-left min-h-[160px] items-center">
-        <div class="col-span-full md:col-span-3 mt-3">
+    <div class="mx-auto w-full max-w-7xl px-2 text-gray-200 sm:px-6 lg:px-8">
+      <div class="grid min-h-[160px] items-center text-center md:grid-cols-4 md:text-left">
+        <div class="col-span-full mt-3 md:col-span-3">
           <h1 class="text-4xl uppercase">Conversion History</h1>
         </div>
       </div>
@@ -24,7 +24,7 @@
       </template>
 
       <template #cell(trx_id)="{ item }">
-        <a :href="getExplorerLink(item.symbol, item.trx_id)" target="_blank"
+        <a v-if="item.trx_id" :href="getExplorerLink(item.symbol, item.trx_id)" target="_blank"
           >{{ item.trx_id.substr(0, 5) }}...{{ item.trx_id.substr(-5, 5) }}</a
         >
       </template>
@@ -35,10 +35,15 @@
 </template>
 
 <script setup>
+import { useHead } from '@unhead/vue';
 import { onBeforeMount, ref } from 'vue';
-import PageFooter from '../components/PageFooter.vue';
-import CustomTable from '../components/utilities/CustomTable.vue';
-import { useWalletStore } from '../stores/wallet';
+import PageFooter from '@/components/PageFooter.vue';
+import CustomTable from '@/components/utilities/CustomTable.vue';
+import { useWalletStore } from '@/stores/wallet';
+
+useHead({
+  title: 'Conversion History',
+});
 
 const loading = ref(true);
 

@@ -1,44 +1,44 @@
 <template>
-  <Modal v-model="show" name="requestLeaseModal" @before-open="onBeforeOpen" @closed="onClosed">
+  <Modal v-model="show" modal-id="requestLeaseModal" @before-open="onBeforeOpen" @closed="onClosed">
     <template #title>Request a Lease</template>
 
     <LoadingOverlay :show="showOverlay">
       <template v-if="page === 1">
         <div class="mb-3">
-          <label class="block mb-3">What you want to lease?</label>
+          <label class="mb-3 block">What you want to lease?</label>
           <select v-model="asset" name="asset">
             <option v-for="symbol of supportedAssets" :key="symbol" :value="symbol">{{ symbol }}</option>
           </select>
         </div>
 
         <div class="mb-3">
-          <label class="block mb-3">Which account do you want to lease for?</label>
+          <label class="mb-3 block">Which account do you want to lease for?</label>
           <input
             v-model="beneficiary"
             type="text"
             :class="
               v$.beneficiary.$error
-                ? '!border-red-500 !dark:border-red-500 !focus:border-red-500 !focus:ring-red-500'
+                ? '!dark:border-red-500 !focus:border-red-500 !focus:ring-red-500 !border-red-500'
                 : ''
             "
           />
         </div>
 
         <div class="mb-3">
-          <label class="block mb-3">How much {{ asset }} do you want to lease?</label>
+          <label class="mb-3 block">How much {{ asset }} do you want to lease?</label>
           <input
             v-model="amount"
             type="number"
             step="1"
             min="1"
             :class="
-              v$.amount.$error ? '!border-red-500 !dark:border-red-500 !focus:border-red-500 !focus:ring-red-500' : ''
+              v$.amount.$error ? '!dark:border-red-500 !focus:border-red-500 !focus:ring-red-500 !border-red-500' : ''
             "
           />
         </div>
 
         <div class="mb-3">
-          <label class="block mb-3">How much do you wanna pay per week?</label>
+          <label class="mb-3 block">How much do you wanna pay per week?</label>
           <div class="flex items-center">
             <input
               v-model="payment"
@@ -47,7 +47,7 @@
               class="!rounded-r-none"
               :class="
                 v$.payment.$error
-                  ? '!border-red-500 !dark:border-red-500 !focus:border-red-500 !focus:ring-red-500'
+                  ? '!dark:border-red-500 !focus:border-red-500 !focus:ring-red-500 !border-red-500'
                   : ''
               "
             />
@@ -59,7 +59,7 @@
         </div>
 
         <div class="mb-3">
-          <label class="block mb-3">How long do you want to lease the {{ asset }} for?</label>
+          <label class="mb-3 block">How long do you want to lease the {{ asset }} for?</label>
 
           <div class="flex items-center">
             <input
@@ -70,18 +70,19 @@
               class="!rounded-r-none"
               :class="
                 v$.duration.$error
-                  ? '!border-red-500 !dark:border-red-500 !focus:border-red-500 !focus:ring-red-500'
+                  ? '!dark:border-red-500 !focus:border-red-500 !focus:ring-red-500 !border-red-500'
                   : ''
               "
             />
 
-            <div class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0">
+            <div class="rounded-r-md border border-l-0 bg-gray-200 p-2 dark:border-gray-500 dark:bg-slate-600">
               Week(s)
             </div>
           </div>
         </div>
 
-        <div class="mb-3">Total payment: {{ totalPayment }} {{ currency }} ({{ apr }}%)</div>
+        <div class="mb-1">Total payment: {{ totalPayment }} {{ currency }}</div>
+        <div class="mb-1">Estimated APR: {{ apr }}%</div>
         <div class="mb-3">Your balance: {{ currencyBalance }} {{ currency }}</div>
 
         <div v-if="totalPayment < leaseStore.minimumPayment.get(currency)" class="mb-3 text-red-400">
@@ -104,7 +105,7 @@
           {{ beneficiary }}
         </div>
 
-        <div class="grid grid-cols-3 gap-4 mb-3">
+        <div class="mb-3 grid grid-cols-3 gap-4">
           <div>
             <h3 class="font-bold">Amount</h3>
 
@@ -124,7 +125,7 @@
           </div>
         </div>
 
-        <div class="flex items-center justify-between gap-4 mt-10">
+        <div class="mt-10 flex items-center justify-between gap-4">
           <button @click="page = 1"><ArrowLeftIcon class="inline h-4 w-4" aria-hidden="true" /> Go Back</button>
 
           <button class="btn" :disabled="btnBusy || totalPayment <= 0" @click="requestPayment">
@@ -141,14 +142,14 @@ import { ArrowLeftIcon } from '@heroicons/vue/24/solid';
 import { useVuelidate } from '@vuelidate/core';
 import { required, minLength, maxLength, numeric, minValue } from '@vuelidate/validators';
 import { computed, ref } from 'vue';
+import Modal from '@/components/modals/Modal.vue';
+import LoadingOverlay from '@/components/utilities/LoadingOverlay.vue';
+import Spinner from '@/components/utilities/Spinner.vue';
 import { useStore } from '@/stores';
 import { useLeaseStore } from '@/stores/lease';
 import { useUserStore } from '@/stores/user';
 import { useWalletStore } from '@/stores/wallet';
 import { toFixedNoRounding } from '@/utils';
-import LoadingOverlay from '../utilities/LoadingOverlay.vue';
-import Spinner from '../utilities/Spinner.vue';
-import Modal from './Modal.vue';
 
 const store = useStore();
 const leaseStore = useLeaseStore();

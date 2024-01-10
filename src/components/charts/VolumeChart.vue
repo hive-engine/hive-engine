@@ -1,22 +1,21 @@
 <template>
-  <VolumeBarChart :chart-data="chartData" :options="options" />
+  <Bar :data="data" :options="options" />
 </template>
 
 <script setup>
 import { BarController, BarElement, Chart, Legend, LogarithmicScale, Tooltip } from 'chart.js';
 import { ref } from 'vue';
-import { defineChartComponent } from 'vue-chart-3';
+import { Bar } from 'vue-chartjs';
 
 Chart.register(BarController, BarElement, Tooltip, Legend, LogarithmicScale);
 
-const VolumeBarChart = defineChartComponent('VolumeBarChart', 'bar');
+// const VolumeBarChart = createTypedChart('VolumeBarChart', BarController);
 
 defineProps({
-  chartData: { type: Object, required: true },
+  data: { type: Object, required: true },
 });
 
 const options = ref({
-  maintainAspectRatio: false,
   interaction: {
     mode: 'index',
     intersect: false,

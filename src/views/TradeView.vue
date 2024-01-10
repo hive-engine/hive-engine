@@ -1,10 +1,10 @@
 <template>
   <div class="page-header">
-    <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 text-gray-200">
-      <div class="grid md:grid-cols-4 text-center md:text-left min-h-[160px] items-center">
-        <div class="col-span-full md:col-span-3 mt-3">
+    <div class="mx-auto w-full max-w-7xl px-2 text-gray-200 sm:px-6 lg:px-8">
+      <div class="grid min-h-[160px] items-center text-center md:grid-cols-4 md:text-left">
+        <div class="col-span-full mt-3 md:col-span-3">
           <h1 class="text-4xl uppercase">Market</h1>
-          <p class="text-xl mt-3">Trade any Hive Engine token against HIVE on the internal DEX!</p>
+          <p class="mt-3 text-xl">Trade any Hive Engine token against HIVE on the internal DEX!</p>
         </div>
       </div>
     </div>
@@ -15,28 +15,28 @@
   <div v-else class="page-content pt-5">
     <div
       v-if="metrics"
-      class="flex flex-wrap items-center justify-center sm:justify-between mb-5 border-b border-gray-400 dark:border-gray-600 pb-5"
+      class="mb-5 flex flex-wrap items-center justify-center border-b border-gray-400 pb-5 dark:border-gray-600 sm:justify-between"
     >
-      <div class="mb-3 pr-2 sm:basis-0 sm:flex-grow md:basis-12">
+      <div class="mb-3 pr-2 sm:flex-grow sm:basis-0 md:basis-12">
         <div class="flex items-center">
           <SearchSelect v-model="symbol" classes="rounded-l-md" menu-class="rounded-md" :options="tokens" />
 
           <button
-            class="self-stretch bg-white dark:bg-slate-600 border-gray-500 dark:border-gray-500 border border-l-0 rounded-r-md p-2 hover:text-red-400"
-            @click="vfm$.show('tokenInfoModal', token)"
+            class="self-stretch rounded-r-md border border-l-0 border-gray-500 bg-white p-2 hover:text-red-400 dark:border-gray-500 dark:bg-slate-600"
+            @click="openTokenInfoModal(token)"
           >
             <information-circle-icon class="h-6 w-6" />
           </button>
         </div>
       </div>
 
-      <div class="mb-3 px-2 text-sm basis-0 flex-grow">
+      <div class="mb-3 flex-grow basis-0 px-2 text-sm">
         <div class="font-bold">Last Price</div>
         <div>{{ metrics.lastPrice }}</div>
         <div class="text-gray-500">${{ (metrics.lastPrice * hivePrice).toFixed(7) }}</div>
       </div>
 
-      <div class="mb-3 px-2 text-sm basis-0 flex-grow">
+      <div class="mb-3 flex-grow basis-0 px-2 text-sm">
         <div class="font-bold">
           24h
           <span
@@ -58,19 +58,19 @@
         <div class="text-gray-500">${{ (metrics.priceChangeHive * hivePrice).toFixed(7) }}</div>
       </div>
 
-      <div class="mb-3 px-2 text-sm basis-0 flex-grow">
+      <div class="mb-3 flex-grow basis-0 px-2 text-sm">
         <div class="font-bold">Ask</div>
         <div>{{ metrics.lowestAsk }}</div>
         <div class="text-gray-500">${{ (metrics.lowestAsk * hivePrice).toFixed(7) }}</div>
       </div>
 
-      <div class="mb-3 px-2 text-sm basis-0 flex-grow">
+      <div class="mb-3 flex-grow basis-0 px-2 text-sm">
         <div class="font-bold">Bid</div>
         <div>{{ metrics.highestBid }}</div>
         <div class="text-gray-500">${{ (metrics.highestBid * hivePrice).toFixed(7) }}</div>
       </div>
 
-      <div class="mb-3 pl-2 text-sm basis-0 flex-grow">
+      <div class="mb-3 flex-grow basis-0 pl-2 text-sm">
         <div class="font-bold">Volume</div>
         <div>{{ metrics.volume }}</div>
         <div class="text-gray-500">${{ (metrics.volume * hivePrice).toFixed(7) }}</div>
@@ -81,7 +81,7 @@
       <div class="text-right">
         <button
           :disabled="interval === 'daily'"
-          class="btn-sm px-4 py-1 rounded-l-md rounded-r-none"
+          class="btn-sm rounded-l-md rounded-r-none px-4 py-1"
           @click="interval = 'daily'"
         >
           Daily
@@ -89,51 +89,51 @@
 
         <button
           :disabled="interval === 'hourly'"
-          class="btn-sm px-4 py-1 rounded-l-none rounded-r-md"
+          class="btn-sm rounded-l-none rounded-r-md px-4 py-1"
           @click="interval = 'hourly'"
         >
           Hourly
         </button>
       </div>
 
-      <CandleChart v-if="chartType === 'candle'" :chart-data="candleChartData" />
-      <DepthChart v-else-if="chartType === 'depth'" :chart-data="depthChartData" />
-      <VolumeChart v-else-if="chartType === 'volume'" :chart-data="volumeChartData" />
+      <CandleChart v-if="chartType === 'candle'" :data="candleChartData" />
+      <DepthChart v-else-if="chartType === 'depth'" :data="depthChartData" />
+      <VolumeChart v-else-if="chartType === 'volume'" :data="volumeChartData" />
     </div>
 
-    <div class="text-center mb-8">
+    <div class="mb-8 text-center">
       <button
         :disabled="chartType === 'candle'"
-        class="btn-sm px-4 py-1 rounded-l-md rounded-r-none"
+        class="btn-sm rounded-l-md rounded-r-none px-4 py-1"
         @click="chartType = 'candle'"
       >
         Candle
       </button>
 
-      <button :disabled="chartType === 'depth'" class="btn-sm px-4 py-1 rounded-none" @click="chartType = 'depth'">
+      <button :disabled="chartType === 'depth'" class="btn-sm rounded-none px-4 py-1" @click="chartType = 'depth'">
         Depth
       </button>
 
       <button
         :disabled="chartType === 'volume'"
-        class="btn-sm px-4 py-1 rounded-l-none rounded-r-md"
+        class="btn-sm rounded-l-none rounded-r-md px-4 py-1"
         @click="chartType = 'volume'"
       >
         Volume
       </button>
     </div>
 
-    <div v-if="isLoggedIn" class="grid md:grid-cols-2 gap-10">
+    <div v-if="isLoggedIn" class="grid gap-10 md:grid-cols-2">
       <div class="col-span-1">
         <div class="flex items-center justify-between">
-          <h3 class="text-xl font-bold w-2/4">Buy {{ symbol }}</h3>
+          <h3 class="w-2/4 text-xl font-bold">Buy {{ symbol }}</h3>
 
           <RadioGroup v-model="buyOrderType" class="flex items-center">
             <RadioGroupOption v-slot="{ checked }" value="limit">
               <span
                 :class="[
-                  checked ? 'bg-red-700 shadow-red-800 shadow-inner' : 'bg-red-600',
-                  'cursor-pointer p-2 text-white font-bold rounded-l-md',
+                  checked ? 'bg-red-700 shadow-inner shadow-red-800' : 'bg-red-600',
+                  'cursor-pointer rounded-l-md p-2 font-bold text-white',
                 ]"
                 >Limit</span
               >
@@ -142,8 +142,8 @@
             <RadioGroupOption v-slot="{ checked, disabled }" value="market" :disabled="token.precision <= 3">
               <span
                 :class="[
-                  checked ? 'bg-red-700 shadow-red-800 shadow-inner' : 'bg-red-600',
-                  'cursor-pointer p-2 text-white font-bold rounded-r-md',
+                  checked ? 'bg-red-700 shadow-inner shadow-red-800' : 'bg-red-600',
+                  'cursor-pointer rounded-r-md p-2 font-bold text-white',
                   disabled ? 'cursor-not-allowed' : '',
                 ]"
                 >Market</span
@@ -152,10 +152,10 @@
           </RadioGroup>
         </div>
 
-        <div class="flex items-center mt-3">
+        <div class="mt-3 flex items-center">
           <label for="buyPrice" class="w-2/4 font-bold">Price</label>
 
-          <div class="flex items-center w-full">
+          <div class="flex w-full items-center">
             <input
               id="buyPrice"
               v-model="buyPrice"
@@ -164,17 +164,17 @@
               :disabled="buyOrderType === 'market'"
             />
             <div
-              class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-500"
+              class="rounded-r-md border border-l-0 border-gray-500 bg-gray-200 p-2 dark:border-gray-500 dark:bg-slate-600"
             >
               HIVE/{{ symbol }}
             </div>
           </div>
         </div>
 
-        <div class="flex items-center mt-3">
+        <div class="mt-3 flex items-center">
           <label for="buyQuantity" class="w-2/4 font-bold">Quantity</label>
 
-          <div class="flex items-center w-full">
+          <div class="flex w-full items-center">
             <input
               id="buyQuantity"
               v-model="buyQuantity"
@@ -183,17 +183,17 @@
               :disabled="buyOrderType === 'market'"
             />
             <div
-              class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-500"
+              class="rounded-r-md border border-l-0 border-gray-500 bg-gray-200 p-2 dark:border-gray-500 dark:bg-slate-600"
             >
               {{ symbol }}
             </div>
           </div>
         </div>
 
-        <div class="flex items-center mt-3">
+        <div class="mt-3 flex items-center">
           <label for="buyTotal" class="w-2/4 font-bold">Total</label>
 
-          <div class="flex items-center w-full">
+          <div class="flex w-full items-center">
             <input
               id="buyTotal"
               v-model="buyTotal"
@@ -202,14 +202,14 @@
               :readonly="buyOrderType === 'limit'"
             />
             <div
-              class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-500"
+              class="rounded-r-md border border-l-0 border-gray-500 bg-gray-200 p-2 dark:border-gray-500 dark:bg-slate-600"
             >
               HIVE
             </div>
           </div>
         </div>
 
-        <div class="flex items-center justify-between mt-3">
+        <div class="mt-3 flex items-center justify-between">
           <div class="w-3/4">
             Balance:
             <a
@@ -244,14 +244,14 @@
 
       <div class="col-span-1">
         <div class="flex items-center justify-between">
-          <h3 class="text-xl font-bold w-2/4">Sell {{ symbol }}</h3>
+          <h3 class="w-2/4 text-xl font-bold">Sell {{ symbol }}</h3>
 
           <RadioGroup v-model="sellOrderType" class="flex items-center">
             <RadioGroupOption v-slot="{ checked }" value="limit">
               <span
                 :class="[
-                  checked ? 'bg-red-700 shadow-red-800 shadow-inner' : 'bg-red-600',
-                  'cursor-pointer p-2 text-white font-bold rounded-l-md',
+                  checked ? 'bg-red-700 shadow-inner shadow-red-800' : 'bg-red-600',
+                  'cursor-pointer rounded-l-md p-2 font-bold text-white',
                 ]"
                 >Limit</span
               >
@@ -260,8 +260,8 @@
             <RadioGroupOption v-slot="{ checked, disabled }" value="market" :disabled="token.precision <= 3">
               <span
                 :class="[
-                  checked ? 'bg-red-700 shadow-red-800 shadow-inner' : 'bg-red-600',
-                  'cursor-pointer p-2 text-white font-bold rounded-r-md',
+                  checked ? 'bg-red-700 shadow-inner shadow-red-800' : 'bg-red-600',
+                  'cursor-pointer rounded-r-md p-2 font-bold text-white',
                   disabled ? 'cursor-not-allowed' : '',
                 ]"
                 >Market</span
@@ -270,10 +270,10 @@
           </RadioGroup>
         </div>
 
-        <div class="flex items-center mt-3">
+        <div class="mt-3 flex items-center">
           <label for="sellPrice" class="w-2/4 font-bold">Price</label>
 
-          <div class="flex items-center w-full">
+          <div class="flex w-full items-center">
             <input
               id="sellPrice"
               v-model="sellPrice"
@@ -282,30 +282,30 @@
               :disabled="sellOrderType === 'market'"
             />
             <div
-              class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-500"
+              class="rounded-r-md border border-l-0 border-gray-500 bg-gray-200 p-2 dark:border-gray-500 dark:bg-slate-600"
             >
               HIVE/{{ symbol }}
             </div>
           </div>
         </div>
 
-        <div class="flex items-center mt-3">
+        <div class="mt-3 flex items-center">
           <label for="sellQuantity" class="w-2/4 font-bold">Quantity</label>
 
-          <div class="flex items-center w-full">
+          <div class="flex w-full items-center">
             <input id="sellQuantity" v-model="sellQuantity" type="number" class="!rounded-r-none" />
             <div
-              class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-500"
+              class="rounded-r-md border border-l-0 border-gray-500 bg-gray-200 p-2 dark:border-gray-500 dark:bg-slate-600"
             >
               {{ symbol }}
             </div>
           </div>
         </div>
 
-        <div class="flex items-center mt-3">
+        <div class="mt-3 flex items-center">
           <label for="sellTotal" class="w-2/4 font-bold">Total</label>
 
-          <div class="flex items-center w-full">
+          <div class="flex w-full items-center">
             <input
               id="sellTotal"
               v-model="sellTotal"
@@ -315,14 +315,14 @@
               :disabled="sellOrderType === 'market'"
             />
             <div
-              class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-500"
+              class="rounded-r-md border border-l-0 border-gray-500 bg-gray-200 p-2 dark:border-gray-500 dark:bg-slate-600"
             >
               HIVE
             </div>
           </div>
         </div>
 
-        <div class="flex items-center justify-between mt-3">
+        <div class="mt-3 flex items-center justify-between">
           <div class="w-3/4">
             Balance:
             <a class="cursor-pointer" @click="sellQuantity = symbolBalance">{{ symbolBalance }} {{ symbol }}</a>
@@ -348,9 +348,9 @@
       </div>
     </div>
 
-    <div class="grid md:grid-cols-2 gap-10">
+    <div class="grid gap-10 md:grid-cols-2">
       <div class="col-span-1 mt-5">
-        <h3 class="text-xl font-bold mb-3">Buy Orders</h3>
+        <h3 class="mb-3 text-xl font-bold">Buy Orders</h3>
 
         <custom-table
           :fields="buyBookFields"
@@ -374,7 +374,7 @@
       </div>
 
       <div class="col-span-1 mt-5">
-        <h3 class="text-xl font-bold mb-3">Sell Orders</h3>
+        <h3 class="mb-3 text-xl font-bold">Sell Orders</h3>
 
         <custom-table
           :fields="sellBookFields"
@@ -400,7 +400,7 @@
 
     <template v-if="isLoggedIn">
       <div class="flex items-center">
-        <h3 class="w-3/4 text-xl font-bold mt-5 mb-3">Open Orders</h3>
+        <h3 class="mb-3 mt-5 w-3/4 text-xl font-bold">Open Orders</h3>
 
         <div v-if="selectedOrders.length > 1" class="w-full text-right">
           <button class="btn-sm px-4" @click="marketStore.requestCancelOrders(selectedOrders)">Cancel All</button>
@@ -426,7 +426,7 @@
       </custom-table>
     </template>
 
-    <h3 class="text-xl font-bold mt-5 mb-3">Trade History</h3>
+    <h3 class="mb-3 mt-5 text-xl font-bold">Trade History</h3>
 
     <custom-table :fields="tradesHistoryFields" :items="tradesHistory">
       <template #cell(type)="{ item }">
@@ -438,35 +438,40 @@
   </div>
 
   <PageFooter />
-  <TokenInfo />
 </template>
 
 <script setup>
 import { RadioGroup, RadioGroupOption } from '@headlessui/vue';
 import { InformationCircleIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { useHead } from '@unhead/vue';
 import { useDocumentVisibility } from '@vueuse/core';
 import { format } from 'date-fns';
-import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, defineAsyncComponent, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useModal } from 'vue-final-modal';
 import { useRoute, useRouter } from 'vue-router';
 import CandleChart from '@/components/charts/CandleChart.vue';
 import DepthChart from '@/components/charts/DepthChart.vue';
 import VolumeChart from '@/components/charts/VolumeChart.vue';
-import TokenInfo from '@/components/modals/TokenInfo.vue';
 import PageFooter from '@/components/PageFooter.vue';
 import CustomTable from '@/components/utilities/CustomTable.vue';
 import SearchSelect from '@/components/utilities/SearchSelect.vue';
+import { emitter } from '@/plugins/mitt';
 import { useStore } from '@/stores';
 import { useMarketStore } from '@/stores/market';
 import { useTokenStore } from '@/stores/token';
 import { useUserStore } from '@/stores/user';
 import { useWalletStore } from '@/stores/wallet';
-import { filterOutliers } from '@/utils';
+import { filterOutliers, toFixedWithoutRounding } from '@/utils';
+
+const TokenInfoModal = defineAsyncComponent(() => import('@/components/modals/TokenInfo.vue'));
 
 const loading = ref(true);
 const route = useRoute();
 const router = useRouter();
-const vfm$ = inject('$vfm');
-const event = inject('eventBus');
+
+useHead({
+  title: `Trade ${route.params.symbol}`,
+});
 
 const store = useStore();
 const userStore = useUserStore();
@@ -474,8 +479,6 @@ const marketStore = useMarketStore();
 const walletStore = useWalletStore();
 const tokenStore = useTokenStore();
 const visibility = useDocumentVisibility();
-
-const toFixedWithoutRounding = inject('toFixedWithoutRounding');
 
 const symbol = ref(route.params.symbol);
 
@@ -838,18 +841,24 @@ onBeforeMount(async () => {
   loading.value = false;
 });
 
+const openTokenInfoModal = async (token) => {
+  const { open } = useModal({ component: TokenInfoModal, attrs: { token } });
+
+  await open();
+};
+
 onMounted(() => {
   refreshTimeout = setInterval(refreshTokenMarket, 60 * 1000);
 
-  event.on('broadcast-success', onBroadcastSuccess);
+  emitter.on('broadcast-success', onBroadcastSuccess);
 
-  event.on('transaction-validated', onTransactionValidated);
+  emitter.on('transaction-validated', onTransactionValidated);
 });
 
 onBeforeUnmount(() => {
   clearInterval(refreshTimeout);
 
-  event.off('broadcast-success', onBroadcastSuccess);
-  event.off('transaction-validated', onTransactionValidated);
+  emitter.off('broadcast-success', onBroadcastSuccess);
+  emitter.off('transaction-validated', onTransactionValidated);
 });
 </script>

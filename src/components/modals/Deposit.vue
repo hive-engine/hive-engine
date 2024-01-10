@@ -1,223 +1,205 @@
 <template>
-  <vue-final-modal
-    v-slot="{ close }"
-    v-model="show"
-    classes="flex justify-center items-center overflow-y-auto"
-    content-class="w-full max-w-xl relative flex flex-col max-h-full"
-    name="depositModal"
-    @before-open="beforeOpen"
-    @closed="modalClose"
-  >
-    <div class="border dark:border-gray-800 rounded bg-white dark:bg-gray-600 dark:text-gray-300">
-      <div class="flex items-center justify-between px-6 py-4">
-        <div class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300">Deposit Tokens</div>
+  <Modal modal-id="depositModal" @before-open="beforeOpen" @closed="modalClose">
+    <template #title>Deposit Tokens</template>
 
-        <button class="dark:text-gray-300" @click="close">
-          <XMarkIcon class="h-5 w-5" aria-hidden="true" />
-        </button>
+    <Loading v-if="modalBusy" small />
+
+    <template v-else>
+      <div class="alert-warning mb-5 font-bold">
+        There is a 0.75% fee on deposits. Ethereum, ERC-20, BNB, BEP-20, Polygon (MATIC) and Polygon ERC-20 deposits
+        have no deposit fees, but you'll pay the Ethereum / BSC / Polygon network gas fee.
       </div>
 
-      <div class="p-6 flex-grow">
-        <Loading v-if="modalBusy" small />
+      <div v-if="!selectedToken && !depositInfo" class="alert-warning">
+        We have optimized our internal
+        <strong>Bitcoin (BTC) wallet</strong>. As a result, all deposit addresses generated before
+        <strong>July 15, 2021</strong> are invalid. We may not be able to recover funds sent to an old address. Make
+        sure you generate a new address by selecting BTC from the select box below.
+      </div>
 
-        <template v-else>
-          <div class="alert-warning mb-5 font-bold">
-            There is a 0.75% fee on deposits. Ethereum, ERC-20, BNB, BEP-20, Polygon (MATIC) and Polygon ERC-20 deposits
-            have no deposit fees, but you'll pay the Ethereum / BSC / Polygon network gas fee.
-          </div>
+      <template v-if="!depositInfo">
+        <SearchSelect v-model="selectedToken" classes="rounded-md" menu-class="rounded-md" :options="tokens" />
+      </template>
 
-          <div v-if="!selectedToken && !depositInfo" class="alert-warning">
-            We have optimized our internal
-            <strong>Bitcoin (BTC) wallet</strong>. As a result, all deposit addresses generated before
-            <strong>July 15, 2021</strong> are invalid. We may not be able to recover funds sent to an old address. Make
-            sure you generate a new address by selecting BTC from the select box below.
-          </div>
+      <template v-else-if="isDepositDisabled.disabled">
+        <div class="alert-warning">{{ isDepositDisabled.reason }}</div>
+      </template>
 
-          <template v-if="!depositInfo">
-            <SearchSelect v-model="selectedToken" classes="rounded-md" menu-class="rounded-md" :options="tokens" />
-          </template>
+      <template v-else-if="selectedToken === 'HIVE' && depositInfo">
+        <div class="mb-3">
+          <label class="mb-2 block font-bold">Available Balance</label>
+          <div class="cursor-pointer" @click="depositAmount = depositInfo.balance">{{ depositInfo.balance }} HIVE</div>
+        </div>
 
-          <template v-else-if="isDepositDisabled.disabled">
-            <div class="alert-warning">{{ isDepositDisabled.reason }}</div>
-          </template>
+        <div class="mb-3">
+          <label for="depositAmount" class="mb-2 block font-bold">Deposit Amount</label>
+          <input id="depositAmount" v-model="depositAmount" type="number" step="any" />
+        </div>
 
-          <template v-else-if="selectedToken === 'HIVE' && depositInfo">
-            <div class="mb-3">
-              <label class="block mb-2 font-bold">Available Balance</label>
-              <div class="cursor-pointer" @click="depositAmount = depositInfo.balance">
-                {{ depositInfo.balance }} HIVE
-              </div>
-            </div>
+        <div class="mb-3">You will receive: {{ hiveReceiveAmount }} HIVE</div>
 
-            <div class="mb-3">
-              <label for="depositAmount" class="block mb-2 font-bold">Deposit Amount</label>
-              <input id="depositAmount" v-model="depositAmount" type="number" step="any" />
-            </div>
+        <button
+          class="btn"
+          :disabled="depositAmount <= 0 || depositAmount > depositInfo.balance"
+          @click.prevent="depositHive"
+        >
+          <Spinner v-if="btnBusy" />
+          {{ ' ' }} Deposit {{ selectedToken }}
+        </button>
+      </template>
 
-            <div class="mb-3">You will receive: {{ hiveReceiveAmount }} HIVE</div>
+      <template v-else-if="isEvmToken && depositInfo">
+        <div class="mb-3">
+          <label for="evmAddress" class="mb-2 block font-bold">Your {{ evmToken }} Address</label>
+
+          <div class="flex items-center">
+            <input id="evmAddress" v-model="evmAddress" type="text" class="!rounded-r-none" placeholder="0x...." />
 
             <button
-              class="btn"
-              :disabled="depositAmount <= 0 || depositAmount > depositInfo.balance"
-              @click.prevent="depositHive"
+              class="btn-sm self-stretch rounded-none border-r-red-800"
+              title="Refresh address"
+              @click="walletStore.fetchEvmAddress(networks[selectedToken])"
             >
-              <Spinner v-if="btnBusy" />
-              {{ ' ' }} Deposit {{ selectedToken }}
+              <ArrowPathIcon class="h-5 w-5" />
             </button>
-          </template>
 
-          <template v-else-if="isEvmToken && depositInfo">
-            <div class="mb-3">
-              <label for="evmAddress" class="block mb-2 font-bold">Your {{ evmToken }} Address</label>
+            <button
+              class="btn-sm self-stretch rounded-l-none"
+              title="Add or update address"
+              @click="updateEvmAddress(networks[selectedToken])"
+            >
+              Update
+            </button>
+          </div>
+        </div>
 
-              <div class="flex items-center">
-                <input id="evmAddress" v-model="evmAddress" type="text" class="!rounded-r-none" placeholder="0x...." />
-
-                <button
-                  class="btn-sm self-stretch rounded-none border-r-red-800"
-                  title="Refresh address"
-                  @click="walletStore.fetchEvmAddress(networks[selectedToken])"
-                >
-                  <ArrowPathIcon class="h-5 w-5" />
-                </button>
-
-                <button
-                  class="btn-sm self-stretch rounded-l-none"
-                  title="Add or update address"
-                  @click="updateEvmAddress(networks[selectedToken])"
-                >
-                  Update
-                </button>
-              </div>
+        <template v-if="['ETH', 'BNB', 'MATIC'].includes(selectedToken)">
+          <div class="mb-3">
+            <label class="mb-2 block font-bold">Available Balance</label>
+            <div class="cursor-pointer" @click="depositAmount = depositInfo.balance">
+              {{ depositInfo.balance }} {{ selectedToken }}
             </div>
+          </div>
 
-            <template v-if="['ETH', 'BNB', 'MATIC'].includes(selectedToken)">
-              <div class="mb-3">
-                <label class="block mb-2 font-bold">Available Balance</label>
-                <div class="cursor-pointer" @click="depositAmount = depositInfo.balance">
-                  {{ depositInfo.balance }} {{ selectedToken }}
-                </div>
-              </div>
+          <div class="mb-3">
+            <label for="depositAmount" class="mb-2 block font-bold">Deposit Amount</label>
+            <input id="depositAmount" v-model="depositAmount" type="number" step="any" />
+          </div>
 
-              <div class="mb-3">
-                <label for="depositAmount" class="block mb-2 font-bold">Deposit Amount</label>
-                <input id="depositAmount" v-model="depositAmount" type="number" step="any" />
-              </div>
-
-              <button
-                class="btn"
-                :disabled="depositAmount <= 0 || depositAmount > depositInfo.balance"
-                @click.prevent="depositEvmAsset(networks[selectedToken])"
-              >
-                <Spinner v-if="btnBusy" />
-                {{ ' ' }} Deposit {{ selectedToken }}
-              </button>
-            </template>
-
-            <template v-else>
-              <div class="mb-3">
-                <label class="block mb-2 font-bold">Tokens</label>
-                <SearchSelect
-                  v-model="evmToken"
-                  classes="border border-gray-500 rounded-md"
-                  :options="evmTokenOptions"
-                />
-              </div>
-
-              <div class="mb-3">
-                <label class="block mb-2 font-bold">Available Balance</label>
-                <div class="cursor-pointer" @click="depositAmount = depositInfo.balance">
-                  {{ depositInfo.balance }} {{ evmToken }}
-                </div>
-              </div>
-
-              <div class="mb-3">
-                <label for="depositAmount" class="block mb-2 font-bold">Deposit Amount</label>
-                <input id="depositAmount" v-model="depositAmount" type="number" step="any" />
-              </div>
-
-              <button
-                class="btn"
-                :disabled="depositAmount <= 0 || depositAmount > depositInfo.balance"
-                @click.prevent="depositEvmToken(networks[selectedToken])"
-              >
-                <Spinner v-if="btnBusy" />
-                {{ ' ' }} Deposit {{ evmToken }}
-              </button>
-            </template>
-          </template>
-
-          <template v-else>
-            <div class="font-bold mb-5">
-              Please send any amount of {{ selectedToken }} to the following address and you will receive an equal
-              amount of {{ depositInfo.pegged_token_symbol }} in the @{{ depositInfo.destination }}
-              account once the transaction has received the required number of confirmations on the external chain.
-            </div>
-
-            <div v-if="depositInfo.address">
-              <div class="mb-3">
-                <label for="address" class="block mb-2 font-bold">Deposit Address</label>
-                <div class="flex items-center">
-                  <input type="text" class="!rounded-r-none" readonly :value="depositInfo.address" />
-
-                  <button
-                    class="btn-sm leading-4 py-3 rounded-l-none border-l-0"
-                    @click="copyAddress(depositInfo.address)"
-                  >
-                    {{ addressCopied ? 'Copied' : 'Copy' }}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div v-else-if="depositInfo.account && depositInfo.memo">
-              <div class="mb-3">
-                <label for="account" class="block mb-2 font-bold">Deposit Account</label>
-                <div class="flex items-center">
-                  <input type="text" class="!rounded-r-none" readonly :value="depositInfo.account" />
-
-                  <button
-                    class="btn-sm leading-4 py-3 rounded-l-none border-l-0"
-                    @click="copyAddress(depositInfo.account)"
-                  >
-                    {{ addressCopied ? 'Copied' : 'Copy' }}
-                  </button>
-                </div>
-              </div>
-
-              <div class="mb-3">
-                <label for="memo" class="block mb-2 font-bold">Memo</label>
-                <div class="flex items-center">
-                  <input type="text" class="!rounded-r-none" readonly :value="depositInfo.memo" />
-
-                  <button class="btn-sm leading-4 py-3 rounded-l-none border-l-0" @click="copyMemo(depositInfo.memo)">
-                    {{ memoCopied ? 'Copied' : 'Copy' }}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </template>
+          <button
+            class="btn"
+            :disabled="depositAmount <= 0 || depositAmount > depositInfo.balance"
+            @click.prevent="depositEvmAsset(networks[selectedToken])"
+          >
+            <Spinner v-if="btnBusy" />
+            {{ ' ' }} Deposit {{ selectedToken }}
+          </button>
         </template>
-      </div>
-    </div>
-  </vue-final-modal>
+
+        <template v-else>
+          <div class="mb-3">
+            <label class="mb-2 block font-bold">Tokens</label>
+            <SearchSelect v-model="evmToken" classes="border border-gray-500 rounded-md" :options="evmTokenOptions" />
+          </div>
+
+          <div class="mb-3">
+            <label class="mb-2 block font-bold">Available Balance</label>
+            <div class="cursor-pointer" @click="depositAmount = depositInfo.balance">
+              {{ depositInfo.balance }} {{ evmToken }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="depositAmount" class="mb-2 block font-bold">Deposit Amount</label>
+            <input id="depositAmount" v-model="depositAmount" type="number" step="any" />
+          </div>
+
+          <button
+            class="btn"
+            :disabled="depositAmount <= 0 || depositAmount > depositInfo.balance"
+            @click.prevent="depositEvmToken(networks[selectedToken])"
+          >
+            <Spinner v-if="btnBusy" />
+            {{ ' ' }} Deposit {{ evmToken }}
+          </button>
+        </template>
+      </template>
+
+      <template v-else>
+        <div class="mb-5">
+          Please send any amount of <strong>{{ selectedToken }}</strong> to the following address and you will receive
+          an equal amount of <strong>{{ depositInfo.pegged_token_symbol }}</strong> in the
+          <strong>@{{ depositInfo.destination }}</strong>
+          account once the transaction has received the required number of confirmations on the external chain.
+        </div>
+
+        <div v-if="depositInfo.address">
+          <div class="mb-3">
+            <label for="address" class="mb-2 block font-bold">Deposit Address</label>
+            <div class="flex items-center">
+              <input type="text" class="!rounded-r-none" readonly :value="depositInfo.address" />
+
+              <button class="btn-sm rounded-l-none border-l-0 py-3 leading-4" @click="copyAddress(depositInfo.address)">
+                {{ addressCopied ? 'Copied' : 'Copy' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div v-else-if="depositInfo.account && depositInfo.memo">
+          <div class="mb-3">
+            <label for="account" class="mb-2 block font-bold">Deposit Account</label>
+            <div class="flex items-center">
+              <input type="text" class="!rounded-r-none" readonly :value="depositInfo.account" />
+
+              <button class="btn-sm rounded-l-none border-l-0 py-3 leading-4" @click="copyAddress(depositInfo.account)">
+                {{ addressCopied ? 'Copied' : 'Copy' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="memo" class="mb-2 block font-bold">Memo</label>
+            <div class="flex items-center">
+              <input type="text" class="!rounded-r-none" readonly :value="depositInfo.memo" />
+
+              <button class="btn-sm rounded-l-none border-l-0 py-3 leading-4" @click="copyMemo(depositInfo.memo)">
+                {{ memoCopied ? 'Copied' : 'Copy' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </template>
+    </template>
+  </Modal>
 </template>
 
 <script setup>
-import { ArrowPathIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { ArrowPathIcon } from '@heroicons/vue/24/outline';
 import { notify } from '@kyvg/vue3-notification';
 import { useClipboard } from '@vueuse/core';
-import { Contract, providers, utils } from 'ethers';
-import { computed, inject, ref, watch } from 'vue';
-import { useStore } from '../../stores';
-import { useTokenStore } from '../../stores/token';
-import { useUserStore } from '../../stores/user';
-import { useWalletStore } from '../../stores/wallet';
-import { toFixedWithoutRounding } from '../../utils';
-import SearchSelect from '../utilities/SearchSelect.vue';
+import {
+  Contract,
+  isAddress,
+  toUtf8Bytes,
+  formatEther,
+  formatUnits,
+  parseEther,
+  parseUnits,
+  BrowserProvider,
+  toBeHex,
+} from 'ethers';
+import { computed, ref, watch } from 'vue';
+import Modal from '@/components/modals/Modal.vue';
+import SearchSelect from '@/components/utilities/SearchSelect.vue';
+import { hiveClient } from '@/plugins/hive';
+import { useStore } from '@/stores';
+import { useTokenStore } from '@/stores/token';
+import { useUserStore } from '@/stores/user';
+import { useWalletStore } from '@/stores/wallet';
+import { toFixedWithoutRounding } from '@/utils';
 
-const hiveClient = inject('hiveClient');
-let web3Provider = null;
+let browserProvider = null;
 
 const networks = {
   ETH: 'eth',
@@ -265,7 +247,6 @@ const ABI = [
   },
 ];
 
-const show = ref(false);
 const modalBusy = ref(true);
 const btnBusy = ref(false);
 
@@ -365,7 +346,7 @@ const updateEvmAddress = async (network = 'eth') => {
     return;
   }
 
-  const currentAddress = await web3Provider.send('eth_accounts');
+  const currentAddress = await browserProvider.send('eth_accounts');
 
   if (!currentAddress.map((a) => a.toLowerCase()).includes(evmAddress.value.toLowerCase())) {
     return notify({
@@ -375,11 +356,10 @@ const updateEvmAddress = async (network = 'eth') => {
     });
   }
 
-  if (utils.isAddress(evmAddress.value)) {
+  if (isAddress(evmAddress.value)) {
     try {
-      const signature = await web3Provider
-        .getSigner(evmAddress.value)
-        .signMessage(utils.toUtf8Bytes(userStore.username));
+      const signer = await browserProvider.getSigner(evmAddress.value);
+      const signature = await signer.signMessage(toUtf8Bytes(userStore.username));
 
       const bridgeConfig = `${network}_bridge`;
 
@@ -415,7 +395,7 @@ const checkEvmAddress = async (network) => {
   try {
     evmAddress.value = await walletStore.fetchEvmAddress(network);
 
-    const currentAddress = await web3Provider.send('eth_accounts');
+    const currentAddress = await browserProvider.send('eth_accounts');
 
     if (!currentAddress.map((a) => a.toLowerCase()).includes(evmAddress.value.toLowerCase())) {
       success = false;
@@ -426,8 +406,8 @@ const checkEvmAddress = async (network) => {
         type: 'error',
       });
 
-      await web3Provider.send('wallet_requestPermissions', [{ eth_accounts: {} }]);
-    } else if (!utils.isAddress(evmAddress.value)) {
+      await browserProvider.send('wallet_requestPermissions', [{ eth_accounts: {} }]);
+    } else if (!isAddress(evmAddress.value)) {
       success = false;
 
       notify({
@@ -450,11 +430,11 @@ const getEvmTokenBalance = async (contractAddress, walletAddress) => {
     return 0;
   }
 
-  const contract = new Contract(contractAddress, ABI, web3Provider);
+  const contract = new Contract(contractAddress, ABI, browserProvider);
 
   const [balance, decimals] = await Promise.all([contract.balanceOf(walletAddress), contract.decimals()]);
 
-  return utils.formatUnits(balance, decimals);
+  return formatUnits(balance, decimals);
 };
 
 const depositHive = async () => {
@@ -484,11 +464,11 @@ const depositEvmAsset = async (network) => {
 
   try {
     if (await checkEvmAddress(network)) {
-      await web3Provider.send('eth_sendTransaction', [
+      await browserProvider.send('eth_sendTransaction', [
         {
           to: depositInfo.value.deposit_address,
           from: evmAddress.value,
-          value: utils.parseEther(depositAmount.value.toString()).toHexString(),
+          value: toBeHex(parseEther(depositAmount.value.toString())),
         },
       ]);
     }
@@ -508,9 +488,9 @@ const depositEvmToken = async (network) => {
         (t) => t.symbol === evmToken.value,
       );
 
-      const contract = new Contract(contractAddress, ABI, web3Provider.getSigner());
+      const contract = new Contract(contractAddress, ABI, browserProvider.getSigner());
 
-      const amount = utils.parseUnits(depositAmount.value.toString(), precision);
+      const amount = parseUnits(depositAmount.value.toString(), precision);
 
       await contract.transfer(depositInfo.value.deposit_address, amount);
     }
@@ -525,7 +505,7 @@ watch(selectedToken, async (value) => {
   modalBusy.value = true;
 
   if (value === 'HIVE') {
-    const [account] = await hiveClient.database.getAccounts([userStore.username]);
+    const [account] = await hiveClient.getAccounts([userStore.username]);
 
     walletStore.depositInfo = { balance: parseFloat(account.balance) };
   } else if (
@@ -537,27 +517,39 @@ watch(selectedToken, async (value) => {
     value === 'POLY-ERC20'
   ) {
     if (window.ethereum) {
-      web3Provider = new providers.Web3Provider(window.ethereum);
+      browserProvider = new BrowserProvider(window.ethereum);
 
       const network = networks[value];
       const bridgeConfig = `${network}_bridge`;
 
-      const chainId = await web3Provider.send('net_version');
+      const chainId = await browserProvider.send('net_version');
       const requiredChainId = settings.value[bridgeConfig].chain_id;
 
-      if (Number(chainId) !== requiredChainId) {
-        selectedToken.value = null;
+      let isCorrectChain = Number(chainId) === requiredChainId;
 
-        const text = `Please make sure Metamask network is set to ${chainIds[requiredChainId]}.`;
-
-        notify({
-          title: 'Error',
-          text,
-          type: 'error',
-        });
-      } else {
+      if (!isCorrectChain) {
         try {
-          await web3Provider.send('eth_requestAccounts', []);
+          await browserProvider.send('wallet_switchEthereumChain', [
+            { chainId: `0x${Number(requiredChainId).toString(16)}` },
+          ]);
+
+          isCorrectChain = true;
+        } catch (error) {
+          selectedToken.value = null;
+
+          const text = `Please make sure your Web3 wallet network is set to ${chainIds[requiredChainId]}.`;
+
+          notify({
+            title: 'Error',
+            text,
+            type: 'error',
+          });
+        }
+      }
+
+      if (isCorrectChain) {
+        try {
+          await browserProvider.send('eth_requestAccounts', []);
 
           evmAddress.value = await walletStore.fetchEvmAddress(network);
 
@@ -566,8 +558,8 @@ watch(selectedToken, async (value) => {
           const depositAddress = settings.value[bridgeConfig].gateway_address;
 
           if (value === 'ETH' || value === 'BNB' || value === 'MATIC') {
-            if (utils.isAddress(evmAddress.value)) {
-              balance = toFixedWithoutRounding(utils.formatEther(await web3Provider.getBalance(evmAddress.value)), 8);
+            if (isAddress(evmAddress.value)) {
+              balance = toFixedWithoutRounding(formatEther(await browserProvider.getBalance(evmAddress.value)), 8);
             }
           } else {
             await tokenStore.fetchSupportedEvmTokens({ network, deposit: true });

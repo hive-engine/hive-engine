@@ -1,22 +1,22 @@
 <template>
   <div class="page-header">
-    <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 text-gray-200">
-      <div class="grid md:grid-cols-4 text-center md:text-left min-h-[120px] items-center">
-        <div class="col-span-full md:col-span-1 mt-3">
+    <div class="mx-auto w-full max-w-7xl px-2 text-gray-200 sm:px-6 lg:px-8">
+      <div class="grid min-h-[120px] items-center text-center md:grid-cols-4 md:text-left">
+        <div class="col-span-full mt-3 md:col-span-1">
           <h1 class="text-4xl uppercase">Lease Market</h1>
         </div>
 
-        <div class="col-span-full md:col-span-3 mt-3">
-          <div class="flex flex-wrap items-center justify-center md:justify-end gap-4">
+        <div class="col-span-full mt-3 md:col-span-3">
+          <div class="flex flex-wrap items-center justify-center gap-4 md:justify-end">
             <template v-if="userStore.isLoggedIn">
-              <button class="btn" @click="$vfm.show('requestLeaseModal')">Request a Lease</button>
+              <button class="btn" @click="openRequestLeaseModal">Request a Lease</button>
 
               <RouterLink class="btn" :to="{ name: 'leasing-dashboard', params: { account: userStore.username } }"
                 >Dashboard</RouterLink
               >
             </template>
 
-            <button v-else class="btn" @click="$vfm.show('loginModal')">Login to Request</button>
+            <button v-else class="btn" @click="vfm.open('loginModal')">Login to Request</button>
           </div>
         </div>
       </div>
@@ -27,12 +27,12 @@
 
   <div v-else class="page-content pt-3">
     <div class="flex items-center justify-between gap-4">
-      <select v-model="selectedAsset" name="selectedAsset" class="w-[200px] mb-5">
+      <select v-model="selectedAsset" name="selectedAsset" class="mb-5 w-[200px]">
         <option :value="null">Filter by asset</option>
         <option v-for="symbol of supportedAssets" :key="symbol" :value="symbol">{{ symbol }}</option>
       </select>
 
-      <select v-model="selectedCurrency" name="selectedCurrency" class="w-[200px] mb-5">
+      <select v-model="selectedCurrency" name="selectedCurrency" class="mb-5 w-[200px]">
         <option :value="null">Filter by currency</option>
         <option v-for="symbol of leaseStore.currencies" :key="symbol" :value="symbol">{{ symbol }}</option>
       </select>
@@ -64,24 +64,30 @@
           <template v-else> Available {{ item.unlock_time_remaining }} </template>
         </button>
 
-        <button v-else class="btn py-1" @click="$vfm.show('loginModal')">Login</button>
+        <button v-else class="btn py-1" @click="vfm.open('loginModal')">Login</button>
       </template>
     </CustomTable>
   </div>
-
-  <RequestLease />
 </template>
 
 <script setup>
+import { useHead } from '@unhead/vue';
 import { watchThrottled } from '@vueuse/core';
-import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
-import { $vfm } from 'vue-final-modal';
-import RequestLease from '@/components/modals/RequestLease.vue';
+import { computed, defineAsyncComponent, inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useModal, useVfm } from 'vue-final-modal';
 import CustomTable from '@/components/utilities/CustomTable.vue';
 import { useStore } from '@/stores';
 import { useLeaseStore } from '@/stores/lease';
 import { useUserStore } from '@/stores/user';
 import { addCommas, toFixedNoRounding } from '@/utils';
+
+const RequestLeaseModal = defineAsyncComponent(() => import('@/components/modals/RequestLease.vue'));
+
+useHead({
+  title: 'Lease',
+});
+
+const vfm = useVfm();
 
 const store = useStore();
 const leaseStore = useLeaseStore();
@@ -131,13 +137,19 @@ onBeforeMount(async () => {
 });
 
 const onBoardcastSuccess = async ({ id }) => {
-  await $vfm.hideAll();
+  await vfm.closeAll();
 
   loading.value = true;
 
   await store.validateTransaction(id);
 
   loading.value = false;
+};
+
+const openRequestLeaseModal = async () => {
+  const { open } = useModal({ component: RequestLeaseModal });
+
+  await open();
 };
 
 let interval = null;

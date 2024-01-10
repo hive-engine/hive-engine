@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { defineStore } from 'pinia';
-import { BSC_BRIDGE_API, CTC_API, ETH_BRIDGE_API, POLYGON_BRIDGE_API } from '../config';
-import { sidechain } from '../plugins/sidechain';
+import { acceptHMRUpdate, defineStore } from 'pinia';
+import { BSC_BRIDGE_API, CTC_API, ETH_BRIDGE_API, POLYGON_BRIDGE_API } from '@/config';
+import { sidechain } from '@/plugins/sidechain';
 import { useStore } from '.';
 
 export const useTokenStore = defineStore({
@@ -51,7 +51,11 @@ export const useTokenStore = defineStore({
             metadata = JSON.parse(t.metadata);
 
             if (metadata.icon && metadata.icon.startsWith('http')) {
-              icon = metadata.icon.endsWith('.svg') ? metadata.icon : `https://images.hive.blog/0x0/${metadata.icon}`;
+              if (t.symbol === 'BEE') {
+                icon = 'https://hive-engine.com/images/logo-small.png';
+              } else {
+                icon = metadata.icon.endsWith('.svg') ? metadata.icon : `https://images.hive.blog/0x0/${metadata.icon}`;
+              }
             }
           } catch {
             //
@@ -166,3 +170,7 @@ export const useTokenStore = defineStore({
     },
   },
 });
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useTokenStore, import.meta.hot));
+}

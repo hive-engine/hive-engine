@@ -1,10 +1,12 @@
+import { useStorage } from '@vueuse/core';
 import axios from 'axios';
-import { defineStore } from 'pinia';
-import { $vfm } from 'vue-final-modal';
-import { SIDECHAIN_ID, TRIBALDEX_API } from '../config';
-import { emitter } from '../plugins/mitt';
-import { sidechain } from '../plugins/sidechain';
-import { useUserStore } from './user';
+import { acceptHMRUpdate, defineStore } from 'pinia';
+import { useVfm } from 'vue-final-modal';
+import { SIDECHAIN_ID, SIDECHAIN_RPC, SIDECHAIN_RPCS, TRIBALDEX_API } from '@/config';
+import { emitter } from '@/plugins/mitt';
+import { sidechain } from '@/plugins/sidechain';
+import { useUserStore } from '@/stores/user';
+import { sleep } from '@/utils';
 
 const parseJSON = (json) => {
   let result = {};
@@ -18,8 +20,6 @@ const parseJSON = (json) => {
   return result;
 };
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export const useStore = defineStore({
   id: 'main',
 
@@ -27,10 +27,14 @@ export const useStore = defineStore({
     settings: null,
     hivePrice: 0,
     loading: false,
+    hiveEngineRPC: useStorage('hiveEngineRPC', SIDECHAIN_RPC),
+    hiveEngineRPCs: useStorage('hiveEngineRPCs', SIDECHAIN_RPCS),
   }),
 
   actions: {
     async requestKeychain(fn, ...args) {
+      const vfm = useVfm();
+
       return new Promise((resolve) => {
         if (window.hive_keychain) {
           window.hive_keychain[fn](...args, (r) => {
@@ -45,7 +49,7 @@ export const useStore = defineStore({
             return resolve({ success: false, ...r });
           });
         } else {
-          $vfm.show('installKeychain');
+          vfm.open('installKeychainModal');
 
           return resolve({ success: false });
         }
@@ -169,3 +173,7 @@ export const useStore = defineStore({
     },
   },
 });
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useStore, import.meta.hot));
+}

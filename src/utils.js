@@ -1,6 +1,5 @@
-import { utils } from '@hiveio/dhive';
 import { addSeconds, formatDistanceToNow } from 'date-fns';
-import { useCardStore } from './stores/card';
+import { useCardStore } from '@/stores/card';
 
 export const toFixedWithoutRounding = (t, l = 3) => {
   const a = 10 ** l;
@@ -33,7 +32,7 @@ const getQuantile = (array, quantile) => {
   } else {
     const lowerIndex = Math.floor(index);
     const remainder = index - lowerIndex;
-    return array[lowerIndex] + remainder * (array[lowerIndex + 1] - array[lowerIndex]);
+    return Number(array[lowerIndex]) + remainder * (Number(array[lowerIndex + 1]) - Number(array[lowerIndex]));
   }
 };
 
@@ -54,7 +53,7 @@ export const filterOutliers = (arrayOfNumbers) => {
   return values.filter((x) => x >= minValue && x <= maxValue);
 };
 
-export const sleep = (ms) => utils.sleep(ms);
+export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const addCommas = (nStr, currency = false) => {
   const x = String(nStr).split('.');
@@ -129,8 +128,8 @@ export const getCardBcx = (card) => {
         ? 'gold_xp'
         : 'alpha_xp'
       : card.gold
-      ? 'beta_gold_xp'
-      : 'beta_xp';
+        ? 'beta_gold_xp'
+        : 'beta_xp';
 
   const baseXp = cardStore.sl_settings[xpProperty][rarity - 1];
 
@@ -195,8 +194,8 @@ export const getCardPower = (card) => {
         ? 'gold_xp'
         : 'alpha_xp'
       : card.gold
-      ? 'beta_gold_xp'
-      : 'beta_xp';
+        ? 'beta_gold_xp'
+        : 'beta_xp';
 
   const baseXp = cardStore.sl_settings[xpProperty][rarity - 1];
   const maxXp = getMaxXp(card);

@@ -1,8 +1,8 @@
 <template>
   <div class="page-header">
-    <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 text-gray-200">
-      <div class="grid md:grid-cols-4 text-center md:text-left min-h-[160px] items-center">
-        <div class="col-span-full md:col-span-3 mt-3">
+    <div class="mx-auto w-full max-w-7xl px-2 text-gray-200 sm:px-6 lg:px-8">
+      <div class="grid min-h-[160px] items-center text-center md:grid-cols-4 md:text-left">
+        <div class="col-span-full mt-3 md:col-span-3">
           <h1 class="text-4xl uppercase">Open Orders</h1>
         </div>
       </div>
@@ -44,91 +44,75 @@
   <PageFooter />
 </template>
 
-<script>
+<script setup>
 import { XMarkIcon } from '@heroicons/vue/24/outline';
-import { computed, defineComponent, inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
-import PageFooter from '../components/PageFooter.vue';
-import CustomTable from '../components/utilities/CustomTable.vue';
-import { useStore } from '../stores';
-import { useMarketStore } from '../stores/market';
-import { useUserStore } from '../stores/user';
-export default defineComponent({
-  name: 'OpenOrders',
+import { useHead } from '@unhead/vue';
+import { computed, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
+import PageFooter from '@/components/PageFooter.vue';
+import CustomTable from '@/components/utilities/CustomTable.vue';
+import { emitter } from '@/plugins/mitt';
+import { useStore } from '@/stores';
+import { useMarketStore } from '@/stores/market';
+import { useUserStore } from '@/stores/user';
 
-  components: {
-    XMarkIcon,
-    CustomTable,
-    PageFooter,
-  },
+useHead({
+  title: 'Open Orders',
+});
 
-  setup() {
-    const loading = ref(true);
-    const event = inject('eventBus');
+const loading = ref(true);
 
-    const store = useStore();
-    const marketStore = useMarketStore();
-    const userStore = useUserStore();
+const store = useStore();
+const marketStore = useMarketStore();
+const userStore = useUserStore();
 
-    const selectedOrders = ref([]);
+const selectedOrders = ref([]);
 
-    const username = computed(() => userStore.username);
-    const openOrders = computed(() => marketStore.openOrdersFormatted);
+const username = computed(() => userStore.username);
+const openOrders = computed(() => marketStore.openOrdersFormatted);
 
-    const openOrdersFields = [
-      { key: 'checkbox', label: '' },
-      { key: 'timestamp', label: 'DATE', sortable: true },
-      { key: 'type', label: 'TYPE', sortable: true },
-      { key: 'quantity', label: 'QUANTITY' },
-      { key: 'symbol', label: 'SYMBOL' },
-      { key: 'price', label: 'PRICE' },
-      { key: 'total', label: 'TOTAL HIVE' },
-      { key: 'txId', label: 'Action' },
-    ];
+const openOrdersFields = [
+  { key: 'checkbox', label: '' },
+  { key: 'timestamp', label: 'DATE', sortable: true },
+  { key: 'type', label: 'TYPE', sortable: true },
+  { key: 'quantity', label: 'QUANTITY' },
+  { key: 'symbol', label: 'SYMBOL' },
+  { key: 'price', label: 'PRICE' },
+  { key: 'total', label: 'TOTAL HIVE' },
+  { key: 'txId', label: 'Action' },
+];
 
-    const onBoardcastSuccess = async ({ id, ntrx }) => {
-      loading.value = true;
+const onBoardcastSuccess = async ({ id, ntrx }) => {
+  loading.value = true;
 
-      await store.validateTransaction(ntrx > 1 ? `${id}-0` : id);
-    };
+  await store.validateTransaction(ntrx > 1 ? `${id}-0` : id);
+};
 
-    const onTransactionValidated = async () => {
-      await marketStore.fetchUserOrders(null, username.value);
+const onTransactionValidated = async () => {
+  await marketStore.fetchUserOrders(null, username.value);
 
-      loading.value = false;
-    };
+  loading.value = false;
+};
 
-    onBeforeMount(async () => {
-      loading.value = true;
+onBeforeMount(async () => {
+  loading.value = true;
 
-      try {
-        await marketStore.fetchUserOrders(null, username.value);
-      } catch {
-        //
-      }
+  try {
+    await marketStore.fetchUserOrders(null, username.value);
+  } catch {
+    //
+  }
 
-      loading.value = false;
-    });
+  loading.value = false;
+});
 
-    onMounted(() => {
-      event.on('broadcast-success', onBoardcastSuccess);
+onMounted(() => {
+  emitter.on('broadcast-success', onBoardcastSuccess);
 
-      event.on('transaction-validated', onTransactionValidated);
-    });
+  emitter.on('transaction-validated', onTransactionValidated);
+});
 
-    onBeforeUnmount(() => {
-      event.off('broadcast-success', onBoardcastSuccess);
-      event.off('transaction-validated', onTransactionValidated);
-    });
-
-    return {
-      loading,
-
-      openOrders,
-      openOrdersFields,
-      selectedOrders,
-
-      marketStore,
-    };
-  },
+onBeforeUnmount(() => {
+  emitter.off('broadcast-success', onBoardcastSuccess);
+  emitter.off('transaction-validated', onTransactionValidated);
 });
 </script>

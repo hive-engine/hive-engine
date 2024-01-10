@@ -1,10 +1,10 @@
 <template>
-  <Modal v-model="show" name="renewLeaseModal" @before-open="onBeforeOpen" @closed="onClosed">
+  <Modal v-model="show" modal-id="renewLeaseModal" @before-open="onBeforeOpen" @closed="onClosed">
     <template #title>Renew Lease</template>
 
     <LoadingOverlay :show="showOverlay">
       <div class="mb-3">
-        <label class="block mb-3">How long do you want to extend the lease for?</label>
+        <label class="mb-3 block">How long do you want to extend the lease for?</label>
 
         <div class="flex items-center">
           <input
@@ -14,11 +14,11 @@
             min="1"
             class="!rounded-r-none"
             :class="
-              v$.duration.$error ? '!border-red-500 !dark:border-red-500 !focus:border-red-500 !focus:ring-red-500' : ''
+              v$.duration.$error ? '!dark:border-red-500 !focus:border-red-500 !focus:ring-red-500 !border-red-500' : ''
             "
           />
 
-          <div class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0">
+          <div class="rounded-r-md border border-l-0 bg-gray-200 p-2 dark:border-gray-500 dark:bg-slate-600">
             Week(s)
           </div>
         </div>
@@ -45,12 +45,12 @@ import { useVuelidate } from '@vuelidate/core';
 import { required, minValue } from '@vuelidate/validators';
 import Big from 'big.js';
 import { computed, ref } from 'vue';
+import Modal from '@/components/modals/Modal.vue';
 import LoadingOverlay from '@/components/utilities/LoadingOverlay.vue';
 import { useLeaseStore } from '@/stores/lease';
 import { useUserStore } from '@/stores/user';
 import { useWalletStore } from '@/stores/wallet';
 import { toFixedNoRounding } from '@/utils';
-import Modal from './Modal.vue';
 
 const show = ref(false);
 const showOverlay = ref(false);
@@ -60,28 +60,31 @@ const leaseStore = useLeaseStore();
 const userStore = useUserStore();
 const walletStore = useWalletStore();
 
-const lease = ref(null);
+const props = defineProps({
+  lease: { type: Object, required: true },
+});
+
 const duration = ref(1);
 
 const totalPayment = computed(() => {
-  if (!lease.value) {
+  if (!props.lease) {
     return 0;
   }
 
-  const payment = new Big(lease.value.daily_payment)
+  const payment = new Big(props.lease.daily_payment)
     .mul(duration.value)
     .mul(7)
-    .toFixed(leaseStore.precisions.get(lease.value.currency));
+    .toFixed(leaseStore.precisions.get(props.lease.currency));
 
   return Number(payment);
 });
 
 const currencyBalance = computed(() => {
-  if (!lease.value) {
+  if (!props.lease) {
     return 0;
   }
 
-  const bal = walletStore.wallet.find((c) => c.symbol === lease.value.currency);
+  const bal = walletStore.wallet.find((c) => c.symbol === props.lease.currency);
 
   return bal ? bal.balance : 0;
 });
@@ -104,12 +107,12 @@ const requestPayment = async () => {
 
   btnBusy.value = true;
 
-  const memo = `renew ${lease.value.id}`;
+  const memo = `renew ${props.lease.id}`;
 
   await walletStore.requestTransfer({
-    symbol: lease.value.currency,
+    symbol: props.lease.currency,
     to: leaseStore.settings.account,
-    quantity: toFixedNoRounding(totalPayment.value, leaseStore.precisions.get(lease.value.currency)),
+    quantity: toFixedNoRounding(totalPayment.value, leaseStore.precisions.get(props.lease.currency)),
     memo,
     eventName: 'lease-renew-successful',
   });
@@ -117,12 +120,10 @@ const requestPayment = async () => {
   btnBusy.value = false;
 };
 
-const onBeforeOpen = async (e) => {
+const onBeforeOpen = async () => {
   showOverlay.value = true;
 
-  lease.value = e.ref.params.value.lease;
-
-  await walletStore.fetchWallet(userStore.username, [lease.value.currency]);
+  await walletStore.fetchWallet(userStore.username, [props.lease.currency]);
 
   showOverlay.value = false;
 };

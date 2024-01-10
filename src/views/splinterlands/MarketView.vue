@@ -1,14 +1,14 @@
 <template>
   <div class="page-header">
-    <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 text-gray-200">
-      <div class="grid md:grid-cols-4 text-center md:text-left min-h-[120px] items-center">
-        <div class="col-span-full md:col-span-1 mt-3">
+    <div class="mx-auto w-full max-w-7xl px-2 text-gray-200 sm:px-6 lg:px-8">
+      <div class="grid min-h-[120px] items-center text-center md:grid-cols-4 md:text-left">
+        <div class="col-span-full mt-3 md:col-span-1">
           <h1 class="text-4xl uppercase">Rental Market</h1>
         </div>
 
-        <div class="col-span-full md:col-span-3 mt-3">
+        <div class="col-span-full mt-3 md:col-span-3">
           <div class="flex flex-wrap items-center justify-end gap-4">
-            <select v-model="currency" name="currency" class="bg-slate-600 border-gray-500 max-w-[180px]">
+            <select v-model="currency" name="currency" class="max-w-[180px] border-gray-500 bg-slate-600">
               <option v-for="symbol of cardStore.settings?.currencies" :key="symbol" :value="symbol">
                 {{ symbol }}
               </option>
@@ -22,13 +22,13 @@
               Log Into Splinterlands
             </button>
 
-            <button v-if="cardStore.isLoggedIn" class="btn self-stretch" @click="$vfm.show('heslWalletModal')">
+            <button v-if="cardStore.isLoggedIn" class="btn self-stretch" @click="vfm.open('heslWalletModal')">
               Wallet
             </button>
 
-            <button class="btn-sm self-stretch relative" @click="$vfm.show('cartModal')">
+            <button class="btn-sm relative self-stretch" @click="vfm.open('cartModal')">
               <div
-                class="absolute text-lg text-center leading-4 -top-2 -right-1 bg-white text-red-600 rounded-full p-1"
+                class="absolute -right-1 -top-2 rounded-full bg-white p-1 text-center text-lg leading-4 text-red-600"
               >
                 {{ cardStore.cart.length }}
               </div>
@@ -40,7 +40,7 @@
 
       <div class="flex flex-wrap justify-between gap-4 pb-5">
         <div class="text-center">
-          <h2 class="mb-2 uppercase font-bold">Edition</h2>
+          <h2 class="mb-2 font-bold uppercase">Edition</h2>
 
           <div class="flex items-center gap-1 xl:gap-2">
             <label
@@ -59,7 +59,7 @@
         </div>
 
         <div class="text-center">
-          <h2 class="mb-2 uppercase font-bold">Foil</h2>
+          <h2 class="mb-2 font-bold uppercase">Foil</h2>
 
           <div class="flex items-center gap-1 xl:gap-2">
             <label v-tooltip="'Regular'" class="cursor-pointer">
@@ -81,7 +81,7 @@
         </div>
 
         <div class="text-center">
-          <h2 class="mb-2 uppercase font-bold">Role</h2>
+          <h2 class="mb-2 font-bold uppercase">Role</h2>
 
           <div class="flex items-center gap-1 xl:gap-2">
             <label v-tooltip="'Monster'" class="cursor-pointer">
@@ -100,7 +100,7 @@
         </div>
 
         <div class="text-center">
-          <h2 class="mb-2 uppercase font-bold">Rarity</h2>
+          <h2 class="mb-2 font-bold uppercase">Rarity</h2>
 
           <div class="flex items-center gap-1 xl:gap-2">
             <label v-tooltip="'Common'" class="cursor-pointer">
@@ -138,7 +138,7 @@
         </div>
 
         <div class="text-center">
-          <h2 class="mb-2 uppercase font-bold">Element</h2>
+          <h2 class="mb-2 font-bold uppercase">Element</h2>
 
           <div class="flex items-center gap-1 xl:gap-2">
             <label
@@ -162,16 +162,16 @@
   <Loading v-if="loading" />
 
   <div v-else class="page-content pt-3">
-    <div v-if="groupedCollection.length > 0" class="grid sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 mt-5">
+    <div v-if="groupedCollection.length > 0" class="mt-5 grid gap-6 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
       <div
         v-for="(card, idx) of groupedCollection"
         :key="idx"
-        class="cursor-pointer relative mx-auto max-w-[250px] lg:min-h-[300px]"
-        @click="$vfm.show('rentalModal', { ...card, currency })"
+        class="relative mx-auto max-w-[250px] cursor-pointer lg:min-h-[300px]"
+        @click="vfm.open('rentalModal', { ...card, currency })"
       >
         <div v-if="card.cards > 1" class="absolute right-2 font-bold">
           <img src="https://d36mxiodymuqjm.cloudfront.net/website/qty-banner.png" class="w-[60px]" />
-          <div class="z-10 absolute top-3 text-center w-full text-xl text-white">
+          <div class="absolute top-3 z-10 w-full text-center text-xl text-white">
             {{ card.cards }}
           </div>
         </div>
@@ -179,7 +179,7 @@
       </div>
     </div>
 
-    <div v-else class="text-center py-10 px-6 mt-10 bg-black bg-opacity-10 text-xl">
+    <div v-else class="mt-10 bg-black bg-opacity-10 px-6 py-10 text-center text-xl">
       No cards available or matched your selected filters!
     </div>
   </div>
@@ -191,7 +191,9 @@
 
 <script setup>
 import { ShoppingBagIcon } from '@heroicons/vue/24/outline';
+import { useHead } from '@unhead/vue';
 import { computed, onBeforeMount, ref, watch } from 'vue';
+import { useVfm } from 'vue-final-modal';
 import Edition from '@/components/sl/Edition.vue';
 import Element from '@/components/sl/Element.vue';
 import Foil from '@/components/sl/Foil.vue';
@@ -203,6 +205,12 @@ import Role from '@/components/sl/Role.vue';
 import { useCardStore } from '@/stores/card';
 import { useUserStore } from '@/stores/user';
 import { getEdition, getElement, getThumbByLevel } from '@/utils';
+
+useHead({
+  title: 'Splinterlands Market',
+});
+
+const vfm = useVfm();
 
 const loading = ref(false);
 

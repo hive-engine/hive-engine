@@ -21,3 +21,14 @@ export const BANXA_API = 'https://banxa.tribaldex.com';
 export const SL_API = 'https://api2.splinterlands.com';
 export const HESL_API = 'https://splinterlands.tribaldex.com';
 export const LEASE_API = 'https://lease-api.tribaldex.com';
+export const SIDECHAIN_RPCS = [
+  SIDECHAIN_RPC,
+  'https://herpc.dtools.dev',
+  'https://api.primersion.com',
+  'https://engine.rishipanthee.com',
+  'https://herpc.kanibot.com',
+  'https://herpc.actifit.io',
+  'https://engine.beeswap.tools',
+  'https://api.hive-engine.com/rpc',
+  'https://ha.herpc.dtools.dev',
+];

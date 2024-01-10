@@ -1,13 +1,18 @@
 <template>
   <div class="page-header">
-    <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 text-gray-200">
-      <div class="grid md:grid-cols-4 text-center md:text-left min-h-[160px] items-center">
-        <div class="col-span-full md:col-span-3 mt-3">
+    <div class="mx-auto w-full max-w-7xl px-2 text-gray-200 sm:px-6 lg:px-8">
+      <div class="grid min-h-[160px] items-center text-center md:grid-cols-4 md:text-left">
+        <div class="col-span-full mt-3 md:col-span-3">
           <h1 class="text-4xl uppercase">Tokens</h1>
         </div>
 
-        <div class="col-span-full md:col-span-1 mt-3">
-          <input v-model="filter" type="text" placeholder="Search tokens" />
+        <div class="col-span-full mt-3 md:col-span-1">
+          <input
+            v-model="filter"
+            type="text"
+            placeholder="Search tokens"
+            @input="(event) => (filter = event.target.value.toUpperCase())"
+          />
         </div>
       </div>
     </div>
@@ -43,11 +48,15 @@
 
       <template #cell(actions)="{ item }">
         <div class="flex">
-          <button class="btn-sm mr-1" @click="vfm$.show('tokenInfoModal', item)">
+          <button class="btn-sm mr-1" @click="openTokenInfoModal(item)">
             <InformationCircleIcon class="h-5 w-5" />
           </button>
 
-          <router-link :to="{ name: 'trade', params: { symbol: item.symbol } }" class="btn-sm">
+          <router-link
+            v-if="item.symbol !== 'SWAP.HIVE'"
+            :to="{ name: 'trade', params: { symbol: item.symbol } }"
+            class="btn-sm"
+          >
             <ArrowsRightLeftIcon class="h-5 w-5" />
           </router-link>
         </div>
@@ -56,27 +65,43 @@
   </div>
 
   <PageFooter />
-
-  <TokenInfo />
 </template>
 
 <script setup>
 import { ArrowsRightLeftIcon, InformationCircleIcon } from '@heroicons/vue/24/outline';
-import { computed, inject, onBeforeMount, ref } from 'vue';
-import TokenInfo from '../components/modals/TokenInfo.vue';
-import PageFooter from '../components/PageFooter.vue';
-import CustomTable from '../components/utilities/CustomTable.vue';
-import { useStore } from '../stores';
-import { useTokenStore } from '../stores/token';
-import { addCommas } from '../utils';
+import { useHead } from '@unhead/vue';
+import { computed, defineAsyncComponent, inject, onBeforeMount, ref } from 'vue';
+import { useModal } from 'vue-final-modal';
+import PageFooter from '@/components/PageFooter.vue';
+import CustomTable from '@/components/utilities/CustomTable.vue';
+import { useStore } from '@/stores';
+import { useTokenStore } from '@/stores/token';
+import { addCommas } from '@/utils';
+
+const TokenInfoModal = defineAsyncComponent(() => import('@/components/modals/TokenInfo.vue'));
+
+useHead({
+  title: 'Tokens',
+});
 
 const loading = ref(true);
 const filter = ref('');
 const toFixedWithoutRounding = inject('toFixedWithoutRounding');
-const vfm$ = inject('$vfm');
 
 const store = useStore();
 const tokenStore = useTokenStore();
+
+const fields = [
+  { key: 'icon', label: '' },
+  { key: 'symbol', label: 'Token', sortable: true },
+  { key: 'name', label: 'Name' },
+  { key: 'marketCap', label: 'Market Cap', sortable: true },
+  { key: 'price', label: 'Price', sortable: true },
+  { key: 'change', label: '% Change', sortable: true },
+  { key: 'volume', label: '24h Volume', sortable: true },
+  { key: 'circulatingSupply', label: 'Supply', sortable: true },
+  { key: 'actions', label: '' },
+];
 
 const metrics = computed(() =>
   tokenStore.metrics.reduce((acc, cur) => {
@@ -144,6 +169,12 @@ const tokens = computed(() => {
     .sort((a, b) => b.volume - a.volume);
 });
 
+const openTokenInfoModal = async (token) => {
+  const { open } = useModal({ component: TokenInfoModal, attrs: { token } });
+
+  await open();
+};
+
 onBeforeMount(async () => {
   loading.value = true;
 
@@ -155,16 +186,4 @@ onBeforeMount(async () => {
 
   loading.value = false;
 });
-
-const fields = [
-  { key: 'icon', label: '' },
-  { key: 'symbol', label: 'Token', sortable: true },
-  { key: 'name', label: 'Name' },
-  { key: 'marketCap', label: 'Market Cap', sortable: true },
-  { key: 'price', label: 'Price', sortable: true },
-  { key: 'change', label: '% Change', sortable: true },
-  { key: 'volume', label: '24h Volume', sortable: true },
-  { key: 'circulatingSupply', label: 'Supply', sortable: true },
-  { key: 'actions', label: '' },
-];
 </script>

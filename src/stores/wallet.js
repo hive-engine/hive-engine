@@ -1,13 +1,13 @@
 import axios from 'axios';
 import Big from 'big.js';
 import { format } from 'date-fns';
-import { utils } from 'ethers';
-import { defineStore } from 'pinia';
-import { BSC_BRIDGE_API, CTC_API, ETH_BRIDGE_API, POLYGON_BRIDGE_API, SCOT_API } from '../config';
-import { sidechain } from '../plugins/sidechain';
-import { toFixedWithoutRounding } from '../utils';
-import { useTokenStore } from './token';
-import { useUserStore } from './user';
+import { isAddress } from 'ethers';
+import { acceptHMRUpdate, defineStore } from 'pinia';
+import { BSC_BRIDGE_API, CTC_API, ETH_BRIDGE_API, POLYGON_BRIDGE_API, SCOT_API } from '@/config';
+import { sidechain } from '@/plugins/sidechain';
+import { useTokenStore } from '@/stores/token';
+import { useUserStore } from '@/stores/user';
+import { toFixedWithoutRounding } from '@/utils';
 import { useStore } from '.';
 
 export const useWalletStore = defineStore({
@@ -20,6 +20,22 @@ export const useWalletStore = defineStore({
     evmGasFee: 0,
     gasFeeBalance: 0,
   }),
+
+  getters: {
+    popularChoices: () => {
+      const tokenStore = useTokenStore();
+
+      const splTokens = tokenStore.tokens.filter((t) => t.issuer === 'steemmonsters').map((t) => t.symbol);
+      const glsTokens = tokenStore.tokens.filter((t) => t.issuer === 'gls.dao').map((t) => t.symbol);
+
+      return (token) =>
+        splTokens.includes(token)
+          ? [{ text: 'Splinterlands', value: 'steemmonsters' }]
+          : glsTokens.includes(token)
+            ? [{ text: 'Genesis League Sports', value: 'gls-he' }]
+            : [];
+    },
+  },
 
   actions: {
     async fetchWallet(account, symbols) {
@@ -234,7 +250,7 @@ export const useWalletStore = defineStore({
         console.log(e.message);
       }
 
-      return utils.isAddress(address) ? address : '';
+      return isAddress(address) ? address : '';
     },
 
     async fetchGasFee(network, evmToken) {
@@ -500,3 +516,7 @@ export const useWalletStore = defineStore({
     },
   },
 });
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useWalletStore, import.meta.hot));
+}

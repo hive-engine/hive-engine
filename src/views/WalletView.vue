@@ -1,7 +1,7 @@
 <template>
   <div class="page-header">
-    <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 text-gray-200">
-      <div class="grid md:grid-cols-4 text-center md:text-left min-h-[160px] items-center">
+    <div class="mx-auto w-full max-w-7xl px-2 text-gray-200 sm:px-6 lg:px-8">
+      <div class="grid min-h-[160px] items-center text-center md:grid-cols-4 md:text-left">
         <div class="col-span-full md:col-span-3">
           <h1 class="text-4xl uppercase">{{ disableActions ? `@${account}'s` : 'My' }} Token Wallet</h1>
 
@@ -9,9 +9,9 @@
         </div>
 
         <div class="col-span-full md:col-span-1">
-          <button :disabled="disableActions" class="btn mr-3 mt-3" @click="vfm$.show('depositModal')">Deposit</button>
+          <button :disabled="disableActions" class="btn mr-3 mt-3" @click="openDepositModal">Deposit</button>
 
-          <button :disabled="disableActions" class="btn mt-3" @click="vfm$.show('withdrawModal')">Withdraw</button>
+          <button :disabled="disableActions" class="btn mt-3" @click="openWithdrawModal">Withdraw</button>
         </div>
       </div>
     </div>
@@ -20,9 +20,14 @@
   <Loading v-if="loading" />
 
   <div v-else class="page-content">
-    <div class="flex flex-wrap items-center text-center sm:text-left justify-center sm:justify-between">
+    <div class="flex flex-wrap items-center justify-center text-center sm:justify-between sm:text-left">
       <div class="mb-5">
-        <input v-model="filter" type="text" placeholder="Search tokens" />
+        <input
+          v-model="filter"
+          type="text"
+          placeholder="Search tokens"
+          @input="(event) => (filter = event.target.value.toUpperCase())"
+        />
       </div>
 
       <div>
@@ -76,15 +81,15 @@
       </template>
 
       <template v-if="!disableActions" #cell(actions)="{ item }">
-        <button class="btn-sm mr-1 mt-1 mb-1" title="Transfer" @click="vfm$.show('tokenInfoModal', item.token)">
+        <button class="btn-sm mb-1 mr-1 mt-1" title="Transfer" @click="openTokenInfoModal(item.token)">
           <InformationCircleIcon class="h-5 w-5" />
         </button>
 
         <button
-          class="btn-sm mr-1 mt-1 mb-1"
+          class="btn-sm mb-1 mr-1 mt-1"
           title="Transfer"
           @click="
-            vfm$.show('walletActionModal', {
+            openWalletActionModal({
               action: 'transfer',
               symbol: item.symbol,
               available: item.balance,
@@ -96,10 +101,10 @@
 
         <button
           v-if="item.stakingEnabled && item.balance > 0"
-          class="btn-sm mr-1 mt-1 mb-1"
+          class="btn-sm mb-1 mr-1 mt-1"
           title="Stake"
           @click="
-            vfm$.show('walletActionModal', {
+            openWalletActionModal({
               action: 'stake',
               symbol: item.symbol,
               available: item.balance,
@@ -111,10 +116,10 @@
 
         <button
           v-if="item.availableStake > 0"
-          class="btn-sm mr-1 mt-1 mb-1"
+          class="btn-sm mb-1 mr-1 mt-1"
           title="Unstake"
           @click="
-            vfm$.show('walletActionModal', {
+            openWalletActionModal({
               action: 'unstake',
               symbol: item.symbol,
               available: item.availableStake,
@@ -126,10 +131,10 @@
 
         <button
           v-if="item.delegationEnabled && item.availableStake > 0"
-          class="btn-sm mr-1 mt-1 mb-1"
+          class="btn-sm mb-1 mr-1 mt-1"
           title="Delegate"
           @click="
-            vfm$.show('walletActionModal', {
+            openWalletActionModal({
               action: 'delegate',
               symbol: item.symbol,
               available: item.availableStake,
@@ -141,10 +146,10 @@
 
         <button
           v-if="item.delegationsOut > 0"
-          class="btn-sm mr-1 mt-1 mb-1"
+          class="btn-sm mb-1 mr-1 mt-1"
           title="Undelegate"
           @click="
-            vfm$.show('walletActionModal', {
+            openWalletActionModal({
               action: 'undelegate',
               symbol: item.symbol,
               available: item.delegationsOut,
@@ -157,7 +162,7 @@
         <router-link
           v-if="item.symbol !== 'SWAP.HIVE'"
           :to="{ name: 'trade', params: { symbol: item.symbol } }"
-          class="btn-sm mr-1 mt-1 mb-1"
+          class="btn-sm mb-1 mr-1 mt-1"
           title="Trade"
         >
           <ArrowsRightLeftIcon class="h-5 w-5" />
@@ -165,10 +170,10 @@
 
         <button
           v-if="item.pendingUnstake > 0"
-          class="btn-sm mr-1 mt-1 mb-1"
+          class="btn-sm mb-1 mr-1 mt-1"
           title="Pending Unstakes"
           @click="
-            vfm$.show('walletActionModal', {
+            openWalletActionModal({
               action: 'pendingUnstakes',
               symbol: item.symbol,
               available: item.pendingUnstake,
@@ -180,7 +185,7 @@
 
         <router-link
           :to="{ name: 'history', params: { symbol: item.symbol } }"
-          class="btn-sm mr-1 mt-1 mb-1"
+          class="btn-sm mb-1 mr-1 mt-1"
           title="History"
         >
           <Bars3CenterLeftIcon class="h-5 w-5" />
@@ -190,11 +195,6 @@
   </div>
 
   <PageFooter />
-
-  <WalletAction />
-  <Deposit />
-  <Withdraw />
-  <TokenInfo />
 </template>
 
 <script setup>
@@ -209,24 +209,32 @@ import {
   LockClosedIcon,
   LockOpenIcon,
 } from '@heroicons/vue/24/outline';
+import { useHead } from '@unhead/vue';
 import { useDocumentVisibility, useStorage } from '@vueuse/core';
 import Big from 'big.js';
-import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, defineAsyncComponent, inject, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useModal, useVfm } from 'vue-final-modal';
 import { useRoute } from 'vue-router';
-import Deposit from '../components/modals/Deposit.vue';
-import TokenInfo from '../components/modals/TokenInfo.vue';
-import WalletAction from '../components/modals/WalletAction.vue';
-import Withdraw from '../components/modals/Withdraw.vue';
-import PageFooter from '../components/PageFooter.vue';
-import CustomTable from '../components/utilities/CustomTable.vue';
-import { useStore } from '../stores';
-import { useTokenStore } from '../stores/token';
-import { useUserStore } from '../stores/user';
-import { useWalletStore } from '../stores/wallet';
-import { addCommas, toFixedNoRounding, toFixedWithoutRounding } from '../utils';
+import PageFooter from '@/components/PageFooter.vue';
+import CustomTable from '@/components/utilities/CustomTable.vue';
+import { useStore } from '@/stores';
+import { useTokenStore } from '@/stores/token';
+import { useUserStore } from '@/stores/user';
+import { useWalletStore } from '@/stores/wallet';
+import { addCommas, toFixedNoRounding, toFixedWithoutRounding } from '@/utils';
+
+const WalletActionModal = defineAsyncComponent(() => import('@/components/modals/WalletAction.vue'));
+const DepositModal = defineAsyncComponent(() => import('@/components/modals/Deposit.vue'));
+const WithdrawModal = defineAsyncComponent(() => import('@/components/modals/Withdraw.vue'));
+const TokenInfoModal = defineAsyncComponent(() => import('@/components/modals/TokenInfo.vue'));
+
+useHead({
+  title: 'Wallet',
+});
 
 const loading = ref(true);
-const vfm$ = inject('$vfm');
+const vfm = useVfm();
+
 const event = inject('eventBus');
 
 const route = useRoute();
@@ -368,7 +376,7 @@ const refreshWallet = async () => {
 const onBoardcastSuccess = async ({ id, ntrx }) => {
   loading.value = true;
 
-  await vfm$.hideAll();
+  await vfm.closeAll();
 
   await store.validateTransaction(ntrx > 1 ? `${id}-0` : id);
 };
@@ -377,6 +385,30 @@ const onTransactionValidated = async () => {
   await fetchWallet();
 
   loading.value = false;
+};
+
+const openDepositModal = async () => {
+  const { open } = useModal({ component: DepositModal });
+
+  await open();
+};
+
+const openWithdrawModal = async () => {
+  const { open } = useModal({ component: WithdrawModal });
+
+  await open();
+};
+
+const openWalletActionModal = async (attrs) => {
+  const { open } = useModal({ component: WalletActionModal, attrs });
+
+  await open();
+};
+
+const openTokenInfoModal = async (token) => {
+  const { open } = useModal({ component: TokenInfoModal, attrs: { token } });
+
+  await open();
 };
 
 watch(visibility, (current) => {

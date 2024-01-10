@@ -1,11 +1,11 @@
 <template>
-  <DepthLineChart :chart-data="chartData" :options="options" />
+  <DepthLineChart :data="data" :options="options" />
 </template>
 
 <script setup>
 import { CategoryScale, Chart, Filler, LineController, LineElement, PointElement, Tooltip } from 'chart.js';
 import { ref } from 'vue';
-import { defineChartComponent } from 'vue-chart-3';
+import { createTypedChart } from 'vue-chartjs';
 
 class CustomLineChart extends LineController {
   draw() {
@@ -13,7 +13,7 @@ class CustomLineChart extends LineController {
 
     const borderColor = '#999';
 
-    if (this.chart.tooltip._active && this.chart.tooltip._active.length) {
+    if (this.chart.tooltip && this.chart.tooltip._active && this.chart.tooltip._active.length) {
       const activePoint = this.chart.tooltip._active[0];
 
       const { x } = activePoint.element;
@@ -34,19 +34,18 @@ class CustomLineChart extends LineController {
   }
 }
 
-CustomLineChart.id = 'CustomLineChart';
+CustomLineChart.id = 'DepthLineChart';
 CustomLineChart.defaults = LineController.defaults;
 
-Chart.register(LineController, LineElement, Tooltip, PointElement, CategoryScale, Filler, CustomLineChart);
+Chart.register(LineController, LineElement, Tooltip, PointElement, CategoryScale, Filler);
 
-const DepthLineChart = defineChartComponent('DepthLineChart', 'CustomLineChart');
+const DepthLineChart = createTypedChart('DepthLineChart', CustomLineChart);
 
 defineProps({
-  chartData: { type: Object, required: true },
+  data: { type: Object, required: true },
 });
 
 const options = ref({
-  maintainAspectRatio: false,
   interaction: {
     mode: 'index',
     intersect: false,

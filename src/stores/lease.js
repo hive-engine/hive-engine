@@ -1,13 +1,13 @@
 import { useTimeAgo } from '@vueuse/core';
 import axios from 'axios';
-import { defineStore } from 'pinia';
+import { acceptHMRUpdate, defineStore } from 'pinia';
 import { LEASE_API } from '@/config';
 import { hiveClient } from '@/plugins/hive';
+import { emitter } from '@/plugins/mitt';
 import { sidechain } from '@/plugins/sidechain';
+import { useUserStore } from '@/stores/user';
+import { useWalletStore } from '@/stores/wallet';
 import { toFixedNoRounding } from '@/utils';
-import { emitter } from '../plugins/mitt';
-import { useUserStore } from './user';
-import { useWalletStore } from './wallet';
 import { useStore } from '.';
 
 export const leaseApi = axios.create({
@@ -157,7 +157,7 @@ export const useLeaseStore = defineStore({
       if (symbol === 'HP') {
         let toDelegate = amount;
 
-        const [delegated] = await hiveClient.database.getVestingDelegations(from, to, 1);
+        const [delegated] = await hiveClient.getVestingDelegations(from, to, 1);
 
         if (delegated && delegated.delegatee === to) {
           if (undelegate) {
@@ -173,10 +173,7 @@ export const useLeaseStore = defineStore({
 
         const {
           rc_direct_delegations: [delegated],
-        } = await hiveClient.rc.call('list_rc_direct_delegations', {
-          start: [from, to],
-          limit: 1,
-        });
+        } = await hiveClient.listRCDirectDelegations(from, to, 1);
 
         if (delegated && delegated.to === to) {
           if (undelegate) {
@@ -356,3 +353,7 @@ export const useLeaseStore = defineStore({
     },
   },
 });
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useLeaseStore, import.meta.hot));
+}

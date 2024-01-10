@@ -3,15 +3,15 @@
     <template #title>Wallet</template>
 
     <LoadingOverlay :show="showOverlay">
-      <h3 class="text-lg font-bold text-center mb-3">Your Balances</h3>
-      <table class="w-full table-auto mb-5">
+      <h3 class="mb-3 text-center text-lg font-bold">Your Balances</h3>
+      <table class="mb-5 w-full table-auto">
         <tbody>
           <template v-if="cardStore.balances.size > 0">
             <tr v-for="bal of cardStore.balances" :key="bal">
               <td class="px-4 py-2 first-of-type:text-left last-of-type:text-right">{{ bal[0] }}</td>
               <td class="px-4 py-2 first-of-type:text-left last-of-type:text-right">{{ bal[1] }}</td>
               <td class="px-4 py-2 first-of-type:text-left last-of-type:text-right">
-                <button @click="$vfm.show('balanceHistoryModal', { currency: bal[0] })">History</button>
+                <button @click="vfm.open('balanceHistoryModal', { currency: bal[0] })">History</button>
               </td>
             </tr>
           </template>
@@ -22,7 +22,7 @@
         </tbody>
       </table>
 
-      <div class="grid grid-cols-2 gap-3 mb-3">
+      <div class="mb-3 grid grid-cols-2 gap-3">
         <input v-model="quantity" type="number" min="1" />
         <select v-model="symbol">
           <option v-for="currency of cardStore.settings.currencies" :key="currency" :value="currency">
@@ -31,7 +31,7 @@
         </select>
       </div>
 
-      <div class="grid grid-cols-2 gap-3 mb-3">
+      <div class="mb-3 grid grid-cols-2 gap-3">
         <button class="btn" :disabled="quantity <= 0 || symbolBalance < quantity" @click="requestAction('deposit')">
           Deposit
         </button>
@@ -58,13 +58,16 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useVfm } from 'vue-final-modal';
 import Modal from '@/components/modals/Modal.vue';
+import BalanceHistory from '@/components/sl/modals/BalanceHistory.vue';
 import LoadingOverlay from '@/components/utilities/LoadingOverlay.vue';
 import { emitter } from '@/plugins/mitt';
 import { useCardStore } from '@/stores/card';
 import { useWalletStore } from '@/stores/wallet';
 import { sleep, toFixedNoRounding } from '@/utils';
-import BalanceHistory from './BalanceHistory.vue';
+
+const vfm = useVfm();
 
 const cardStore = useCardStore();
 const walletStore = useWalletStore();

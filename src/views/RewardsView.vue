@@ -1,8 +1,8 @@
 <template>
   <div class="page-header">
-    <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 text-gray-200">
-      <div class="grid md:grid-cols-4 text-center md:text-left min-h-[160px] items-center">
-        <div class="col-span-full md:col-span-3 mt-3">
+    <div class="mx-auto w-full max-w-7xl px-2 text-gray-200 sm:px-6 lg:px-8">
+      <div class="grid min-h-[160px] items-center text-center md:grid-cols-4 md:text-left">
+        <div class="col-span-full mt-3 md:col-span-3">
           <h1 class="text-4xl uppercase">Rewards</h1>
         </div>
       </div>
@@ -20,7 +20,7 @@
       </template>
     </CustomTable>
 
-    <div class="text-right mt-5">
+    <div class="mt-5 text-right">
       <button class="btn-sm" @click.prevent="claimAll">Claim All</button>
     </div>
   </div>
@@ -29,14 +29,19 @@
 </template>
 
 <script setup>
-import { inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
-import PageFooter from '../components/PageFooter.vue';
-import CustomTable from '../components/utilities/CustomTable.vue';
-import { useWalletStore } from '../stores/wallet';
-import { sleep } from '../utils';
+import { useHead } from '@unhead/vue';
+import { onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
+import PageFooter from '@/components/PageFooter.vue';
+import CustomTable from '@/components/utilities/CustomTable.vue';
+import { emitter } from '@/plugins/mitt';
+import { useWalletStore } from '@/stores/wallet';
+import { sleep } from '@/utils';
+
+useHead({
+  title: 'SCOT Rewards',
+});
 
 const loading = ref(true);
-const event = inject('eventBus');
 
 const walletStore = useWalletStore();
 
@@ -82,10 +87,10 @@ onBeforeMount(async () => {
 });
 
 onMounted(() => {
-  event.on('scot-claim-successful', onScotClaim);
+  emitter.on('scot-claim-successful', onScotClaim);
 });
 
 onBeforeUnmount(() => {
-  event.off('scot-claim-successful', onScotClaim);
+  emitter.off('scot-claim-successful', onScotClaim);
 });
 </script>

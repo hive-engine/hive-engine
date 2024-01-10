@@ -1,12 +1,12 @@
 <template>
   <div class="page-header">
-    <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 text-gray-200">
-      <div class="grid md:grid-cols-4 text-center md:text-left min-h-[120px] items-center">
-        <div class="col-span-full md:col-span-2 mt-3">
+    <div class="mx-auto w-full max-w-7xl px-2 text-gray-200 sm:px-6 lg:px-8">
+      <div class="grid min-h-[120px] items-center text-center md:grid-cols-4 md:text-left">
+        <div class="col-span-full mt-3 md:col-span-2">
           <h1 class="text-4xl uppercase">@{{ route.params.account }}'s Collection</h1>
         </div>
 
-        <div class="col-span-full md:col-span-2 mt-3">
+        <div class="col-span-full mt-3 md:col-span-2">
           <div class="flex flex-wrap items-center justify-end gap-4">
             <button
               v-if="userStore.isLoggedIn && !cardStore.isLoggedIn"
@@ -24,7 +24,7 @@
               Add Authority
             </button>
 
-            <select v-model="filter" name="filter" class="bg-slate-600 border-gray-500 max-w-[180px]">
+            <select v-model="filter" name="filter" class="max-w-[180px] border-gray-500 bg-slate-600">
               <option v-for="opt of filterOptions" :key="opt.key" :value="opt.key">
                 {{ opt.label }}
               </option>
@@ -35,7 +35,7 @@
 
       <div class="flex flex-wrap justify-between gap-4 pb-5">
         <div class="text-center">
-          <h2 class="mb-2 uppercase font-bold">Edition</h2>
+          <h2 class="mb-2 font-bold uppercase">Edition</h2>
 
           <div class="flex items-center gap-1 xl:gap-2">
             <label
@@ -54,7 +54,7 @@
         </div>
 
         <div class="text-center">
-          <h2 class="mb-2 uppercase font-bold">Foil</h2>
+          <h2 class="mb-2 font-bold uppercase">Foil</h2>
 
           <div class="flex items-center gap-1 xl:gap-2">
             <label v-tooltip="'Regular'" class="cursor-pointer">
@@ -76,7 +76,7 @@
         </div>
 
         <div class="text-center">
-          <h2 class="mb-2 uppercase font-bold">Role</h2>
+          <h2 class="mb-2 font-bold uppercase">Role</h2>
 
           <div class="flex items-center gap-1 xl:gap-2">
             <label v-tooltip="'Monster'" class="cursor-pointer">
@@ -95,7 +95,7 @@
         </div>
 
         <div class="text-center">
-          <h2 class="mb-2 uppercase font-bold">Rarity</h2>
+          <h2 class="mb-2 font-bold uppercase">Rarity</h2>
 
           <div class="flex items-center gap-1 xl:gap-2">
             <label v-tooltip="'Common'" class="cursor-pointer">
@@ -133,7 +133,7 @@
         </div>
 
         <div class="text-center">
-          <h2 class="mb-2 uppercase font-bold">Element</h2>
+          <h2 class="mb-2 font-bold uppercase">Element</h2>
 
           <div class="flex items-center gap-1 xl:gap-2">
             <label
@@ -157,16 +157,16 @@
   <Loading v-if="loading" />
 
   <div v-else class="page-content pt-3">
-    <div v-if="groupedCollection.length > 0" class="grid sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 mt-5">
+    <div v-if="groupedCollection.length > 0" class="mt-5 grid gap-6 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
       <div
         v-for="(card, idx) of groupedCollection"
         :key="idx"
-        class="cursor-pointer relative mx-auto max-w-[250px] lg:min-h-[300px]"
-        @click="$vfm.show('collectionModal', card)"
+        class="relative mx-auto max-w-[250px] cursor-pointer lg:min-h-[300px]"
+        @click="vfm.open('collectionModal', card)"
       >
         <div v-if="card.cards > 1" class="absolute right-2 font-bold">
           <img src="https://d36mxiodymuqjm.cloudfront.net/website/qty-banner.png" class="w-[60px]" />
-          <div class="z-10 absolute top-3 text-center w-full text-xl text-white">
+          <div class="absolute top-3 z-10 w-full text-center text-xl text-white">
             {{ card.cards }}
           </div>
         </div>
@@ -174,7 +174,7 @@
       </div>
     </div>
 
-    <div v-else class="text-center py-10 px-6 mt-10 bg-black bg-opacity-10 text-xl">
+    <div v-else class="mt-10 bg-black bg-opacity-10 px-6 py-10 text-center text-xl">
       No cards matches your selected filters!
     </div>
   </div>
@@ -185,7 +185,9 @@
 </template>
 
 <script setup>
+import { useHead } from '@unhead/vue';
 import { computed, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useVfm } from 'vue-final-modal';
 import { useRoute } from 'vue-router';
 import Edition from '@/components/sl/Edition.vue';
 import Element from '@/components/sl/Element.vue';
@@ -199,6 +201,12 @@ import { emitter } from '@/plugins/mitt';
 import { useCardStore } from '@/stores/card';
 import { useUserStore } from '@/stores/user';
 import { getEdition, getElement, getThumbByLevel, sleep } from '@/utils';
+
+useHead({
+  title: 'Cards',
+});
+
+const vfm = useVfm();
 
 const loading = ref(true);
 const route = useRoute();

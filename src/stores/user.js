@@ -1,6 +1,7 @@
-import { defineStore } from 'pinia';
-import { emitter } from '../plugins/mitt';
-import { useCardStore } from './card';
+import { acceptHMRUpdate, defineStore } from 'pinia';
+import { useVfm } from 'vue-final-modal';
+import { emitter } from '@/plugins/mitt';
+import { useCardStore } from '@/stores/card';
 import { useStore } from '.';
 
 export const useUserStore = defineStore({
@@ -46,6 +47,10 @@ export const useUserStore = defineStore({
             this.router.replace({ query: {} });
           }
         }
+      } else {
+        const vfm = useVfm();
+
+        vfm.open('installKeychainModal');
       }
     },
 
@@ -63,3 +68,7 @@ export const useUserStore = defineStore({
     },
   },
 });
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useUserStore, import.meta.hot));
+}

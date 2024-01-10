@@ -1,8 +1,8 @@
 <template>
   <div class="page-header">
-    <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 text-gray-200">
-      <div class="grid md:grid-cols-4 text-center md:text-left min-h-[160px] items-center">
-        <div class="col-span-full md:col-span-3 mt-3">
+    <div class="mx-auto w-full max-w-7xl px-2 text-gray-200 sm:px-6 lg:px-8">
+      <div class="grid min-h-[160px] items-center text-center md:grid-cols-4 md:text-left">
+        <div class="col-span-full mt-3 md:col-span-3">
           <h1 class="text-4xl uppercase">Swaps</h1>
         </div>
       </div>
@@ -25,7 +25,7 @@
       <template #cell(realized)="{ item }">{{ item.actualAmount }} {{ item.toSymbol }}</template>
 
       <template #cell(status)="{ item }">
-        <span :class="[getStatusClass(item.status), 'py-1 px-2 text-sm font-bold']">
+        <span :class="[getStatusClass(item.status), 'px-2 py-1 text-sm font-bold']">
           {{ item.status }}
         </span>
       </template>
@@ -36,13 +36,18 @@
 </template>
 
 <script setup>
+import { useHead } from '@unhead/vue';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { computed, onBeforeMount, ref } from 'vue';
-import PageFooter from '../components/PageFooter.vue';
-import CustomTable from '../components/utilities/CustomTable.vue';
-import { DSWAP_API, DSWAP_SOURCE_ID } from '../config';
-import { useUserStore } from '../stores/user';
+import PageFooter from '@/components/PageFooter.vue';
+import CustomTable from '@/components/utilities/CustomTable.vue';
+import { DSWAP_API, DSWAP_SOURCE_ID } from '@/config';
+import { useUserStore } from '@/stores/user';
+
+useHead({
+  title: 'Swaps',
+});
 
 const loading = ref(true);
 

@@ -1,15 +1,29 @@
+import { useStorage } from '@vueuse/core';
 import axios from 'axios';
-import { HISTORY_API, SIDECHAIN_RPC } from '@/config';
-
-const instance = axios.create({
-  baseURL: SIDECHAIN_RPC,
-  headers: {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-  },
-});
+import { HISTORY_API, SIDECHAIN_RPC, SIDECHAIN_RPCS } from '@/config';
 
 const sidechain = {
+  failover() {
+    const currentRPC = useStorage('hiveEngineRPC', SIDECHAIN_RPC);
+    const rpcs = useStorage('hiveEngineRPCs', SIDECHAIN_RPCS);
+
+    const index = rpcs.value.indexOf(currentRPC.value);
+
+    const newRPC = rpcs.value.length === index + 1 ? rpcs.value[0] : rpcs.value[index + 1];
+
+    currentRPC.value = newRPC;
+
+    console.log(`Switched RPC to ${newRPC} from ${currentRPC.value}`);
+  },
+
+  getRPC(endpoint) {
+    const store = useStorage('hiveEngineRPC', SIDECHAIN_RPC);
+
+    const rpc = new URL(endpoint, store.value);
+
+    return rpc.href;
+  },
+
   async call(endpoint, request) {
     const postData = {
       jsonrpc: '2.0',
@@ -19,7 +33,7 @@ const sidechain = {
 
     let result = null;
 
-    const query = await instance.post(`${endpoint}`, postData, {
+    const query = await axios.post(this.getRPC(endpoint), postData, {
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',

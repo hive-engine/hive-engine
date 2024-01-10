@@ -1,5 +1,5 @@
 <template>
-  <Modal v-model="show" name="loginModal" @before-open="beforeOpen" @close="onClose">
+  <Modal v-model="show" modal-id="loginModal" @before-open="beforeOpen" @close="onClose">
     <template #title>Login</template>
 
     <div class="text-center">
@@ -12,8 +12,8 @@
         name="username"
         placeholder="Hive username"
         :class="[
-          v$.username.$error ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500' : '',
-          'max-w-sm mx-auto w-3/4 text-center text-xl px-3 py-3 placeholder-gray-300',
+          v$.username.$error ? 'border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500' : '',
+          'mx-auto w-3/4 max-w-sm px-3 py-3 text-center text-xl placeholder-gray-300',
         ]"
         required
         @blur="v$.username.$touch()"
@@ -21,12 +21,12 @@
         @keyup.enter="requestLogin"
       />
 
-      <button type="submit" class="btn py-3 mt-10" :disabled="v$.username.$invalid || btnBusy" @click="requestLogin">
+      <button type="submit" class="btn mt-10 py-3" :disabled="v$.username.$invalid || btnBusy" @click="requestLogin">
         <Spinner v-if="btnBusy" />
         {{ ' ' }} Login using Keychain
       </button>
 
-      <div class="text-center mt-3 text-sm">
+      <div class="mt-3 text-center text-sm">
         <a href="https://hive-keychain.com" target="_blank">Download Hive Keychain</a>
       </div>
     </div>
@@ -36,14 +36,16 @@
 <script setup>
 import { useVuelidate } from '@vuelidate/core';
 import { maxLength, minLength, required } from '@vuelidate/validators';
-import { inject, onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { useVfm } from 'vue-final-modal';
 import { useRoute, useRouter } from 'vue-router';
-import { useUserStore } from '../../stores/user';
-import Modal from './Modal.vue';
+import Modal from '@/components/modals/Modal.vue';
+import { emitter } from '@/plugins/mitt';
+import { useUserStore } from '@/stores/user';
 
 const userStore = useUserStore();
-const event = inject('eventBus');
-const vfm$ = inject('$vfm');
+
+const vfm = useVfm();
 
 const username = ref('');
 const show = ref(false);
@@ -108,19 +110,19 @@ const onClose = () => {
 };
 
 onMounted(() => {
-  event.on('login-awaiting', () => {
+  emitter.on('login-awaiting', () => {
     btnBusy.value = true;
   });
 
-  event.on('login-done', () => {
+  emitter.on('login-done', () => {
     btnBusy.value = false;
 
-    vfm$.hide('loginModal');
+    vfm.close('loginModal');
   });
 });
 
 onBeforeUnmount(() => {
-  event.off('login-awaiting');
-  event.off('login-done');
+  emitter.off('login-awaiting');
+  emitter.off('login-done');
 });
 </script>

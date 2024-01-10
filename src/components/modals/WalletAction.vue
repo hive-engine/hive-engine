@@ -1,187 +1,159 @@
 <template>
-  <vue-final-modal
-    v-slot="{ params, close }"
-    v-model="show"
-    classes="flex justify-center items-center overflow-y-auto"
-    content-class="w-full max-w-xl relative flex flex-col max-h-full"
-    name="walletActionModal"
-    @before-open="beforeOpen"
-    @closed="modalClose"
-  >
-    <div class="border dark:border-gray-800 rounded bg-white dark:bg-gray-600 dark:text-gray-300">
-      <div class="flex items-center justify-between px-6 py-4">
-        <div class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300">
-          {{ actionName }} {{ params.symbol }}
-        </div>
+  <Modal modal-id="walletActionModal" @before-open="beforeOpen" @closed="modalClose">
+    <template #title>{{ actionName }} {{ symbol }}</template>
 
-        <button class="dark:text-gray-300" @click="close">
-          <XMarkIcon class="h-5 w-5" aria-hidden="true" />
-        </button>
-      </div>
+    <Loading v-if="modalBusy" small />
 
-      <div class="p-6 flex-grow">
-        <Loading v-if="modalBusy" small />
+    <template v-else>
+      <CustomTable v-if="action === 'pendingUnstakes'" :items="pendingUnstakes" :fields="pendingUnstakeFields">
+        <template #cell(quantity)="{ item }">{{ item.quantity }} {{ symbol }}</template>
 
-        <template v-else>
-          <CustomTable
-            v-if="params.action === 'pendingUnstakes'"
-            :items="pendingUnstakes"
-            :fields="pendingUnstakeFields"
+        <template #cell(quantityLeft)="{ item }">
+          {{ item.quantityLeft }} {{ symbol }}
+          <small>({{ item.numberTransactionsLeft }} Transactions)</small>
+        </template>
+
+        <template #cell(nextTransactionTimestamp)="{ item }"
+          >{{ item.quantityLeft / item.numberTransactionsLeft }} {{ symbol }} at
+          {{ new Date(item.nextTransactionTimestamp).toLocaleString() }}</template
+        >
+
+        <template #cell(actions)="{ item }">
+          <button
+            class="btn-sm"
+            @click.prevent="
+              walletStore.requestCancelUnstake({
+                symbol: symbol,
+                trxId: item.txID,
+              })
+            "
           >
-            <template #cell(quantity)="{ item }">{{ item.quantity }} {{ params.symbol }}</template>
+            <XMarkIcon class="h-5 w-5" />
+          </button>
+        </template>
+      </CustomTable>
 
-            <template #cell(quantityLeft)="{ item }">
-              {{ item.quantityLeft }} {{ params.symbol }}
-              <small>({{ item.numberTransactionsLeft }} Transactions)</small>
-            </template>
-
-            <template #cell(nextTransactionTimestamp)="{ item }"
-              >{{ item.quantityLeft / item.numberTransactionsLeft }} {{ params.symbol }} at
-              {{ new Date(item.nextTransactionTimestamp).toLocaleString() }}</template
+      <template v-else>
+        <CustomTable v-if="action === 'undelegate'" :fields="delegationFields" :items="delegations" class="mb-5">
+          <template #cell(actions)="{ item }">
+            <button
+              class="btn-sm"
+              @click.prevent="
+                quantity = item.quantity;
+                from = item.to;
+                requestAction();
+              "
             >
-
-            <template #cell(actions)="{ item }">
-              <button
-                class="btn-sm"
-                @click.prevent="
-                  walletStore.requestCancelUnstake({
-                    symbol: params.symbol,
-                    trxId: item.txID,
-                  })
-                "
-              >
-                <XMarkIcon class="h-5 w-5" />
-              </button>
-            </template>
-          </CustomTable>
-
-          <template v-else>
-            <CustomTable
-              v-if="params.action === 'undelegate'"
-              :fields="delegationFields"
-              :items="delegations"
-              class="mb-5"
-            >
-              <template #cell(actions)="{ item }">
-                <button
-                  class="btn-sm"
-                  @click.prevent="
-                    quantity = item.quantity;
-                    from = item.to;
-                    requestAction(params);
-                  "
-                >
-                  <XMarkIcon class="h-5 w-5" />
-                </button>
-              </template>
-            </CustomTable>
-
-            <div v-if="params.symbol && params.symbol.startsWith('SWAP.')" class="alert-warning font-bold">
-              If you are trying to withdraw to an external chain, please use the Withdraw menu. This window is for
-              transferring to another Hive account.
-            </div>
-
-            <div class="block mb-2 font-bold">Available</div>
-            <div class="cursor-pointer mb-4" @click="quantity = params.available">
-              {{ params.available }} {{ params.symbol }}
-            </div>
-
-            <div v-if="showTo" class="mb-3">
-              <label for="to" class="block mb-2 font-bold">To</label>
-              <input
-                id="to"
-                v-model="to"
-                type="text"
-                :class="[
-                  v$.to.$error ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500' : '',
-                  '',
-                ]"
-                placeholder="Hive username"
-                @input="(event) => (to = event.target.value.toLowerCase())"
-              />
-              <div v-if="v$.to.$error" class="text-sm text-red-500 mt-1">Please enter a valid hive username.</div>
-              <div v-if="popularChoices.length" class="text-sm mt-1">
-                Popular choice:
-                <a v-for="(choice, i) of popularChoices" :key="i" class="cursor-pointer" @click="to = choice.value">{{
-                  choice.text
-                }}</a>
-              </div>
-            </div>
-
-            <div v-if="showFrom" class="mb-3">
-              <label for="from" class="block mb-2 font-bold">From</label>
-              <input
-                id="from"
-                v-model="from"
-                type="text"
-                :class="[
-                  v$.from.$error ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500' : '',
-                  '',
-                ]"
-                placeholder="Hive username"
-                @input="(event) => (from = event.target.value.toLowerCase())"
-              />
-              <div v-if="v$.from.$error" class="text-sm text-red-500 mt-1">Please enter a valid hive username.</div>
-            </div>
-
-            <div class="mb-3">
-              <label for="quantity" class="block mb-2 font-bold">Quantity</label>
-
-              <div class="flex items-center w-full">
-                <input
-                  id="quantity"
-                  v-model="quantity"
-                  type="number"
-                  :class="[
-                    v$.quantity.$error
-                      ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
-                      : '',
-                    '!rounded-r-none',
-                  ]"
-                  placeholder="Amount"
-                />
-                <div class="bg-gray-200 dark:bg-slate-600 h-full p-2 border border-l-0 rounded-r-md border-gray-500">
-                  {{ params.symbol }}
-                </div>
-              </div>
-              <div v-if="v$.quantity.$error" class="text-sm text-red-500 mt-1">
-                Please enter a quantity greater than zero.
-              </div>
-            </div>
-
-            <div v-if="params.action === 'transfer'" class="mb-3">
-              <label for="memo" class="block mb-2 font-bold">Memo</label>
-              <input id="memo" v-model="memo" type="text" />
-            </div>
-
-            <button class="btn" :disabled="quantity > params.available" @click="requestAction(params)">
-              <Spinner v-if="btnBusy" />
-              {{ ' ' }} {{ actionName }}
+              <XMarkIcon class="h-5 w-5" />
             </button>
           </template>
-        </template>
-      </div>
-    </div>
-  </vue-final-modal>
+        </CustomTable>
+
+        <div v-if="symbol && symbol.startsWith('SWAP.')" class="alert-warning font-bold">
+          If you are trying to withdraw to an external chain, please use the Withdraw menu. This window is for
+          transferring to another Hive account.
+        </div>
+
+        <div class="mb-2 block font-bold">Available</div>
+        <div class="mb-4 cursor-pointer" @click="quantity = available">{{ available }} {{ symbol }}</div>
+
+        <div v-if="showTo" class="mb-3">
+          <label for="to" class="mb-2 block font-bold">To</label>
+          <input
+            id="to"
+            v-model="to"
+            type="text"
+            :class="[
+              v$.to.$error ? 'border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500' : '',
+              '',
+            ]"
+            placeholder="Hive username"
+            @input="(event) => (to = event.target.value.toLowerCase())"
+          />
+          <div v-if="v$.to.$error" class="mt-1 text-sm text-red-500">Please enter a valid hive username.</div>
+          <div v-if="popularChoices.length" class="mt-1 text-sm">
+            Popular choice:
+            <a v-for="(choice, i) of popularChoices" :key="i" class="cursor-pointer" @click="to = choice.value">{{
+              choice.text
+            }}</a>
+          </div>
+        </div>
+
+        <div v-if="showFrom" class="mb-3">
+          <label for="from" class="mb-2 block font-bold">From</label>
+          <input
+            id="from"
+            v-model="from"
+            type="text"
+            :class="[
+              v$.from.$error ? 'border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500' : '',
+              '',
+            ]"
+            placeholder="Hive username"
+            @input="(event) => (from = event.target.value.toLowerCase())"
+          />
+          <div v-if="v$.from.$error" class="mt-1 text-sm text-red-500">Please enter a valid hive username.</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="quantity" class="mb-2 block font-bold">Quantity</label>
+
+          <div class="flex w-full items-center">
+            <input
+              id="quantity"
+              v-model="quantity"
+              type="number"
+              :class="[
+                v$.quantity.$error ? 'border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500' : '',
+                '!rounded-r-none',
+              ]"
+              placeholder="Amount"
+            />
+            <div class="h-full rounded-r-md border border-l-0 border-gray-500 bg-gray-200 p-2 dark:bg-slate-600">
+              {{ symbol }}
+            </div>
+          </div>
+          <div v-if="v$.quantity.$error" class="mt-1 text-sm text-red-500">
+            Please enter a quantity greater than zero.
+          </div>
+        </div>
+
+        <div v-if="action === 'transfer'" class="mb-3">
+          <label for="memo" class="mb-2 block font-bold">Memo</label>
+          <input id="memo" v-model="memo" type="text" />
+        </div>
+
+        <button class="btn" :disabled="quantity > available || btnBusy" @click="requestAction">
+          <Spinner v-if="btnBusy" />
+          {{ ' ' }} {{ actionName }}
+        </button>
+      </template>
+    </template>
+  </Modal>
 </template>
 
 <script setup>
 import { XMarkIcon } from '@heroicons/vue/24/outline';
 import { useVuelidate } from '@vuelidate/core';
 import { maxLength, minLength, required } from '@vuelidate/validators';
-import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
-import { sidechain } from '../../plugins/sidechain';
-import { useUserStore } from '../../stores/user';
-import { useWalletStore } from '../../stores/wallet';
-import CustomTable from '../utilities/CustomTable.vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import Modal from '@/components/modals/Modal.vue';
+import CustomTable from '@/components/utilities/CustomTable.vue';
+import { hiveClient } from '@/plugins/hive';
+import { emitter } from '@/plugins/mitt';
+import { sidechain } from '@/plugins/sidechain';
+import { useUserStore } from '@/stores/user';
+import { useWalletStore } from '@/stores/wallet';
 
-const eventBus = inject('eventBus');
-const show = ref(false);
+const props = defineProps({
+  action: { type: String, default: 'transfer', required: true },
+  symbol: { type: String, required: true },
+  available: { type: [Object, String, Number], required: true },
+});
 
 const userStore = useUserStore();
 const walletStore = useWalletStore();
 
-const modalAction = ref('transfer');
 const modalBusy = ref(true);
 const btnBusy = ref(false);
 
@@ -190,7 +162,7 @@ const from = ref('');
 const quantity = ref('');
 const memo = ref('');
 
-const tokenSymbol = ref('');
+const externalResults = ref({});
 
 const delegations = ref([]);
 const delegationFields = [
@@ -258,13 +230,13 @@ const computedRules = computed(() => {
     pendingUnstakes: {},
   };
 
-  return Object.keys(obj[modalAction.value]).reduce((a, c) => {
+  return Object.keys(obj[props.action]).reduce((a, c) => {
     a[c] = rules[c];
     return a;
   }, {});
 });
 
-const v$ = useVuelidate(computedRules, { to, from, quantity });
+const v$ = useVuelidate(computedRules, { to, from, quantity }, { $externalResults: externalResults });
 
 const actionName = computed(() => {
   const obj = {
@@ -276,11 +248,41 @@ const actionName = computed(() => {
     pendingUnstakes: 'Pending Unstakes',
   };
 
-  return obj[modalAction.value] || '';
+  return obj[props.action] || '';
 });
 
-const requestAction = async (params) => {
-  v$.value.$touch();
+const popularChoices = computed(() => {
+  return walletStore.popularChoices(props.symbol);
+});
+
+const showTo = computed(() => ['transfer', 'stake', 'delegate'].includes(props.action));
+const showFrom = computed(() => ['undelegate'].includes(props.action));
+
+const validate = async () => {
+  v$.value.$clearExternalResults();
+
+  if (!(await v$.value.$validate())) return;
+
+  if (v$.value.to || v$.value.from) {
+    const account = v$.value.to ? to.value : from.value;
+    const key = v$.value.to ? 'to' : 'from';
+
+    try {
+      const [data] = await hiveClient.getAccounts([account]);
+
+      if (!data || !data.name) {
+        externalResults.value = {
+          [key]: ['Invalid hive username'],
+        };
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+};
+
+const requestAction = async () => {
+  await validate();
 
   if (!v$.value.$invalid) {
     const actions = {
@@ -291,8 +293,8 @@ const requestAction = async (params) => {
       unstake: walletStore.requestUnstake,
     };
 
-    await actions[modalAction.value]({
-      symbol: params.symbol,
+    await actions[props.action]({
+      symbol: props.symbol,
       to: to.value.trim(),
       from: from.value.trim(),
       quantity: quantity.value.toString(),
@@ -301,55 +303,18 @@ const requestAction = async (params) => {
   }
 };
 
-const popularChoices = computed(() => {
-  if (
-    [
-      'ORB',
-      'ALPHA',
-      'BETA',
-      'UNTAMED',
-      'DEC',
-      'SLDICE',
-      'PLOT',
-      'ZONE',
-      'SECTOR',
-      'TRACT',
-      'REGION',
-      'RAFFLE',
-      'TOTEMC',
-      'TOTEMR',
-      'TOTEME',
-      'TOTEML',
-      'SPS',
-      'CHAOS',
-      'VOUCHER',
-    ].includes(tokenSymbol.value)
-  ) {
-    return [{ text: 'Splinterlands', value: 'steemmonsters' }];
-  }
-
-  return [];
-});
-
-const showTo = computed(() => ['transfer', 'stake', 'delegate'].includes(modalAction.value));
-const showFrom = computed(() => ['undelegate'].includes(modalAction.value));
-
-const beforeOpen = async (e) => {
+const beforeOpen = async () => {
   modalBusy.value = true;
 
-  const { action, symbol } = e.ref.params.value;
-  modalAction.value = action;
-  tokenSymbol.value = symbol;
-
-  if (modalAction.value === 'stake') {
+  if (props.action === 'stake') {
     to.value = username.value;
-  } else if (modalAction.value === 'undelegate') {
+  } else if (props.action === 'undelegate') {
     const result = await sidechain.contract({
       method: 'find',
       params: {
         contract: 'tokens',
         table: 'delegations',
-        query: { symbol, from: username.value },
+        query: { symbol: props.symbol, from: username.value },
       },
     });
 
@@ -357,8 +322,8 @@ const beforeOpen = async (e) => {
       ...d,
       quantity: Number(d.quantity),
     }));
-  } else if (modalAction.value === 'pendingUnstakes') {
-    const result = await sidechain.getPendingUnstakes(username.value, symbol);
+  } else if (props.action === 'pendingUnstakes') {
+    const result = await sidechain.getPendingUnstakes(username.value, props.symbol);
 
     pendingUnstakes.value = result.map((p) => ({
       ...p,
@@ -373,8 +338,6 @@ const beforeOpen = async (e) => {
 const modalClose = () => {
   v$.value.$reset();
 
-  modalAction.value = 'transfer';
-
   to.value = '';
   from.value = '';
   quantity.value = '';
@@ -385,22 +348,17 @@ const modalClose = () => {
 };
 
 onMounted(() => {
-  eventBus.on('broadcast-awaiting', () => {
+  emitter.on('broadcast-awaiting', () => {
     btnBusy.value = true;
   });
 
-  eventBus.on('broadcast-done', () => {
+  emitter.on('broadcast-done', () => {
     btnBusy.value = false;
-  });
-
-  eventBus.on('broadcast-success', () => {
-    show.value = false;
   });
 });
 
 onBeforeUnmount(() => {
-  eventBus.off('broadcast-awaiting');
-  eventBus.off('broadcast-done');
-  eventBus.off('broadcast-success');
+  emitter.off('broadcast-awaiting');
+  emitter.off('broadcast-done');
 });
 </script>

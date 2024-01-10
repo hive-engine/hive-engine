@@ -16,15 +16,23 @@
 
 @layer components {
   .btn {
-    @apply align-middle inline-block leading-normal px-6 py-2 border border-transparent shadow-sm font-bold rounded-md text-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 focus:disabled:ring-0;
+    @apply inline-block px-6 py-2 text-sm font-bold leading-normal text-white align-middle bg-red-600 rounded-md border border-transparent shadow-sm hover:bg-red-700 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 focus:disabled:ring-0 transition;
   }
 
   .btn-sm {
-    @apply btn px-1 py-1;
+    @apply px-1 py-1 btn;
+  }
+
+  .btn-outline {
+    @apply btn bg-transparent text-red-600 border-red-600 hover:text-white
+  }
+
+  .btn-outline-sm {
+    @apply px-1 py-1 btn-outline;
   }
 
   .alert-warning {
-    @apply text-sm border border-orange-200 bg-orange-100 text-orange-700 p-3 mb-5;
+    @apply p-3 mb-5 text-sm text-orange-700 bg-orange-100 border border-orange-200;
   }
 
   .page-content {

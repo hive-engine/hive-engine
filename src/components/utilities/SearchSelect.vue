@@ -1,13 +1,13 @@
 <template>
   <div
-    class="relative bg-white text-gray-700 border border-gray-500 dark:bg-slate-600 dark:text-gray-300 dark:border-gray-500"
+    class="relative border border-gray-500 bg-white text-gray-700 dark:border-gray-500 dark:bg-slate-600 dark:text-gray-300"
     :class="classes"
   >
     <input
       ref="input"
       type="text"
       autocomplete="off"
-      class="input bg-transparent w-full px-3 py-2 top-0 border-0 focus:ring-0 z-10"
+      class="input top-0 z-10 w-full border-0 bg-transparent px-3 py-2 focus:ring-0"
       :value="searchText"
       :disabled="disabled"
       @input="searchText = $event.target.value"
@@ -15,16 +15,16 @@
       @blur="blurInput"
     />
 
-    <div class="text absolute cursor-text left-1 top-0 p-2" @click="openMenu">{{ inputText }}</div>
+    <div class="text absolute left-1 top-0 cursor-text p-2" @click="openMenu">{{ inputText }}</div>
 
-    <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-      <ChevronUpDownIcon class="w-5 h-5 text-gray-400" aria-hidden="true" />
+    <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+      <ChevronUpDownIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
     </span>
 
     <div
       :class="[
         showMenu ? 'block' : 'hidden',
-        'bg-white dark:bg-slate-600 border-gray-400 dark:border-gray-500 border-r border-l border-b absolute max-h-60 min-w-full overflow-x-hidden overflow-y-auto top-full z-50',
+        'absolute top-full z-50 max-h-60 min-w-full overflow-y-auto overflow-x-hidden border-b border-l border-r border-gray-400 bg-white dark:border-gray-500 dark:bg-slate-600',
         menuClass,
       ]"
       @mousedown.prevent
@@ -33,7 +33,7 @@
         v-for="(option, i) of filteredOptions"
         :key="i"
         :class="[
-          'p-2 border-gray-400 border-t dark:border-gray-500 cursor-pointer hover:bg-[rgba(0,0,0,.05)]',
+          'cursor-pointer border-t border-gray-400 p-2 hover:bg-[rgba(0,0,0,.05)] dark:border-gray-500',
           optionClass,
         ]"
         @click.stop="selectItem(option)"

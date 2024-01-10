@@ -1,8 +1,8 @@
 <template>
   <div class="page-header">
-    <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 text-gray-200">
-      <div class="grid md:grid-cols-4 text-center md:text-left min-h-[160px] items-center">
-        <div class="col-span-full md:col-span-3 mt-3">
+    <div class="mx-auto w-full max-w-7xl px-2 text-gray-200 sm:px-6 lg:px-8">
+      <div class="grid min-h-[160px] items-center text-center md:grid-cols-4 md:text-left">
+        <div class="col-span-full mt-3 md:col-span-3">
           <h1 class="text-4xl uppercase">History: {{ symbol }}</h1>
         </div>
       </div>
@@ -20,36 +20,36 @@
       <template #cell(amount)="{ item }">{{ item.amount }} {{ symbol }}</template>
 
       <template #cell(action)="{ item }">
-        <button class="btn-sm" @click="vfm$.show('transactionInfo', item)">
+        <button class="btn-sm" @click="openTransactionInfoModal(item)">
           <InformationCircleIcon class="h-5 w-5" />
         </button>
       </template>
     </CustomTable>
 
-    <div v-if="!disabledLoadMore" class="text-center mt-5">
+    <div v-if="!disabledLoadMore" class="mt-5 text-center">
       <button class="btn-sm" @click="fetchAccountHistory(true)">Load More</button>
     </div>
   </div>
-
-  <TransactionInfo />
 
   <PageFooter />
 </template>
 
 <script setup>
 import { ChevronLeftIcon, InformationCircleIcon } from '@heroicons/vue/24/outline';
+import { useHead } from '@unhead/vue';
 import { format } from 'date-fns';
-import { computed, inject, onBeforeMount, ref } from 'vue';
+import { computed, defineAsyncComponent, onBeforeMount, ref } from 'vue';
+import { useModal } from 'vue-final-modal';
 import { useRoute } from 'vue-router';
-import TransactionInfo from '../components/modals/TransactionInfo.vue';
-import PageFooter from '../components/PageFooter.vue';
-import CustomTable from '../components/utilities/CustomTable.vue';
-import { sidechain } from '../plugins/sidechain';
-import { useUserStore } from '../stores/user';
-import { toFixedWithoutRounding } from '../utils';
+import PageFooter from '@/components/PageFooter.vue';
+import CustomTable from '@/components/utilities/CustomTable.vue';
+import { sidechain } from '@/plugins/sidechain';
+import { useUserStore } from '@/stores/user';
+import { toFixedWithoutRounding } from '@/utils';
+
+const TransactionInfoModal = defineAsyncComponent(() => import('@/components/modals/TransactionInfo.vue'));
 
 const loading = ref(true);
-const vfm$ = inject('$vfm');
 const route = useRoute();
 
 const userStore = useUserStore();
@@ -59,6 +59,10 @@ const offset = ref(0);
 const limit = ref(20);
 const disabledLoadMore = ref(false);
 const symbol = computed(() => route.params.symbol);
+
+useHead({
+  title: `${symbol.value} History`,
+});
 
 const rawHistory = ref([]);
 const historyTableFields = [
@@ -144,6 +148,12 @@ const fetchAccountHistory = async (more = false) => {
   } catch {
     //
   }
+};
+
+const openTransactionInfoModal = async (transaction) => {
+  const { open } = useModal({ component: TransactionInfoModal, attrs: { transaction } });
+
+  await open();
 };
 
 onBeforeMount(async () => {

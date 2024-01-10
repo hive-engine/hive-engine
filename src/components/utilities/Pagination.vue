@@ -1,8 +1,8 @@
 <template>
-  <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+  <nav class="relative z-0 inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
     <button
       :disabled="!isPrevControlsActive"
-      class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-sm font-bold text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed"
+      class="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-2 py-2 text-sm font-bold text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed dark:border-gray-700 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
       @click="goToPrev"
     >
       <span class="sr-only">Previous</span>
@@ -16,9 +16,9 @@
         aria-current="page"
         :class="[
           modelValue === page
-            ? 'z-10 bg-red-50 dark:bg-gray-600 border-red-200 dark:border-gray-700 text-red-400 dark:text-gray-300'
-            : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800',
-          'relative inline-flex items-center px-4 py-2 border text-sm font-bold',
+            ? 'z-10 border-red-200 bg-red-50 text-red-400 dark:border-gray-700 dark:bg-gray-600 dark:text-gray-300'
+            : 'border-gray-300 bg-white text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-800',
+          'relative inline-flex items-center border px-4 py-2 text-sm font-bold',
         ]"
         @click="updatePageHandler(page)"
       >
@@ -28,14 +28,14 @@
       <span
         v-else
         :key="`pagination-page-${page}-else`"
-        class="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-sm font-bold text-gray-700 dark:text-gray-300"
+        class="relative inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-bold text-gray-700 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-300"
         >...</span
       >
     </template>
 
     <button
       :disabled="!isNextControlsActive"
-      class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-sm font-bold text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed"
+      class="relative inline-flex items-center rounded-r-md border border-gray-300 bg-white px-2 py-2 text-sm font-bold text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed dark:border-gray-700 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
       @click="goToNext"
     >
       <span class="sr-only">Next</span>

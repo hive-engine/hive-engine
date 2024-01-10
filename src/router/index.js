@@ -6,7 +6,7 @@ import { useUserStore } from '@/stores/user';
 import HomeView from '@/views/HomeView.vue';
 
 function loadView(view) {
-  return () => import(`../views/${view}View.vue`);
+  return () => import(`@/views/${view}View.vue`);
 }
 
 const beforeEnterSL = async () => {
@@ -65,7 +65,7 @@ const router = createRouter({
     {
       path: '/@:account/cards',
       name: 'sl-cards',
-      component: () => import('../views/splinterlands/CardsView.vue'),
+      component: () => import('@/views/splinterlands/CardsView.vue'),
       beforeEnter: [beforeEnterSL, validateUsername],
       meta: {
         requiresAuth: true,
@@ -74,7 +74,7 @@ const router = createRouter({
     {
       path: '/@:account/active-rentals',
       name: 'sl-active-rentals',
-      component: () => import('../views/splinterlands/ActiveRentalsView.vue'),
+      component: () => import('@/views/splinterlands/ActiveRentalsView.vue'),
       beforeEnter: [beforeEnterSL, validateUsername],
       meta: {
         requiresAuth: true,
@@ -83,7 +83,7 @@ const router = createRouter({
     {
       path: '/splinterlands',
       name: 'sl-market',
-      component: () => import('../views/splinterlands/MarketView.vue'),
+      component: () => import('@/views/splinterlands/MarketView.vue'),
       beforeEnter: [beforeEnterSL],
       meta: {
         requiresAuth: true,
@@ -137,13 +137,13 @@ const router = createRouter({
     {
       path: '/lease',
       name: 'lease',
-      component: () => import('../views/leasing/LeaseView.vue'),
+      component: () => import('@/views/leasing/LeaseView.vue'),
       beforeEnter: beforeEnterLease,
     },
     {
       path: '/@:account/leases',
       name: 'leasing-dashboard',
-      component: () => import('../views/leasing/LeasingDashboardView.vue'),
+      component: () => import('@/views/leasing/LeasingDashboardView.vue'),
       beforeEnter: [beforeEnterLease, validateUsername],
       meta: {
         requiresAuth: true,

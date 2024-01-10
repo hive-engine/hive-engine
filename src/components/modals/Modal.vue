@@ -1,23 +1,24 @@
 <template>
   <vue-final-modal
-    v-slot="{ params, close }"
     v-bind="$attrs"
-    classes="flex justify-center items-center overflow-y-auto"
+    class="flex items-center justify-center overflow-y-auto"
+    overlay-class="fixed"
     :content-class="contentClasses"
+    @update:model-value="(v) => emit('update:modelValue', v)"
   >
-    <div class="border dark:border-gray-800 rounded bg-white dark:bg-gray-600 dark:text-gray-300">
+    <div class="rounded border bg-white dark:border-gray-800 dark:bg-gray-600 dark:text-gray-300">
       <div class="flex items-center justify-between px-6 py-4">
         <div class="text-3xl font-bold leading-6 text-gray-900 dark:text-gray-300">
-          <slot name="title" :params="params"></slot>
+          <slot name="title"></slot>
         </div>
 
-        <button class="dark:text-gray-300" @click="close">
+        <button class="dark:text-gray-300" @click="emit('update:modelValue', false)">
           <XMarkIcon class="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
 
       <div :class="bodyClass">
-        <slot :params="params"></slot>
+        <slot></slot>
       </div>
     </div>
   </vue-final-modal>
@@ -26,11 +27,14 @@
 <script setup>
 import { XMarkIcon } from '@heroicons/vue/24/outline';
 import { computed } from 'vue';
+import { VueFinalModal } from 'vue-final-modal';
 
 const props = defineProps({
   size: { type: String, default: 'sm' },
   bodyClass: { type: String, default: 'p-6 flex-grow' },
 });
+
+const emit = defineEmits(['update:modelValue']);
 
 const contentClasses = computed(() => {
   const classes = ['w-full relative flex flex-col max-h-full'];

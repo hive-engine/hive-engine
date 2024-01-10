@@ -1,14 +1,14 @@
 <template>
   <section class="hero flex items-center justify-center text-gray-200">
-    <div class="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 text-center">
+    <div class="mx-auto w-full max-w-7xl px-2 text-center sm:px-6 lg:px-8">
       <h1 class="text-4xl">Create Tokens + Smart Contracts on the Hive Blockchain.</h1>
 
-      <router-link :to="{ name: 'tokens' }" class="btn py-3 px-8 mt-10">Get Started</router-link>
+      <router-link :to="{ name: 'tokens' }" class="btn mt-10 px-8 py-3">Get Started</router-link>
     </div>
   </section>
 
   <section class="flex items-center justify-center text-gray-700 dark:text-gray-300">
-    <div class="w-full max-w-5xl mx-auto py-16 px-2 sm:px-6 lg:px-8 text-center">
+    <div class="mx-auto w-full max-w-5xl px-2 py-16 text-center sm:px-6 lg:px-8">
       <h2 class="text-2xl">
         Hive Engine is a platform that empowers communities, project owners, fundraisers, developers, and businesses to
         quickly and easily build on the Hive blockchain like never before.
@@ -17,11 +17,11 @@
   </section>
 
   <section class="full-steam flex items-center text-gray-200">
-    <div class="w-full max-w-xl mx-auto p-6 rounded-lg text-center bg-[rgba(0,0,0,.85)]">
+    <div class="mx-auto w-full max-w-xl rounded-lg bg-[rgba(0,0,0,.85)] p-6 text-center">
       <h3 class="text-4xl uppercase text-yellow-400">Full Steam</h3>
 
       <p class="mt-5 text-xl">
-        Up until now, you’ve only been tapping into a very small fraction of Hive's true potential. It’s like you’ve
+        Up until now, you've only been tapping into a very small fraction of Hive's true potential. It's like you've
         been using the Death Star to charge your phone.
       </p>
 
@@ -35,7 +35,7 @@
   </section>
 
   <section class="gears flex items-center text-gray-200">
-    <div class="w-full max-w-7xl mx-auto py-16 px-2 sm:px-6 lg:px-8 text-center">
+    <div class="mx-auto w-full max-w-7xl px-2 py-16 text-center sm:px-6 lg:px-8">
       <h3 class="text-4xl uppercase">Holy Smart Contract, Batman!</h3>
 
       <p class="mt-10 text-xl">
@@ -45,17 +45,17 @@
 
       <p class="mt-8">Do you know the best part?</p>
 
-      <p class="mt-5 uppercase font-bold text-yellow-400">No coding required!</p>
+      <p class="mt-5 font-bold uppercase text-yellow-400">No coding required!</p>
 
-      <img class="block mx-auto mt-5" src="/images/hive-engine-overview.png" alt="Hive-Engine Overview" />
+      <img class="mx-auto mt-5 block" src="/images/hive-engine-overview.png" alt="Hive-Engine Overview" />
     </div>
   </section>
 
   <section class="aboard-he flex items-center text-gray-700 dark:text-gray-300">
-    <div class="w-full max-w-7xl mx-auto py-16 px-2 sm:px-6 lg:px-8">
-      <h3 class="text-4xl uppercase text-red-500 text-center">The Train is Leaving the Station</h3>
+    <div class="mx-auto w-full max-w-7xl px-2 py-16 sm:px-6 lg:px-8">
+      <h3 class="text-center text-4xl uppercase text-red-500">The Train is Leaving the Station</h3>
 
-      <div class="text-xl mt-10">
+      <div class="mt-10 text-xl">
         <p>All aboard the Hive Express!</p>
 
         <p class="mt-5">Today is Token Creation. Tomorrow the world!</p>
@@ -82,7 +82,7 @@
 
 <script setup>
 import { useRoute, useRouter } from 'vue-router';
-import PageFooter from '../components/PageFooter.vue';
+import PageFooter from '@/components/PageFooter.vue';
 
 const router = useRouter();
 const route = useRoute();

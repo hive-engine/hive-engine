@@ -1,7 +1,7 @@
 <template>
   <Modal
     v-model="show"
-    name="swapModal"
+    modal-id="swapModal"
     :click-to-close="false"
     @before-open="beforeOpen"
     @before-close="beforeClose"
@@ -19,42 +19,42 @@
 
       <LoadingOverlay :show="showOverlay">
         <div class="mb-5 mt-10">
-          <label for="fromSymbol" class="block mb-2 font-bold">From</label>
+          <label for="fromSymbol" class="mb-2 block font-bold">From</label>
 
           <SearchSelect v-model="fromSymbol" :options="fromSymbolOptions" classes="mb-3 rounded-md" />
 
           <template v-if="fromSymbol">
             <div class="mb-3">Current balance: {{ fromSymbolBalance }} {{ fromSymbol }}</div>
 
-            <div class="flex items-center w-full">
+            <div class="flex w-full items-center">
               <input id="fromQuantity" v-model="fromQuantity" type="number" class="!rounded-r-none" />
               <div
-                class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-500"
+                class="rounded-r-md border border-l-0 border-gray-500 bg-gray-200 p-2 dark:border-gray-500 dark:bg-slate-600"
               >
                 {{ fromSymbol }}
               </div>
             </div>
-            <div class="text-sm mt-1">Estimated value (USD): ${{ fromPriceUSD }}</div>
+            <div class="mt-1 text-sm">Estimated value (USD): ${{ fromPriceUSD }}</div>
           </template>
         </div>
 
         <div class="mb-5">
-          <label for="toSymbol" class="block mb-2 font-bold">To</label>
+          <label for="toSymbol" class="mb-2 block font-bold">To</label>
 
           <SearchSelect v-model="toSymbol" :options="toSymbolOptions" classes="mb-3 rounded-md" />
 
           <template v-if="toSymbol">
             <div class="mb-3">Current balance: {{ toSymbolBalance }} {{ toSymbol }}</div>
 
-            <div class="flex items-center w-full">
+            <div class="flex w-full items-center">
               <input id="toQuantity" v-model="toQuantity" type="number" class="!rounded-r-none" readonly />
               <div
-                class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-500"
+                class="rounded-r-md border border-l-0 border-gray-500 bg-gray-200 p-2 dark:border-gray-500 dark:bg-slate-600"
               >
                 {{ toSymbol }}
               </div>
             </div>
-            <div class="text-sm mt-1">Estimated value (USD): ${{ toPriceUSD }}</div>
+            <div class="mt-1 text-sm">Estimated value (USD): ${{ toPriceUSD }}</div>
           </template>
         </div>
 
@@ -62,12 +62,12 @@
           <div class="mb-2 font-bold">SWAP Settings</div>
 
           <div class="mb-3 flex flex-wrap items-center justify-between">
-            <div class="text-sm font-bold mr-3">Max Slippage ({{ fromSymbol }} -> SWAP.HIVE)</div>
+            <div class="mr-3 text-sm font-bold">Max Slippage ({{ fromSymbol }} -> SWAP.HIVE)</div>
 
             <div class="flex items-center">
               <input v-model="slippageOne" type="number" class="w-16 !rounded-r-none" />
               <div
-                class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-500"
+                class="rounded-r-md border border-l-0 border-gray-500 bg-gray-200 p-2 dark:border-gray-500 dark:bg-slate-600"
               >
                 %
               </div>
@@ -75,12 +75,12 @@
           </div>
 
           <div v-if="toSymbol !== 'SWAP.HIVE'" class="mb-3 flex flex-wrap items-center justify-between">
-            <div class="text-sm font-bold mr-3">Max Slippage (SWAP.HIVE -> {{ toSymbol }})</div>
+            <div class="mr-3 text-sm font-bold">Max Slippage (SWAP.HIVE -> {{ toSymbol }})</div>
 
             <div class="flex items-center">
               <input v-model="slippageTwo" type="number" class="w-16 !rounded-r-none" />
               <div
-                class="bg-gray-200 dark:bg-slate-600 dark:border-gray-500 rounded-r-md p-2 border border-l-0 border-gray-500"
+                class="rounded-r-md border border-l-0 border-gray-500 bg-gray-200 p-2 dark:border-gray-500 dark:bg-slate-600"
               >
                 %
               </div>
@@ -95,7 +95,7 @@
           Please check carefully before proceeding.
         </div>
 
-        <label class="block mt-1 font-bold"
+        <label class="mt-1 block font-bold"
           ><input v-model="riskAccepted" type="checkbox" /> I have checked, please let me swap.</label
         >
       </div>
@@ -108,7 +108,7 @@
         Swap request is queued. Please transfer your tokens to initiate the Swapping process.
       </div>
 
-      <div class="text-center mt-10">
+      <div class="mt-10 text-center">
         <button
           class="btn w-4/5 text-lg"
           :disabled="
@@ -131,24 +131,25 @@
 </template>
 
 <script setup>
-import { debouncedWatch } from '@vueuse/core';
+import { watchDebounced } from '@vueuse/core';
 import axios from 'axios';
 import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useVfm } from 'vue-final-modal';
 import { useRouter } from 'vue-router';
 import { uuid } from 'vue-uuid';
-import { DSWAP_ACCOUNT, DSWAP_API, DSWAP_API_VERSION, DSWAP_SOURCE_ID } from '../../config';
-import { sidechain } from '../../plugins/sidechain';
-import { useStore } from '../../stores';
-import { useTokenStore } from '../../stores/token';
-import { useUserStore } from '../../stores/user';
-import { useWalletStore } from '../../stores/wallet';
-import { toFixedNoRounding, toFixedWithoutRounding } from '../../utils';
-import LoadingOverlay from '../utilities/LoadingOverlay.vue';
-import SearchSelect from '../utilities/SearchSelect.vue';
-import Modal from './Modal.vue';
+import Modal from '@/components/modals/Modal.vue';
+import LoadingOverlay from '@/components/utilities/LoadingOverlay.vue';
+import SearchSelect from '@/components/utilities/SearchSelect.vue';
+import { DSWAP_ACCOUNT, DSWAP_API, DSWAP_API_VERSION, DSWAP_SOURCE_ID } from '@/config';
+import { sidechain } from '@/plugins/sidechain';
+import { useStore } from '@/stores';
+import { useTokenStore } from '@/stores/token';
+import { useUserStore } from '@/stores/user';
+import { useWalletStore } from '@/stores/wallet';
+import { toFixedNoRounding, toFixedWithoutRounding } from '@/utils';
 
 const event = inject('eventBus');
-const vfm$ = inject('$vfm');
+const vfm = useVfm();
 const show = ref(false);
 const modalBusy = ref(true);
 const btnBusy = ref(false);
@@ -278,7 +279,7 @@ const beforeClose = async (e) => {
         'Swap request is in progress. If you close this modal, your swap will fail. Click cancel to stop closing the modal.',
       )
     ) {
-      await vfm$.hideAll();
+      await vfm.closeAll();
 
       onClosed();
     } else {
@@ -360,7 +361,7 @@ const onTransactionValidated = async ({ error, contract, action, payload }) => {
       showOverlay.value = false;
       swapSendTokens.value = false;
 
-      await vfm$.hideAll();
+      await vfm.closeAll();
 
       onClosed();
 
@@ -403,7 +404,7 @@ watch(fromQuantity, () => {
   }
 });
 
-debouncedWatch(
+watchDebounced(
   fromQuantity,
   async () => {
     if (toSymbol.value) {
