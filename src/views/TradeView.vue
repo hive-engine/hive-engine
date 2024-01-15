@@ -579,7 +579,7 @@ const disabledSellButton = computed(() => {
   return sellQuantity.value <= 0 || Number(sellTotal.value) <= 0 || sellQuantity.value > symbolBalance.value;
 });
 
-watch(isLoggedIn, async (loggedIn) => {
+watch([username, isLoggedIn], async ([, loggedIn]) => {
   if (loggedIn) {
     await Promise.all([
       marketStore.fetchUserOrders(symbol.value, username.value),

@@ -38,7 +38,7 @@
 import { ChevronLeftIcon, InformationCircleIcon } from '@heroicons/vue/24/outline';
 import { useHead } from '@unhead/vue';
 import { format } from 'date-fns';
-import { computed, defineAsyncComponent, onBeforeMount, ref } from 'vue';
+import { computed, defineAsyncComponent, onBeforeMount, ref, watch } from 'vue';
 import { useModal } from 'vue-final-modal';
 import { useRoute } from 'vue-router';
 import PageFooter from '@/components/PageFooter.vue';
@@ -53,11 +53,12 @@ const loading = ref(true);
 const route = useRoute();
 
 const userStore = useUserStore();
-const username = computed(() => userStore.username);
 
 const offset = ref(0);
-const limit = ref(20);
+const limit = ref(30);
 const disabledLoadMore = ref(false);
+
+const username = computed(() => userStore.username);
 const symbol = computed(() => route.params.symbol);
 
 useHead({
@@ -99,6 +100,22 @@ const history = computed(() => {
     };
   });
 });
+
+watch(
+  () => userStore.username,
+  async () => {
+    if (userStore.isLoggedIn) {
+      disabledLoadMore.value = false;
+      offset.value = 0;
+
+      loading.value = true;
+
+      await fetchAccountHistory();
+
+      loading.value = false;
+    }
+  },
+);
 
 const titleCase = (str) => {
   return str

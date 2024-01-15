@@ -136,12 +136,13 @@ import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue';
 import { useHead } from '@unhead/vue';
 import { watchThrottled } from '@vueuse/core';
 import { addWeeks } from 'date-fns';
-import { computed, inject, onBeforeMount, onMounted, onBeforeUnmount, ref, defineAsyncComponent } from 'vue';
+import { computed, inject, onBeforeMount, onMounted, onBeforeUnmount, ref, defineAsyncComponent, watch } from 'vue';
 import { useModal, useVfm } from 'vue-final-modal';
 import CustomTable from '@/components/utilities/CustomTable.vue';
 import Loading from '@/components/utilities/Loading.vue';
 import { useStore } from '@/stores';
 import { useLeaseStore } from '@/stores/lease';
+import { useUserStore } from '@/stores/user';
 import { addCommas, toFixedNoRounding } from '@/utils';
 
 const RenewLeaseModal = defineAsyncComponent(() => import('@/components/modals/RenewLeaseModal.vue'));
@@ -158,6 +159,7 @@ const eventBus = inject('eventBus');
 const eventSource = inject('eventSource');
 
 const store = useStore();
+const userStore = useUserStore();
 const leaseStore = useLeaseStore();
 
 const selectedAsset = ref(null);
@@ -328,6 +330,19 @@ const openRenewLeaseModal = async (lease) => {
 
   await open();
 };
+
+watch(
+  () => userStore.username,
+  async () => {
+    if (userStore.isLoggedIn) {
+      loading.value = true;
+
+      await leaseStore.fetchUserLeases();
+
+      loading.value = false;
+    }
+  },
+);
 
 let interval = null;
 

@@ -128,14 +128,6 @@ const computedRequests = computed(() => {
   });
 });
 
-onBeforeMount(async () => {
-  loading.value = true;
-
-  await leaseStore.fetchLeaseRequests();
-
-  loading.value = false;
-});
-
 const onBoardcastSuccess = async ({ id }) => {
   await vfm.closeAll();
 
@@ -167,6 +159,14 @@ watchThrottled(
 );
 
 let eventSourceInstance = eventSource.getInstance();
+
+onBeforeMount(async () => {
+  loading.value = true;
+
+  await leaseStore.fetchLeaseRequests();
+
+  loading.value = false;
+});
 
 onMounted(() => {
   eventSourceInstance.addEventListener('open', () => (eventSourceConnected.value = true));

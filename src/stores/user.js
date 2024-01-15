@@ -1,3 +1,4 @@
+import { useStorage } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { useVfm } from 'vue-final-modal';
 import { emitter } from '@/plugins/mitt';
@@ -8,7 +9,8 @@ export const useUserStore = defineStore({
   id: 'user',
 
   state: () => ({
-    username: '',
+    username: useStorage('username', ''),
+    accounts: useStorage('accounts', []),
   }),
 
   getters: {
@@ -30,6 +32,10 @@ export const useUserStore = defineStore({
           this.username = username;
 
           localStorage.setItem('username', username);
+
+          if (!this.accounts.includes(username)) {
+            this.accounts.push(username);
+          }
         }
 
         emitter.emit('login-done');
@@ -47,6 +53,34 @@ export const useUserStore = defineStore({
             this.router.replace({ query: {} });
           }
         }
+      } else {
+        const vfm = useVfm();
+
+        vfm.open('installKeychainModal');
+      }
+    },
+
+    async addAccount(account) {
+      const ts = Date.now();
+
+      const username = account.toLowerCase().replace('@', '');
+
+      if (this.accounts.includes(username)) {
+        return;
+      }
+
+      if (window.hive_keychain) {
+        emitter.emit('add-account-awaiting');
+
+        const store = useStore();
+
+        const { success } = await store.requestKeychain('requestSignBuffer', username, `${username}${ts}`, 'Posting');
+
+        if (success) {
+          this.accounts.push(username);
+        }
+
+        emitter.emit('add-account-done');
       } else {
         const vfm = useVfm();
 

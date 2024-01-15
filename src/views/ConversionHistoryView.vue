@@ -36,9 +36,10 @@
 
 <script setup>
 import { useHead } from '@unhead/vue';
-import { onBeforeMount, ref } from 'vue';
+import { onBeforeMount, ref, watch } from 'vue';
 import PageFooter from '@/components/PageFooter.vue';
 import CustomTable from '@/components/utilities/CustomTable.vue';
+import { useUserStore } from '@/stores/user';
 import { useWalletStore } from '@/stores/wallet';
 
 useHead({
@@ -47,6 +48,7 @@ useHead({
 
 const loading = ref(true);
 
+const userStore = useUserStore();
 const walletStore = useWalletStore();
 
 const history = ref([]);
@@ -86,14 +88,31 @@ const getExplorerLink = (symbol, trxId) => {
   return explorer.replace('{trxId}', trxId);
 };
 
-onBeforeMount(async () => {
-  loading.value = true;
-
+const fetchConversionHistory = async () => {
   try {
     history.value = await walletStore.fetchConversionHistory();
   } catch {
     //
   }
+};
+
+watch(
+  () => userStore.username,
+  async () => {
+    if (userStore.isLoggedIn) {
+      loading.value = true;
+
+      await fetchConversionHistory();
+
+      loading.value = false;
+    }
+  },
+);
+
+onBeforeMount(async () => {
+  loading.value = true;
+
+  await fetchConversionHistory();
 
   loading.value = false;
 });

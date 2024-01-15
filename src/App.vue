@@ -117,7 +117,10 @@
             <MenuButton
               class="flex rounded-full border-2 border-gray-700 bg-gray-800 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
             >
-              <img class="h-8 w-8 rounded-full bg-white" :src="`https://images.hive.blog/u/${username}/avatar`" />
+              <img
+                class="h-8 w-8 rounded-full border-2 bg-white"
+                :src="`https://images.hive.blog/u/${username}/avatar`"
+              />
             </MenuButton>
 
             <transition
@@ -133,6 +136,16 @@
               >
                 <MenuItem>
                   <div class="block border-b px-4 py-2 font-bold text-gray-700">@{{ username }}</div>
+                </MenuItem>
+
+                <MenuItem v-slot="{ active }">
+                  <a
+                    href="#"
+                    :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-gray-700']"
+                    active-class="text-white bg-gray-700 hover:bg-gray-700"
+                    @click="openAccountsModal"
+                    >Switch Accounts</a
+                  >
                 </MenuItem>
 
                 <MenuItem v-slot="{ active }">
@@ -340,6 +353,7 @@ import { useUserStore } from '@/stores/user';
 
 const HiveEngineRPCModal = defineAsyncComponent(() => import('@/components/modals/HiveEngineRPC.vue'));
 const SwapModal = defineAsyncComponent(() => import('@/components/modals/Swap.vue'));
+const AccountsModal = defineAsyncComponent(() => import('@/components/modals/Accounts.vue'));
 // const BuyCryptoModal = defineAsyncComponent(() => import('@/components/modals/BuyCrypto.vue'));
 
 useHead({
@@ -373,6 +387,12 @@ const openHiveEngineRPCModal = async () => {
 
 const openSwapModal = async () => {
   const { open } = useModal({ component: SwapModal });
+
+  await open();
+};
+
+const openAccountsModal = async () => {
+  const { open } = useModal({ component: AccountsModal });
 
   await open();
 };

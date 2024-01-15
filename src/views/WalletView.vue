@@ -214,7 +214,7 @@ import { useDocumentVisibility, useStorage } from '@vueuse/core';
 import Big from 'big.js';
 import { computed, defineAsyncComponent, inject, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useModal, useVfm } from 'vue-final-modal';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import PageFooter from '@/components/PageFooter.vue';
 import CustomTable from '@/components/utilities/CustomTable.vue';
 import { useStore } from '@/stores';
@@ -238,6 +238,7 @@ const vfm = useVfm();
 const event = inject('eventBus');
 
 const route = useRoute();
+const router = useRouter();
 
 const { account } = route.params;
 
@@ -418,6 +419,15 @@ watch(visibility, (current) => {
     refresh.value = false;
   }
 });
+
+watch(
+  () => userStore.username,
+  async () => {
+    if (userStore.username !== '') {
+      await router.push({ name: route.name, params: { account: userStore.username } });
+    }
+  },
+);
 
 onBeforeMount(async () => {
   loading.value = true;

@@ -39,7 +39,7 @@
 import { useHead } from '@unhead/vue';
 import axios from 'axios';
 import { format } from 'date-fns';
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, onBeforeMount, ref, watch } from 'vue';
 import PageFooter from '@/components/PageFooter.vue';
 import CustomTable from '@/components/utilities/CustomTable.vue';
 import { DSWAP_API, DSWAP_SOURCE_ID } from '@/config';
@@ -85,9 +85,7 @@ const getStatusClass = (status) => {
   return statusClass[status];
 };
 
-onBeforeMount(async () => {
-  loading.value = true;
-
+const fetchSwapRequests = async () => {
   try {
     let { data } = await axios.get(`${DSWAP_API}/SwapRequest`, {
       params: { account: username.value, sourceId: DSWAP_SOURCE_ID, limit: 50 },
@@ -107,6 +105,25 @@ onBeforeMount(async () => {
   } catch {
     //
   }
+};
+
+watch(
+  () => userStore.username,
+  async () => {
+    if (userStore.isLoggedIn) {
+      loading.value = true;
+
+      await fetchSwapRequests();
+
+      loading.value = false;
+    }
+  },
+);
+
+onBeforeMount(async () => {
+  loading.value = true;
+
+  await fetchSwapRequests();
 
   loading.value = false;
 });

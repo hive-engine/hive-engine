@@ -30,10 +30,11 @@
 
 <script setup>
 import { useHead } from '@unhead/vue';
-import { onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import PageFooter from '@/components/PageFooter.vue';
 import CustomTable from '@/components/utilities/CustomTable.vue';
 import { emitter } from '@/plugins/mitt';
+import { useUserStore } from '@/stores/user';
 import { useWalletStore } from '@/stores/wallet';
 import { sleep } from '@/utils';
 
@@ -43,6 +44,7 @@ useHead({
 
 const loading = ref(true);
 
+const userStore = useUserStore();
 const walletStore = useWalletStore();
 
 const rewards = ref([]);
@@ -77,6 +79,19 @@ const onScotClaim = async () => {
 
   loading.value = false;
 };
+
+watch(
+  () => userStore.username,
+  async () => {
+    if (userStore.isLoggedIn) {
+      loading.value = true;
+
+      await fetchRewards();
+
+      loading.value = false;
+    }
+  },
+);
 
 onBeforeMount(async () => {
   loading.value = true;

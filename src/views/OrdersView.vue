@@ -47,7 +47,7 @@
 <script setup>
 import { XMarkIcon } from '@heroicons/vue/24/outline';
 import { useHead } from '@unhead/vue';
-import { computed, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import PageFooter from '@/components/PageFooter.vue';
 import CustomTable from '@/components/utilities/CustomTable.vue';
 import { emitter } from '@/plugins/mitt';
@@ -92,6 +92,19 @@ const onTransactionValidated = async () => {
 
   loading.value = false;
 };
+
+watch(
+  () => userStore.username,
+  async () => {
+    if (userStore.isLoggedIn) {
+      loading.value = true;
+
+      await marketStore.fetchUserOrders(null, username.value);
+
+      loading.value = false;
+    }
+  },
+);
 
 onBeforeMount(async () => {
   loading.value = true;
