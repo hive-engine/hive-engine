@@ -19,7 +19,7 @@ export const useTokenStore = defineStore({
       const limit = 1000;
       let results = [];
       let newData = 0;
-      let offset = 0;
+      let lastId = null;
 
       const store = useStore();
 
@@ -28,17 +28,18 @@ export const useTokenStore = defineStore({
       }
 
       do {
-        const data = await sidechain.getTokens({}, offset, limit);
+        const data = await sidechain.getTokens({}, lastId, limit);
         newData = data.length;
 
         if (data.length > 0) {
           results.push(...data);
 
+          lastId = data.at(-1)._id;
+
           if (data.length < limit) {
             newData = 0;
           }
         }
-        offset += limit;
       } while (newData > 0);
 
       results = results
@@ -75,20 +76,21 @@ export const useTokenStore = defineStore({
       const limit = 1000;
       let results = [];
       let newData = 0;
-      let offset = 0;
+      let lastId = 0;
 
       do {
-        const data = await sidechain.getMetrics({}, offset, limit);
+        const data = await sidechain.getMetrics({}, lastId, limit);
         newData = data.length;
 
         if (data.length > 0) {
           results.push(...data);
 
+          lastId = data.at(-1)._id;
+
           if (data.length < limit) {
             newData = 0;
           }
         }
-        offset += limit;
       } while (newData > 0);
 
       this.metrics = results;

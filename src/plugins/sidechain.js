@@ -100,15 +100,19 @@ const sidechain = {
     return this.contract(request);
   },
 
-  getTokens(query = {}, offset = 0, limit = 1000) {
+  getTokens(query = {}, lastId = null, limit = 1000) {
+    if (lastId) {
+      query = { _id: { $gt: lastId }, ...query };
+    }
+
     const request = {
       method: 'find',
       params: {
         contract: 'tokens',
         table: 'tokens',
         query,
-        offset,
         limit,
+        indexes: [{ index: '_id', descending: false }],
       },
     };
 
@@ -136,7 +140,11 @@ const sidechain = {
     return this.contract(request);
   },
 
-  getMetrics(query = {}, offset = 0, limit = 1000) {
+  getMetrics(query = {}, lastId = null, limit = 1000) {
+    if (lastId) {
+      query = { _id: { $gt: lastId }, ...query };
+    }
+
     const request = {
       method: 'find',
       params: {
@@ -144,7 +152,7 @@ const sidechain = {
         table: 'metrics',
         query,
         limit,
-        offset,
+        indexes: [{ index: '_id', descending: false }],
       },
     };
 
