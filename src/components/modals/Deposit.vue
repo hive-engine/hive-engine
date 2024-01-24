@@ -488,7 +488,9 @@ const depositEvmToken = async (network) => {
         (t) => t.symbol === evmToken.value,
       );
 
-      const contract = new Contract(contractAddress, ABI, browserProvider.getSigner());
+      const signer = await browserProvider.getSigner();
+
+      const contract = new Contract(contractAddress, ABI, signer);
 
       const amount = parseUnits(depositAmount.value.toString(), precision);
 
