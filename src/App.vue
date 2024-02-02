@@ -341,7 +341,7 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 import { Bars3Icon, MoonIcon, SunIcon, XMarkIcon, ChevronDownIcon, CogIcon } from '@heroicons/vue/24/outline';
 import { useHead } from '@unhead/vue';
-import { useDark, useToggle } from '@vueuse/core';
+import { useDark, useStorage, useToggle } from '@vueuse/core';
 import { computed, defineAsyncComponent, onMounted } from 'vue';
 import { useVfm, ModalsContainer, useModal } from 'vue-final-modal';
 import { RouterLink, RouterView, useRoute } from 'vue-router';
@@ -355,6 +355,7 @@ const HiveEngineRPCModal = defineAsyncComponent(() => import('@/components/modal
 const SwapModal = defineAsyncComponent(() => import('@/components/modals/Swap.vue'));
 const AccountsModal = defineAsyncComponent(() => import('@/components/modals/Accounts.vue'));
 // const BuyCryptoModal = defineAsyncComponent(() => import('@/components/modals/BuyCrypto.vue'));
+const AnnouncementsModal = defineAsyncComponent(() => import('@/components/modals/Announcements.vue'));
 
 useHead({
   titleTemplate: (title) => (title ? `${title} - Hive-Engine` : 'Hive-Engine - Smart Contracts on the Hive Blockchain'),
@@ -405,5 +406,23 @@ const openAccountsModal = async () => {
 
 onMounted(async () => {
   await fetchHivePrice();
+
+  const shown = useStorage('announcements-shown', []);
+
+  let { announcements } = store.settings;
+
+  if (!announcements || announcements.length <= 0) {
+    shown.value = [];
+  }
+
+  announcements = announcements.filter((ann) => !shown.value.includes(ann.id));
+
+  for (let index = 0; index < announcements.length; index++) {
+    const announcement = announcements[index];
+
+    const { open } = useModal({ component: AnnouncementsModal, attrs: announcement });
+
+    await open();
+  }
 });
 </script>
