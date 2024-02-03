@@ -20,6 +20,20 @@
   <Loading v-if="loading" />
 
   <div v-else class="page-content">
+    <div v-if="haveDelistedTokens.length > 0" class="alert-warning">
+      <p class="mb-2">
+        You have the following token(s) that are going to be delisted or is delisted. Click the token(s) to read more.
+      </p>
+      <a
+        v-for="delisted of haveDelistedTokens"
+        :key="delisted.id"
+        class="block"
+        href="#"
+        @click.prevent="openAnnouncementModal(delisted.symbol)"
+        >{{ delisted.symbol }}</a
+      >
+    </div>
+
     <div class="flex flex-wrap items-center justify-center text-center sm:justify-between sm:text-left">
       <div class="mb-5">
         <input
@@ -227,6 +241,7 @@ const WalletActionModal = defineAsyncComponent(() => import('@/components/modals
 const DepositModal = defineAsyncComponent(() => import('@/components/modals/Deposit.vue'));
 const WithdrawModal = defineAsyncComponent(() => import('@/components/modals/Withdraw.vue'));
 const TokenInfoModal = defineAsyncComponent(() => import('@/components/modals/TokenInfo.vue'));
+const AnnouncementsModal = defineAsyncComponent(() => import('@/components/modals/Announcements.vue'));
 
 useHead({
   title: 'Wallet',
@@ -344,6 +359,16 @@ const estimatedValue = computed(() => {
   return toFixedWithoutRounding(wallet.value.reduce((acc, cur) => acc + cur.usdValue, 0));
 });
 
+const delistedTokensMap = computed(() => {
+  return new Map(store.settings?.delisted_tokens?.map((d) => [d.symbol, d]));
+});
+
+const haveDelistedTokens = computed(() => {
+  const delistedTokens = Array.from(delistedTokensMap.value.keys());
+
+  return walletStore.wallet.filter((w) => delistedTokens.includes(w.symbol) && w.balance.gt(0));
+});
+
 const walletTableFields = [
   { key: 'icon', label: '' },
   { key: 'symbol', label: 'Symbol', sortable: true },
@@ -410,6 +435,18 @@ const openTokenInfoModal = async (token) => {
   const { open } = useModal({ component: TokenInfoModal, attrs: { token } });
 
   await open();
+};
+
+const openAnnouncementModal = async (symbol) => {
+  const announcement = store.settings.announcements.find(
+    (ann) => ann.id === delistedTokensMap.value.get(symbol)?.announcementId,
+  );
+
+  if (announcement) {
+    const { open } = useModal({ component: AnnouncementsModal, attrs: announcement });
+
+    await open();
+  }
 };
 
 watch(visibility, (current) => {

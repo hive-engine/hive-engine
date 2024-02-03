@@ -464,6 +464,7 @@ import { useWalletStore } from '@/stores/wallet';
 import { filterOutliers, toFixedWithoutRounding } from '@/utils';
 
 const TokenInfoModal = defineAsyncComponent(() => import('@/components/modals/TokenInfo.vue'));
+const AnnouncementsModal = defineAsyncComponent(() => import('@/components/modals/Announcements.vue'));
 
 const loading = ref(true);
 const route = useRoute();
@@ -847,12 +848,28 @@ const openTokenInfoModal = async (token) => {
   await open();
 };
 
-onMounted(() => {
+onMounted(async () => {
   refreshTimeout = setInterval(refreshTokenMarket, 60 * 1000);
 
   emitter.on('broadcast-success', onBroadcastSuccess);
 
   emitter.on('transaction-validated', onTransactionValidated);
+
+  const delistedTokensMap = new Map(store.settings?.delisted_tokens?.map((d) => [d.symbol, d]));
+
+  const delistedTokens = Array.from(delistedTokensMap.keys());
+
+  if (delistedTokens.includes(route.params.symbol)) {
+    const announcement = store.settings.announcements.find(
+      (ann) => ann.id === delistedTokensMap.get(route.params.symbol)?.announcementId,
+    );
+
+    if (announcement) {
+      const { open } = useModal({ component: AnnouncementsModal, attrs: announcement });
+
+      await open();
+    }
+  }
 });
 
 onBeforeUnmount(() => {
