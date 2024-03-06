@@ -380,7 +380,7 @@
         <custom-table
           :fields="sellBookFields"
           :items="sellBook.slice(0, 250)"
-          :per-page="20"
+          :per-page="25"
           th-class="md:text-left"
           td-class="md:text-left"
         >
@@ -543,15 +543,17 @@ const marketHistory = computed(() => marketStore.marketHistory);
 const buyBookFields = [
   { key: 'hive_volume', label: 'Total HIVE', class: 'md:hidden lg:table-cell' },
   { key: 'total', label: 'HIVE' },
+  { key: 'volume', label: 'Total ' + symbol.value, class: 'md:hidden lg:table-cell' },
   { key: 'quantity', label: symbol.value },
   { key: 'account', label: 'Account' },
-  { key: 'price', label: 'BID' },
+  { key: 'price', label: 'BID', sortable: true },
 ];
 
 const sellBookFields = [
-  { key: 'price', label: 'ASK' },
+  { key: 'price', label: 'ASK', sortable: true },
   { key: 'account', label: 'Account' },
   { key: 'quantity', label: symbol.value },
+  { key: 'volume', label: 'Total ' + symbol.value, class: 'md:hidden lg:table-cell' },
   { key: 'total', label: 'HIVE' },
   { key: 'hive_volume', label: 'Total HIVE', class: 'md:hidden lg:table-cell' },
 ];
