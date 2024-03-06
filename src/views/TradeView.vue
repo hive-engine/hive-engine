@@ -77,7 +77,7 @@
       </div>
     </div>
 
-    <div class="" id="show-hide-button">
+    <div class="flex justify-center p-5" id="show-hide-button">
       <button
           :disabled="showhide === 'true'"
           class="btn-sm rounded-l-md rounded-r-none px-4 py-1"
