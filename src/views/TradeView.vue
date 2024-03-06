@@ -354,7 +354,8 @@
 
         <custom-table
           :fields="buyBookFields"
-          :items="buyBook.slice(0, 15)"
+          :items="buyBook.slice(0, 250)"
+          :per-page="25"
           th-class="md:text-right"
           td-class="md:text-right"
         >
@@ -378,7 +379,8 @@
 
         <custom-table
           :fields="sellBookFields"
-          :items="sellBook.slice(0, 15)"
+          :items="sellBook.slice(0, 250)"
+          :per-page="20"
           th-class="md:text-left"
           td-class="md:text-left"
         >
@@ -542,11 +544,13 @@ const buyBookFields = [
   { key: 'hive_volume', label: 'Total HIVE', class: 'md:hidden lg:table-cell' },
   { key: 'total', label: 'HIVE' },
   { key: 'quantity', label: symbol.value },
+  { key: 'account', label: 'Account' },
   { key: 'price', label: 'BID' },
 ];
 
 const sellBookFields = [
   { key: 'price', label: 'ASK' },
+  { key: 'account', label: 'Account' },
   { key: 'quantity', label: symbol.value },
   { key: 'total', label: 'HIVE' },
   { key: 'hive_volume', label: 'Total HIVE', class: 'md:hidden lg:table-cell' },
@@ -554,10 +558,10 @@ const sellBookFields = [
 
 const openOrdersFields = [
   { key: 'checkbox', label: '' },
-  { key: 'timestamp', label: 'DATE' },
-  { key: 'type', label: 'TYPE' },
-  { key: 'quantity', label: symbol.value },
-  { key: 'price', label: 'PRICE' },
+  { key: 'timestamp', label: 'DATE', sortable: true },
+  { key: 'type', label: 'TYPE', sortable: true },
+  { key: 'quantity', label: symbol.value, sortable: true },
+  { key: 'price', label: 'PRICE', sortable: true },
   { key: 'total', label: 'TOTAL HIVE' },
   { key: 'txId', label: 'Action' },
 ];

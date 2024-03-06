@@ -36,6 +36,6 @@
   }
 
   .page-content {
-    @apply w-full max-w-7xl mx-auto py-10 px-2 sm:px-6 lg:px-8 min-h-[calc(100vh-484px)];
+    @apply w-full max-w-full mx-auto py-10 px-2 sm:px-6 lg:px-8 min-h-[calc(100vh-484px)];
   }
 }

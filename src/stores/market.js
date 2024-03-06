@@ -5,21 +5,28 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { sidechain } from '@/plugins/sidechain';
 import { useStore } from '.';
 
+computed: {
+  console: () => console;
+  window: () => window;
+}
+
 const processOrderBook = (orderBook) => {
   let volume = Big(0);
   let hiveVolume = Big(0);
 
   return orderBook
-    .map((o) => {
+    .map((o, index) => {
       const price = Big(o.price);
       const quantity = Big(o.quantity);
       const total = price.times(quantity);
+      const account = o.account;
 
       return {
         account,
         price,
         quantity,
         total,
+        index
       };
     })
     .reduce((acc, cur) => {
@@ -46,6 +53,7 @@ const processOrderBook = (orderBook) => {
     .map((o) => {
       return {
         ...o,
+        account: o.account,
         total: o.total.toFixed(6),
         volume: o.volume.toFixed(8),
         hive_volume: o.hive_volume.toFixed(5),
