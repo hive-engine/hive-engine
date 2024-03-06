@@ -51,12 +51,25 @@ const processOrderBook = (orderBook) => {
       return acc;
     }, [])
     .map((o) => {
+      if(o.volume > 999999) {
+        o.volume = (o.volume / 1000000).toFixed(4) + 'M';
+      }
+      else {
+        o.volume = o.volume.toFixed(8)
+      }
+      if(o.quantity > 999999) {
+        o.quantityFormat = (o.quantity / 1000000).toFixed(4) + 'M';
+      }
+      else {
+        o.quantityFormat = o.quantity.toFixed(8)
+      }
       return {
         ...o,
         account: o.account,
-        total: o.total.toFixed(6),
-        volume: o.volume.toFixed(8),
-        hive_volume: o.hive_volume.toFixed(5),
+        quantityFormat: o.quantityFormat,
+        total: o.total.toFixed(8),
+        volume: o.volume,
+        hive_volume: o.hive_volume.toFixed(8),
       };
     });
 };

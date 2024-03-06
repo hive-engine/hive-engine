@@ -544,7 +544,7 @@ const buyBookFields = [
   { key: 'hive_volume', label: 'Total HIVE', class: 'md:hidden lg:table-cell' },
   { key: 'total', label: 'HIVE' },
   { key: 'volume', label: 'Total ' + symbol.value, class: 'md:hidden lg:table-cell' },
-  { key: 'quantity', label: symbol.value },
+  { key: 'quantityFormat', label: symbol.value },
   { key: 'account', label: 'Account' },
   { key: 'price', label: 'BID', sortable: true },
 ];
@@ -552,7 +552,7 @@ const buyBookFields = [
 const sellBookFields = [
   { key: 'price', label: 'ASK', sortable: true },
   { key: 'account', label: 'Account' },
-  { key: 'quantity', label: symbol.value },
+  { key: 'quantityFormat', label: symbol.value },
   { key: 'volume', label: 'Total ' + symbol.value, class: 'md:hidden lg:table-cell' },
   { key: 'total', label: 'HIVE' },
   { key: 'hive_volume', label: 'Total HIVE', class: 'md:hidden lg:table-cell' },
