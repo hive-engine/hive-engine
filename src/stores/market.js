@@ -16,13 +16,14 @@ const processOrderBook = (orderBook) => {
       const total = price.times(quantity);
 
       return {
+        account,
         price,
         quantity,
         total,
       };
     })
     .reduce((acc, cur) => {
-      const exists = acc.find((o) => o.price.eq(cur.price));
+      const exists = acc.find((o) => (o.account == cur.account) && (o.price.eq(cur.price)));
 
       volume = volume.plus(cur.quantity);
       hiveVolume = hiveVolume.plus(cur.total);
