@@ -77,7 +77,25 @@
       </div>
     </div>
 
-    <div class="mb-5">
+    <div class="" id="show-hide-button">
+      <button
+          :disabled="showhide === 'true'"
+          class="btn-sm rounded-l-md rounded-r-none px-4 py-1"
+          @click="showhide = true"
+        >
+          Show Graph
+        </button>
+
+        <button
+          :disabled="showhide === 'false'"
+          class="btn-sm rounded-l-none rounded-r-md px-4 py-1"
+          @click="showhide = false"
+        >
+          Hide Graph
+        </button>
+    </div>
+
+    <div class="mb-5" id="chart-overview" v-show="showhide">
       <div class="text-right">
         <button
           :disabled="interval === 'daily'"
@@ -101,7 +119,7 @@
       <VolumeChart v-else-if="chartType === 'volume'" :data="volumeChartData" />
     </div>
 
-    <div class="mb-8 text-center">
+    <div class="mb-8 text-center" v-show="showhide">
       <button
         :disabled="chartType === 'candle'"
         class="btn-sm rounded-l-md rounded-r-none px-4 py-1"
@@ -495,6 +513,8 @@ const sellPrice = ref('');
 const sellQuantity = ref('');
 const sellTotal = ref('');
 
+const showhide = ref(false); //new
+
 const interval = ref('daily');
 const chartType = ref('candle');
 const selectedOrders = ref([]);
@@ -677,6 +697,10 @@ watch(interval, async () => {
   produceCandleChart();
   producevDepthChart();
   produceVolumeChart();
+});
+
+watch(showhide, async () => {
+  console.log(showhide.value)
 });
 
 watch(visibility, (current) => {
