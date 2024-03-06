@@ -79,7 +79,7 @@
 
     <div class="flex justify-center p-5" id="show-hide-button">
       <button
-          :disabled="showhide === 'true'"
+          :disabled="showhide === true"
           class="btn-sm rounded-l-md rounded-r-none px-4 py-1"
           @click="showhide = true"
         >
@@ -87,7 +87,7 @@
         </button>
 
         <button
-          :disabled="showhide === 'false'"
+          :disabled="showhide === false"
           class="btn-sm rounded-l-none rounded-r-md px-4 py-1"
           @click="showhide = false"
         >
