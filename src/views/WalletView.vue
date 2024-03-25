@@ -174,7 +174,7 @@
         </button>
 
         <router-link
-          v-if="item.symbol !== 'SWAP.HIVE'"
+          v-if="item.symbol !== 'SWAP.HIVE' && !store.settings.deprecated_tokens.includes(item.symbol)"
           :to="{ name: 'trade', params: { symbol: item.symbol } }"
           class="btn-sm mb-1 mr-1 mt-1"
           title="Trade"

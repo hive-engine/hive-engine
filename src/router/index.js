@@ -54,6 +54,17 @@ const router = createRouter({
     {
       path: '/trade/:symbol',
       name: 'trade',
+      beforeEnter: (to) => {
+        const store = useStore();
+        const { symbol } = to.params;
+
+        if (store.settings.deprecated_tokens.includes(symbol)) {
+          return {
+            name: to.name,
+            params: { symbol: 'BEE' },
+          };
+        }
+      },
       component: loadView('Trade'),
     },
     {
