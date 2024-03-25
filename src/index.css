@@ -10,32 +10,32 @@
   input[type='text'],
   input[type='number'],
   select {
-    @apply w-full rounded-md dark:bg-slate-600 dark:border-gray-500 disabled:bg-[rgba(0,0,0,.05)] disabled:dark:bg-[rgba(255,255,255,.10)] disabled:cursor-not-allowed focus:ring-0 dark:placeholder-slate-400;
+    @apply w-full rounded-md focus:ring-0 disabled:cursor-not-allowed disabled:bg-[rgba(0,0,0,.05)] dark:border-gray-500 dark:bg-slate-600 dark:placeholder-slate-400 disabled:dark:bg-[rgba(255,255,255,.10)];
   }
 }
 
 @layer components {
   .btn {
-    @apply inline-block px-6 py-2 text-sm font-bold leading-normal text-white align-middle bg-red-600 rounded-md border border-transparent shadow-sm hover:bg-red-700 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 focus:disabled:ring-0 transition;
+    @apply inline-block rounded-md border border-transparent bg-red-600 px-6 py-2 align-middle text-sm font-bold leading-normal text-white shadow-sm transition hover:bg-red-700 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 focus:disabled:ring-0;
   }
 
   .btn-sm {
-    @apply px-1 py-1 btn;
+    @apply btn px-1 py-1;
   }
 
   .btn-outline {
-    @apply btn bg-transparent text-red-600 border-red-600 hover:text-white
+    @apply btn border-red-600 bg-transparent text-red-600 hover:text-white;
   }
 
   .btn-outline-sm {
-    @apply px-1 py-1 btn-outline;
+    @apply btn-outline px-1 py-1;
   }
 
   .alert-warning {
-    @apply p-3 mb-5 text-sm text-orange-700 bg-orange-100 border border-orange-200;
+    @apply mb-5 border border-orange-200 bg-orange-100 p-3 text-sm text-orange-700;
   }
 
   .page-content {
-    @apply w-full max-w-7xl mx-auto py-10 px-2 sm:px-6 lg:px-8 min-h-[calc(100vh-484px)];
+    @apply mx-auto min-h-[calc(100vh-484px)] w-full max-w-7xl px-2 py-10 sm:px-6 lg:px-8;
   }
 }

@@ -3,7 +3,9 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: local(''), url('/fonts/nunito-v22-latin-ext_latin-regular.woff2') format('woff2'),
+  src:
+    local(''),
+    url('/fonts/nunito-v22-latin-ext_latin-regular.woff2') format('woff2'),
     url('/fonts/nunito-v22-latin-ext_latin-regular.woff') format('woff');
 }
 
@@ -12,7 +14,9 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: local(''), url('/fonts/nunito-v22-latin-ext_latin-700.woff2') format('woff2'),
+  src:
+    local(''),
+    url('/fonts/nunito-v22-latin-ext_latin-700.woff2') format('woff2'),
     url('/fonts/nunito-v22-latin-ext_latin-700.woff') format('woff');
 }
 
@@ -72,7 +76,9 @@ thead tr > [aria-sort='descending'] {
 }
 
 .page-header {
-  background: url('/images/img-gear.svg') no-repeat, linear-gradient(263deg, #27475e, #080e13);
+  background:
+    url('/images/img-gear.svg') no-repeat,
+    linear-gradient(263deg, #27475e, #080e13);
 }
 
 .vue-notification-group {

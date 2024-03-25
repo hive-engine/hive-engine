@@ -3,7 +3,7 @@
     <template #title="{ params }">Balance History: {{ params.currency }}</template>
 
     <LoadingOverlay :show="showOverlay">
-      <table class="w-full table-auto mb-5">
+      <table class="mb-5 w-full table-auto">
         <thead>
           <tr>
             <th class="px-4 py-2 text-left last-of-type:text-right">Username</th>

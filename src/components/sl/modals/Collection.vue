@@ -11,22 +11,22 @@
 
     <template #default="{ params }">
       <LoadingOverlay :show="showOverlay">
-        <div class="flex flex-wrap justify-between items-center mb-5">
+        <div class="mb-5 flex flex-wrap items-center justify-between">
           <div v-if="card.edition && card.color" class="flex flex-wrap gap-2 font-bold">
-            <div class="flex gap-2 justify-center items-center">
-              <Edition class="w-6 h-6" :edition="card.edition" /> {{ getEdition(card.edition) }}
+            <div class="flex items-center justify-center gap-2">
+              <Edition class="h-6 w-6" :edition="card.edition" /> {{ getEdition(card.edition) }}
             </div>
 
-            <div class="flex gap-2 justify-center items-center">
-              <Element class="w-6 h-6" :color="card.color" /> {{ getElement(card.color) }}
+            <div class="flex items-center justify-center gap-2">
+              <Element class="h-6 w-6" :color="card.color" /> {{ getElement(card.color) }}
             </div>
 
-            <div class="flex gap-2 justify-center items-center">
-              <Rarity class="w-6 h-6" :rarity="card.rarity" /> {{ getRarity(card.rarity) }}
+            <div class="flex items-center justify-center gap-2">
+              <Rarity class="h-6 w-6" :rarity="card.rarity" /> {{ getRarity(card.rarity) }}
             </div>
 
-            <div class="flex gap-2 justify-center items-center">
-              <Foil class="w-6 h-6" :gold="card.gold" /> {{ card.gold ? 'Gold' : 'Regular' }}
+            <div class="flex items-center justify-center gap-2">
+              <Foil class="h-6 w-6" :gold="card.gold" /> {{ card.gold ? 'Gold' : 'Regular' }}
             </div>
           </div>
 
@@ -38,14 +38,14 @@
             Log Into Splinterlands
           </button>
 
-          <div v-else-if="cardStore.authorized" class="flex flex-wrap gap-2 justify-end items-center">
+          <div v-else-if="cardStore.authorized" class="flex flex-wrap items-center justify-end gap-2">
             <button
               v-tooltip="'List for rent'"
               :disabled="cardStore.player !== userStore.username || cardStore.listable.length <= 0"
               class="btn-sm"
               @click="vfm.open('listCards')"
             >
-              <BuildingStorefrontIcon class="w-5 h-5" />
+              <BuildingStorefrontIcon class="h-5 w-5" />
             </button>
 
             <button
@@ -54,7 +54,7 @@
               class="btn-sm"
               @click="cardStore.requestCancelListing"
             >
-              <XCircleIcon class="w-5 h-5" />
+              <XCircleIcon class="h-5 w-5" />
             </button>
 
             <button
@@ -67,7 +67,7 @@
               class="btn-sm"
               @click="vfm.open('changePriceModal')"
             >
-              <CurrencyDollarIcon class="w-5 h-5" />
+              <CurrencyDollarIcon class="h-5 w-5" />
             </button>
 
             <button
@@ -76,7 +76,7 @@
               class="btn-sm"
               @click="cardStore.requestUndelegateCards"
             >
-              <ArrowUturnDownIcon class="w-5 h-5" />
+              <ArrowUturnDownIcon class="h-5 w-5" />
             </button>
           </div>
 
@@ -105,7 +105,7 @@
             <ClockIcon
               v-if="item.cooldown"
               v-tooltip="item.cooldown"
-              class="inline w-5 h-5 text-orange-500 align-text-top"
+              class="inline h-5 w-5 align-text-top text-orange-500"
             />
           </template>
 

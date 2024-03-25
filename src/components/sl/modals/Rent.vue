@@ -3,7 +3,7 @@
     <template #title>{{ card.name }}</template>
 
     <LoadingOverlay :show="showOverlay">
-      <div class="flex flex-wrap items-center justify-between mb-5">
+      <div class="mb-5 flex flex-wrap items-center justify-between">
         <div v-if="card.edition && card.color" class="flex flex-wrap gap-2 font-bold">
           <div class="flex items-center justify-center gap-2">
             <Edition class="h-6 w-6" :edition="card.edition" /> {{ getEdition(card.edition) }}

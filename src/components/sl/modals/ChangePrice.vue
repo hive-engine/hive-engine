@@ -8,16 +8,16 @@
           {{ card.name }}
         </div>
         <div class="text-xs">{{ card.uid }}</div>
-        <div class="text-xs flex">
+        <div class="flex text-xs">
           <div class="mr-3">Level {{ card.level }}</div>
           <div>BCX {{ card.bcx }}</div>
         </div>
       </div>
     </div>
 
-    <div class="max-w-md mx-auto text-center mt-5">
-      <label class="block font-bold mb-3">Rental Price for Each (per day)</label>
-      <div class="flex flex-wrap items-center justify-center mb-3 gap-1">
+    <div class="mx-auto mt-5 max-w-md text-center">
+      <label class="mb-3 block font-bold">Rental Price for Each (per day)</label>
+      <div class="mb-3 flex flex-wrap items-center justify-center gap-1">
         <input v-model="price" type="number" min="0.0001" class="max-w-[150px]" />
 
         <select class="max-w-fit" disabled>
