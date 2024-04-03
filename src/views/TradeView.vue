@@ -518,7 +518,11 @@ const symbolBalance = computed(() => {
 
 const hivePrice = computed(() => store.hivePrice);
 
-const tokens = computed(() => tokenStore.tokens.map((t) => ({ text: t.symbol, value: t.symbol })));
+const tokens = computed(() =>
+  tokenStore.tokens
+    .filter((t) => !store.settings.deprecated_tokens.includes(t.symbol))
+    .map((t) => ({ text: t.symbol, value: t.symbol })),
+);
 
 const token = computed(() => marketStore.token);
 const buyBook = computed(() =>

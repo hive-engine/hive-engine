@@ -21,7 +21,7 @@
   <Loading v-if="loading" />
 
   <div v-else class="page-content">
-    <custom-table :fields="fields" :items="tokens" :per-page="100">
+    <custom-table :fields="fields" :items="filteredTokens" :per-page="100">
       <template #cell(icon)="{ item }">
         <img :src="item.icon" class="w-10" />
       </template>
@@ -119,16 +119,8 @@ const metrics = computed(() =>
 );
 
 const tokens = computed(() => {
-  const regExp = new RegExp(filter.value, 'i');
-
   return tokenStore.tokens
-    .filter((t) => {
-      if (filter.value !== '') {
-        return regExp.test(t.symbol);
-      }
-
-      return true;
-    })
+    .filter((t) => !store.settings.deprecated_tokens.includes(t.symbol))
     .reduce((acc, cur) => {
       let { maxSupply, supply, circulatingSupply } = cur;
 
@@ -167,6 +159,18 @@ const tokens = computed(() => {
       return acc;
     }, [])
     .sort((a, b) => b.volume - a.volume);
+});
+
+const filteredTokens = computed(() => {
+  const regExp = new RegExp(filter.value, 'i');
+
+  return tokens.value.filter((t) => {
+    if (filter.value !== '') {
+      return regExp.test(t.symbol);
+    }
+
+    return true;
+  });
 });
 
 const openTokenInfoModal = async (token) => {
