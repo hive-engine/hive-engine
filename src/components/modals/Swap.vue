@@ -183,7 +183,7 @@ const slippageTwo = ref(5);
 
 const baseTokenAmount = ref(0);
 
-const tokens = computed(() => tokenStore.tokens);
+const tokens = computed(() => tokenStore.tokens.filter((t) => !store.settings.deprecated_tokens.includes(t.symbol)));
 const wallet = computed(() => walletStore.wallet);
 const username = computed(() => userStore.username);
 
