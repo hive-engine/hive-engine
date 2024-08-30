@@ -38,7 +38,7 @@
         </div>
 
         <div class="mb-3">
-          <label class="mb-3 block">How much do you wanna pay per week?</label>
+          <label class="mb-3 block">How much do you want to pay per week?</label>
           <div class="flex items-center">
             <input
               v-model="payment"
