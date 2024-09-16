@@ -6,8 +6,8 @@
 
     <template v-else>
       <div class="alert-warning mb-5 font-bold">
-        There is a 0.75% fee on deposits. Ethereum, ERC-20, BNB, BEP-20, Polygon (POL) and Polygon ERC-20 deposits
-        have no deposit fees, but you'll pay the Ethereum / BSC / Polygon network gas fee.
+        There is a 0.75% fee on deposits. Ethereum, ERC-20, BNB, BEP-20, Polygon (POL) and Polygon ERC-20 deposits have
+        no deposit fees, but you'll pay the Ethereum / BSC / Polygon network gas fee.
       </div>
 
       <div v-if="!selectedToken && !depositInfo" class="alert-warning">
@@ -86,14 +86,21 @@
             <input id="depositAmount" v-model="depositAmount" type="number" step="any" />
           </div>
 
-          <button
-            class="btn"
-            :disabled="depositAmount <= 0 || depositAmount > depositInfo.balance"
-            @click.prevent="depositEvmAsset(networks[selectedToken])"
-          >
-            <Spinner v-if="btnBusy" />
-            {{ ' ' }} Deposit {{ selectedToken }}
-          </button>
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <button
+              class="btn"
+              :disabled="depositAmount <= 0 || depositAmount > depositInfo.balance"
+              @click.prevent="depositEvmAsset(networks[selectedToken])"
+            >
+              <Spinner v-if="btnBusy" />
+              {{ ' ' }} Deposit {{ selectedToken }}
+            </button>
+
+            <p v-if="selectedToken === 'POL'" class="text-sm">
+              By depositing POL you'll receive SWAP.MATIC to your wallet. You can get POL back by
+              withdrawing SWAP.MATIC.
+            </p>
+          </div>
         </template>
 
         <template v-else>
@@ -296,9 +303,7 @@ const tokens = computed(() => {
   return [{ value: null, text: 'Please select a token' }, ...tokens];
 });
 
-const isEvmToken = computed(() =>
-  ['ETH', 'ERC20', 'BNB', 'BEP20', 'POL', 'POLY-ERC20'].includes(selectedToken.value),
-);
+const isEvmToken = computed(() => ['ETH', 'ERC20', 'BNB', 'BEP20', 'POL', 'POLY-ERC20'].includes(selectedToken.value));
 
 const evmTokenOptions = computed(() => {
   const allEvmTokens = evmTokens.value.map((t) => ({
