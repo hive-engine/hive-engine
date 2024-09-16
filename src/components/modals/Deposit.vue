@@ -6,7 +6,7 @@
 
     <template v-else>
       <div class="alert-warning mb-5 font-bold">
-        There is a 0.75% fee on deposits. Ethereum, ERC-20, BNB, BEP-20, Polygon (MATIC) and Polygon ERC-20 deposits
+        There is a 0.75% fee on deposits. Ethereum, ERC-20, BNB, BEP-20, Polygon (POL) and Polygon ERC-20 deposits
         have no deposit fees, but you'll pay the Ethereum / BSC / Polygon network gas fee.
       </div>
 
@@ -73,7 +73,7 @@
           </div>
         </div>
 
-        <template v-if="['ETH', 'BNB', 'MATIC'].includes(selectedToken)">
+        <template v-if="['ETH', 'BNB', 'POL'].includes(selectedToken)">
           <div class="mb-3">
             <label class="mb-2 block font-bold">Available Balance</label>
             <div class="cursor-pointer" @click="depositAmount = depositInfo.balance">
@@ -206,7 +206,7 @@ const networks = {
   ERC20: 'eth',
   BNB: 'bsc',
   BEP20: 'bsc',
-  MATIC: 'polygon',
+  POL: 'polygon',
   'POLY-ERC20': 'polygon',
 };
 
@@ -274,7 +274,7 @@ const tokens = computed(() => {
     ...peggedTokens.value,
     settings.value.eth_bridge.ethereum,
     settings.value.bsc_bridge.bnb,
-    settings.value.polygon_bridge.matic,
+    settings.value.polygon_bridge.pol,
   ];
 
   if (settings.value.eth_bridge.erc_20.enabled) {
@@ -297,7 +297,7 @@ const tokens = computed(() => {
 });
 
 const isEvmToken = computed(() =>
-  ['ETH', 'ERC20', 'BNB', 'BEP20', 'MATIC', 'POLY-ERC20'].includes(selectedToken.value),
+  ['ETH', 'ERC20', 'BNB', 'BEP20', 'POL', 'POLY-ERC20'].includes(selectedToken.value),
 );
 
 const evmTokenOptions = computed(() => {
@@ -515,7 +515,7 @@ watch(selectedToken, async (value) => {
     value === 'ERC20' ||
     value === 'BNB' ||
     value === 'BEP20' ||
-    value === 'MATIC' ||
+    value === 'POL' ||
     value === 'POLY-ERC20'
   ) {
     if (window.ethereum) {
@@ -559,7 +559,7 @@ watch(selectedToken, async (value) => {
 
           const depositAddress = settings.value[bridgeConfig].gateway_address;
 
-          if (value === 'ETH' || value === 'BNB' || value === 'MATIC') {
+          if (value === 'ETH' || value === 'BNB' || value === 'POL') {
             if (isAddress(evmAddress.value)) {
               balance = toFixedWithoutRounding(formatEther(await browserProvider.getBalance(evmAddress.value)), 8);
             }

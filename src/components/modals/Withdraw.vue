@@ -7,7 +7,7 @@
 
       <template v-else>
         <div class="alert-warning mb-5 font-bold">
-          There is a 0.75% fee on withdrawals. For Ethereum, ERC-20, BNB, BEP-20, Polygon (MATIC) and Polygon ERC-20
+          There is a 0.75% fee on withdrawals. For Ethereum, ERC-20, BNB, BEP-20, Polygon (POL) and Polygon ERC-20
           withdrawals fee is 1% and you will also pay for the Ethereum / BSC / Polygon network gas fee.
         </div>
 
@@ -198,7 +198,7 @@ const tokens = computed(() => {
     ...peggedTokens.value,
     settings.value.eth_bridge.ethereum,
     settings.value.bsc_bridge.bnb,
-    settings.value.polygon_bridge.matic,
+    settings.value.polygon_bridge.pol,
   ];
 
   if (settings.value.eth_bridge.erc_20.enabled) {
@@ -259,7 +259,7 @@ const evmAssets = computed(() => {
       bnb: { pegged_token_symbol: peggedBnb },
     },
     polygon_bridge: {
-      matic: { pegged_token_symbol: peggedMatic },
+      pol: { pegged_token_symbol: peggedMatic },
     },
   } = settings.value;
 
@@ -275,7 +275,7 @@ const evmFeeSymbol = computed(() => {
       bnb: { pegged_token_symbol: peggedBnb },
     },
     polygon_bridge: {
-      matic: { pegged_token_symbol: peggedMatic },
+      pol: { pegged_token_symbol: peggedMatic },
     },
   } = settings.value;
 
@@ -284,7 +284,7 @@ const evmFeeSymbol = computed(() => {
     ERC20: peggedEth,
     BNB: peggedBnb,
     BEP20: peggedBnb,
-    MATIC: peggedMatic,
+    POL: peggedMatic,
     'POLY-ERC20': peggedMatic,
   };
 
