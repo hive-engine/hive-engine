@@ -134,6 +134,7 @@
               class="btn"
               :disabled="
                 minimumWithdrawAmount > tokenBalance ||
+                minimumWithdrawAmount > withdrawAmount
                 withdrawAmount <= 0 ||
                 withdrawAmount > tokenBalance ||
                 (isEvmToken && evmGasFee > gasFeeBalance)
