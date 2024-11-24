@@ -56,7 +56,7 @@ export const useStore = defineStore({
       });
     },
 
-    async requestBrodcastTransfer({ to, amount, currency, memo, eventName }) {
+    async requestBroadcastTransfer({ to, amount, currency, memo, eventName }) {
       emitter.emit('broadcast-awaiting');
 
       const useStore = useUserStore();

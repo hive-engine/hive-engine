@@ -3,7 +3,7 @@ import Big from 'big.js';
 import { format } from 'date-fns';
 import { isAddress } from 'ethers';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { BSC_BRIDGE_API, CTC_API, ETH_BRIDGE_API, POLYGON_BRIDGE_API, SCOT_API } from '@/config';
+import { BSC_BRIDGE_API, CTC_API, ETH_BRIDGE_API, POLYGON_BRIDGE_API, SCOT_API, SOLANA_BRIDGE_API } from '@/config';
 import { sidechain } from '@/plugins/sidechain';
 import { useTokenStore } from '@/stores/token';
 import { useUserStore } from '@/stores/user';
@@ -314,6 +314,24 @@ export const useWalletStore = defineStore({
       await store.requestBroadcastJson({ message, json, eventName: 'fee-deposit-successful' });
     },
 
+    async fetchSolAddress() {
+      const userStore = useUserStore();
+
+      let address = '';
+
+      try {
+        const {
+          data: { data },
+        } = await axios.get(`${SOLANA_BRIDGE_API}/utils/soladdress/${userStore.username}`);
+
+        address = data['solanaAddress'];
+      } catch (e) {
+        console.log(e.message);
+      }
+
+      return /[1-9A-HJ-NP-Za-km-z]{32,44}/.test(address) ? address : '';
+    },
+
     async getWithdrawalAddress({ symbol, address }) {
       const tokenStore = useTokenStore();
       const userStore = useUserStore();
@@ -360,6 +378,13 @@ export const useWalletStore = defineStore({
             contractPayload: {
               quantity: toFixedWithoutRounding(Number(amount), 3).toFixed(3),
             },
+          };
+        } else if (symbol === store.settings?.solana_bridge.solana.pegged_token_symbol) {
+          json.contractPayload = {
+            symbol,
+            to: store.settings.solana_bridge.account,
+            quantity: amount,
+            memo: address,
           };
         } else if (network) {
           const bridgeAccount = store.settings[`${network}_bridge`].account;

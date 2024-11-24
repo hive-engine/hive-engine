@@ -11,6 +11,7 @@ export const CTC_API = 'https://converter-api.hive-engine.com/api';
 export const ETH_BRIDGE_API = 'https://ethgw.hive-engine.com/api';
 export const BSC_BRIDGE_API = 'https://bscgw.hive-engine.com/api';
 export const POLYGON_BRIDGE_API = 'https://polygw.hive-engine.com/api';
+export const SOLANA_BRIDGE_API = 'https://solgw.hive-engine.com/api';
 export const TRIBALDEX_API = 'https://api.tribaldex.com';
 export const SCOT_API = 'https://scot-api.hive-engine.com';
 export const DSWAP_API = 'https://dswap-api.dswap.trade/api';
