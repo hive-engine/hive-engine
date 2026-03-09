@@ -6,7 +6,8 @@
 
     <template v-else>
       <div class="alert-warning mb-5 font-bold">
-        There is a 0.75% fee on deposits. Ethereum, ERC-20, BNB, BEP-20, Polygon (POL), Polygon ERC-20, and Solana (SOL) deposits have no deposit fees.
+        There is a 0.75% fee on deposits. Ethereum, ERC-20, BNB, BEP-20, Polygon (POL), Polygon ERC-20, and Solana (SOL)
+        deposits have no deposit fees.
       </div>
 
       <div v-if="!selectedToken && !depositInfo" class="alert-warning">
@@ -14,6 +15,17 @@
         <strong>Bitcoin (BTC) wallet</strong>. As a result, all deposit addresses generated before
         <strong>July 15, 2021</strong> are invalid. We may not be able to recover funds sent to an old address. Make
         sure you generate a new address by selecting BTC from the select box below.
+      </div>
+
+      <div v-if="isEvmToken" class="alert-warning">
+        <p class="mb-1">
+          Please do not use MetaMask's Smart Transaction feature or any gas-sponsored / gas-included transaction
+          mechanism that permits network fees (gas) to be paid with non-native tokens.
+        </p>
+        <p>
+          Our bridge infrastructure is not currently equipped to process or support such transactions. Using these
+          features may result in failed bridge operations, stuck funds, or other unexpected behavior.
+        </p>
       </div>
 
       <template v-if="!depositInfo">
@@ -96,8 +108,8 @@
             </button>
 
             <p v-if="selectedToken === 'POL'" class="text-sm">
-              By depositing POL you'll receive SWAP.MATIC to your wallet. You can get POL back by
-              withdrawing SWAP.MATIC.
+              By depositing POL you'll receive SWAP.MATIC to your wallet. You can get POL back by withdrawing
+              SWAP.MATIC.
             </p>
           </div>
         </template>
@@ -146,39 +158,35 @@
               <ArrowPathIcon class="h-5 w-5" />
             </button>
 
-            <button
-              class="btn-sm self-stretch rounded-l-none"
-              title="Add or update address"
-              @click="updateSolAddress"
-            >
+            <button class="btn-sm self-stretch rounded-l-none" title="Add or update address" @click="updateSolAddress">
               Update
             </button>
           </div>
         </div>
 
-          <div class="mb-3">
-            <label class="mb-2 block font-bold">Available Balance</label>
-            <div class="cursor-pointer" @click="depositAmount = depositInfo.balance">
-              {{ depositInfo.balance }} {{ selectedToken }}
-            </div>
+        <div class="mb-3">
+          <label class="mb-2 block font-bold">Available Balance</label>
+          <div class="cursor-pointer" @click="depositAmount = depositInfo.balance">
+            {{ depositInfo.balance }} {{ selectedToken }}
           </div>
+        </div>
 
-          <div class="mb-3">
-            <label for="depositAmount" class="mb-2 block font-bold">Deposit Amount</label>
-            <input id="depositAmount" v-model="depositAmount" type="number" step="any" :min="0.01" />
-            <div class="text-sm mt-1">Minimum Solana deposit amount is 0.01 SOL</div>
-          </div>
+        <div class="mb-3">
+          <label for="depositAmount" class="mb-2 block font-bold">Deposit Amount</label>
+          <input id="depositAmount" v-model="depositAmount" type="number" step="any" :min="0.01" />
+          <div class="mt-1 text-sm">Minimum Solana deposit amount is 0.01 SOL</div>
+        </div>
 
-          <div class="flex flex-wrap items-center justify-between gap-4">
-            <button
-              class="btn"
-              :disabled="depositAmount < 0.01 || depositAmount > depositInfo.balance"
-              @click.prevent="depositSolAsset()"
-            >
-              <Spinner v-if="btnBusy" />
-              {{ ' ' }} Deposit {{ selectedToken }}
-            </button>
-          </div>
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <button
+            class="btn"
+            :disabled="depositAmount < 0.01 || depositAmount > depositInfo.balance"
+            @click.prevent="depositSolAsset()"
+          >
+            <Spinner v-if="btnBusy" />
+            {{ ' ' }} Deposit {{ selectedToken }}
+          </button>
+        </div>
       </template>
 
       <template v-else>
@@ -245,15 +253,10 @@ import {
   BrowserProvider,
   toBeHex,
 } from 'ethers';
-import {
-  Connection,
-  PublicKey,
-  SystemProgram,
-  Transaction,
-} from '@solana/web3.js';
+import { Connection, PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 import { computed, ref, watch } from 'vue';
 import Big from 'big.js';
-import { Buffer } from 'buffer'
+import { Buffer } from 'buffer';
 import Modal from '@/components/modals/Modal.vue';
 import SearchSelect from '@/components/utilities/SearchSelect.vue';
 import { hiveClient } from '@/plugins/hive';
@@ -264,7 +267,7 @@ import { useWalletStore } from '@/stores/wallet';
 import { sleep, toFixedWithoutRounding } from '@/utils';
 import { useVfm } from 'vue-final-modal';
 
-globalThis.Buffer = Buffer
+globalThis.Buffer = Buffer;
 
 let browserProvider = null;
 let solanaProvider;
@@ -328,7 +331,7 @@ const depositAmount = ref('');
 const evmAddress = ref('');
 const evmToken = ref(null);
 
-const solAddress = ref(null)
+const solAddress = ref(null);
 
 const settings = computed(() => store.settings);
 const peggedTokens = computed(() => tokenStore.peggedTokens);
@@ -377,7 +380,6 @@ const evmTokenOptions = computed(() => {
 
   return [{ value: null, text: 'Please select a token' }, ...allEvmTokens];
 });
-
 
 const isSolanaToken = computed(() => ['SOL'].includes(selectedToken.value));
 
@@ -575,7 +577,6 @@ const depositEvmToken = async (network) => {
   btnBusy.value = false;
 };
 
-
 const getSolConnection = () => {
   return new Connection('https://solana-rpc.publicnode.com', 'confirmed');
 };
@@ -605,10 +606,7 @@ const updateSolAddress = async () => {
     try {
       const encodedMessage = new TextEncoder().encode(userStore.username);
 
-      const signedMessage = await solanaProvider.signMessage(
-        encodedMessage,
-        'utf8',
-      );
+      const signedMessage = await solanaProvider.signMessage(encodedMessage, 'utf8');
 
       console.log(signedMessage);
 
@@ -686,7 +684,7 @@ const solWaitForConfirmation = async (signature) => {
   }
 };
 
-const $vfm = useVfm()
+const $vfm = useVfm();
 
 const depositSolAsset = async () => {
   btnBusy.value = true;
@@ -698,9 +696,7 @@ const depositSolAsset = async () => {
       const transaction = new Transaction().add(
         SystemProgram.transfer({
           fromPubkey: sender,
-          toPubkey: new PublicKey(
-            store.settings.solana_bridge.gateway_address,
-          ),
+          toPubkey: new PublicKey(store.settings.solana_bridge.gateway_address),
           lamports: Big(depositAmount.value)
             .times(10 ** 9)
             .toNumber(),
@@ -712,8 +708,7 @@ const depositSolAsset = async () => {
       transaction.recentBlockhash = blockhash;
       transaction.feePayer = sender;
 
-      const { signature } =
-        await solanaProvider.signAndSendTransaction(transaction);
+      const { signature } = await solanaProvider.signAndSendTransaction(transaction);
 
       await solWaitForConfirmation(signature);
 
@@ -723,7 +718,7 @@ const depositSolAsset = async () => {
         text: `Transaction has been submitted to the Solana blockchain`,
       });
 
-      await $vfm.closeAll()
+      await $vfm.closeAll();
     }
   } catch (e) {
     console.log(e);
@@ -818,12 +813,8 @@ watch(selectedToken, async (value) => {
         type: 'error',
       });
     }
-  }else if (value === 'SOL') {
-    const provider = window.solana
-      ? window.solana
-      : window.xfi && window.xfi.solana
-        ? window.xfi.solana
-        : null;
+  } else if (value === 'SOL') {
+    const provider = window.solana ? window.solana : window.xfi && window.xfi.solana ? window.xfi.solana : null;
 
     if (!provider) {
       selectedToken.value = '';
