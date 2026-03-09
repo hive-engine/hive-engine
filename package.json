@@ -67,5 +67,8 @@
   "bugs": {
     "url": "https://github.com/hive-engine/hive-engine/issues"
   },
-  "homepage": "https://github.com/hive-engine/hive-engine#readme"
+  "homepage": "https://github.com/hive-engine/hive-engine#readme",
+  "engines": {
+    "node": "22.x"
+  }
 }
