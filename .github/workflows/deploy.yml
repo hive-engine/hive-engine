@@ -24,7 +24,7 @@ jobs:
           NODE_ENV: production
 
       - name: Deploy to BunnyCDN 🚀
-        uses: ayeressian/bunnycdn-storage-deploy@v2.4.6
+        uses: ayeressian/bunnycdn-storage-deploy@v2.4.5
         with:
           source: 'dist'
           storageZoneName: '${{ secrets.STORAGE_NAME }}'
