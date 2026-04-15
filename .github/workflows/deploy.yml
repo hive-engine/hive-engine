@@ -1,0 +1,36 @@
+name: 'Deploy'
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@master
+        with:
+          persist-credentials: false
+
+      - name: Install 🔧
+        run: npm install
+
+      - name: Build 🏗️
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Deploy to BunnyCDN 🚀
+        uses: ayeressian/bunnycdn-storage-deploy@v2.4.6
+        with:
+          source: 'dist'
+          storageZoneName: '${{ secrets.STORAGE_NAME }}'
+          storagePassword: '${{ secrets.STORAGE_PASSWORD }}'
+          accessKey: '${{ secrets.ACCESS_KEY }}'
+          pullZoneId: '${{ secrets.ZONE_ID }}'
+          upload: 'true'
+          remove: 'true'
+          purgePullZone: 'true'
