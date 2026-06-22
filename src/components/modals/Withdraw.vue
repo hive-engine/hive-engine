@@ -296,11 +296,11 @@ const evmFeeSymbol = computed(() => {
 
 const network = computed(() => {
   const networks = {
-    ['SWAP.ETH']: 'eth',
+    ['ETH.SWAP']: 'eth',
     ERC20: 'eth',
-    ['SWAP.BNB']: 'bsc',
+    ['BNB.SWAP']: 'bsc',
     BEP20: 'bsc',
-    ['SWAP.MATIC']: 'polygon',
+    ['POL.SWAP']: 'polygon',
     'POLY-ERC20': 'polygon',
   };
 

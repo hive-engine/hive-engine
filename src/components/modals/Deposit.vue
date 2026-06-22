@@ -106,11 +106,6 @@
               <Spinner v-if="btnBusy" />
               {{ ' ' }} Deposit {{ selectedToken }}
             </button>
-
-            <p v-if="selectedToken === 'POL'" class="text-sm">
-              By depositing POL you'll receive SWAP.MATIC to your wallet. You can get POL back by withdrawing
-              SWAP.MATIC.
-            </p>
           </div>
         </template>
 
